@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Логово новелл</title>
+    <meta name="description" content="Система управления библиотекой новелл для Логова Солёной Рыбки">
+    <meta name="keywords" content="новеллы, библиотека, переводы">
+
+    <script>
+    (function() {
+        try {
+            const theme = localStorage.getItem('novel-library-theme') || 'classic';
+            const mode = localStorage.getItem('novel-library-mode') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.setAttribute('data-mode', mode);
+
+            // Полная проверка пользователя
+            const token = localStorage.getItem('session_token');
+            const userRole = localStorage.getItem('userRole');
+            const user = localStorage.getItem('currentUser');
+        
+            if (token && user) {
+                document.documentElement.classList.add('user-logged-in');
+            
+                // Добавляем роль для CSS
+                if (userRole) {
+                    document.documentElement.setAttribute('data-user-role', userRole);
+                }
+            
+                // Проверяем права на админку
+                if (userRole === 'admin' || userRole === 'owner') {
+                    document.documentElement.classList.add('is-admin');
+                }
+            
+                // Проверяем права на создание
+                if (['creator', 'admin', 'owner'].includes(userRole)) {
+                    document.documentElement.classList.add('can-create');
+                }
+            }
+        } catch (e) {
+            console.error('Early init error:', e);
+        }
+    })();
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+    <div id="chapter-load-overlay"></div>
+
+    <div id="app" class="app">
+        <header class="header is-hidden" role="banner" id="main-header">
+            <div class="header-content">
+                <h1 class="logo">Логово новелл</h1>
+                
+                <div class="header-actions">
+                    <div class="theme-switcher">
+                        <button id="theme-toggle" class="theme-btn" title="Переключить тему" aria-label="Переключить тему">
+                            <span class="theme-icon">🌙</span>
+                        </button>
+                        <div id="theme-menu" class="theme-menu hidden">
+                            <h4>Темы</h4>
+                            <button class="theme-option" data-theme="classic">☯ Классика</button>
+                            <button class="theme-option" data-theme="solar">🌅 Солнечная</button>
+                            <button class="theme-option" data-theme="forest">🌲 Лесная</button>
+                            <div class="theme-auto">
+                                <label><input type="checkbox" id="auto-theme-toggle"> Автоматически</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="user-info" class="user-info-display">
+
+                        <button id="profile-btn" class="btn btn-secondary user-icon" onclick="navigateTo('profile')" title="Мой профиль">
+                            (°ロ°) !
+                        </button>
+
+                    </div>
+
+                    <button id="login-btn" class="btn btn-login" onclick="showModal('auth-modal')">Войти</button>
+
+                    <button id="admin-btn" class="btn btn-secondary admin-only" style="display: none;" aria-label="Открыть админ-панель">
+                        <span>Админ-панель</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+<script>
+(function() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = urlParams.get('page') || 'home';
+        const header = document.getElementById('main-header');
+        // Используем твой ID оверлея из этого скрипта
+        const overlay = document.getElementById('chapter-load-overlay');
+
+        if (page === 'chapter-read') {
+            if (overlay) {
+                // 1. ПОКАЗЫВАЕМ ОВЕРЛЕЙ
+                overlay.style.display = 'block';
+
+                // ✨ 2. ОБНОВЛЕННАЯ ГЕНЕРАЦИЯ ПУЗЫРЬКОВ ✨
+                let bubblesHtml = '<div class="bubbles-container">';
+
+                const bubbleCount = 50;     // Количество
+                const blurProbability = 0.4; // Шанс размытия (40%)
+                const blurAmount = '3.5px';    // Сила размытия
+
+                for (let i = 0; i < bubbleCount; i++) {
+                    const size = 5 + Math.random() * 25;
+                    const left = Math.random() * 100;
+                    const delay = Math.random() * 5;
+                    const duration = 5 + Math.random() * 5;
+                    let opacity = 0.1 + Math.random() * 0.3; // Начальная прозрачность
+
+                    let individualStyle = ''; // Строка для доп. стилей
+
+                    // Решаем, будет ли пузырек размыт
+                    if (Math.random() < blurProbability) {
+                        individualStyle += `filter: blur(${blurAmount});`;
+                        // Затемняем (уменьшаем opacity) размытые
+                        opacity = Math.max(0.02, opacity * 0.4);
+                    }
+
+                    // Добавляем opacity и individualStyle в style
+                    bubblesHtml += `
+                        <div class="bubble" style="
+                            left: ${left}%;
+                            width: ${size}px;
+                            height: ${size}px;
+                            opacity: ${opacity}; /* Задаем рассчитанную прозрачность */
+                            animation-delay: ${delay}s;
+                            animation-duration: ${duration}s;
+                            ${individualStyle} /* Добавляем размытие, если нужно */
+                        "></div>`;
+                }
+                bubblesHtml += '</div>';
+                // ✨ КОНЕЦ ОБНОВЛЕННОЙ ГЕНЕРАЦИИ ✨
+
+                // 3. Вставляем HTML в оверлей
+                overlay.innerHTML = bubblesHtml;
+            }
+        } else {
+            // Другая страница: УБИРАЕМ КЛАСС СКРЫТИЯ С ХЕДЕРА
+            if (header) header.classList.remove('is-hidden');
+       }
+    } catch (e) {
+        console.error('Inline overlay/header script error:', e);
+         // Запасной вариант: показать хедер, если НЕ страница чтения
+         if (!window.location.search.includes('page=chapter-read')) {
+            const header = document.getElementById('main-header');
+            if (header) header.classList.remove('is-hidden');
+        }
+   }
+})();
+</script>
+        
+        <main class="main" role="main">
+
+            <section id="search-section" class="search-section" style="display: none;">
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Поиск по названию или автору..." class="search-input" aria-label="Поиск новелл"/>
+                        <button id="search-btn" class="btn btn-primary" aria-label="Начать поиск">Поиск</button>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="filter-toggle" class="btn btn-secondary">Фильтры</button>
+
+                        <div class="sort-controls">
+                            <label for="sort-select" class="visually-hidden">Сортировать по:</label>
+                            <button id="sort-btn" class="btn btn-secondary">
+                                <span class="sort-icon">⇅</span>
+                            </button>
+                        </div>
+
+                        <button id="add-novel-btn" class="btn btn-primary btn-add-novel">Добавить новеллу</button>
+                    </div>
+                </div>
+
+                <div id="filters-panel" class="filters-panel expanded" style="display: none;"> <div class="filters-content">
+                    <h3><i class="fas fa-filter"></i> Расширенные Фильтры</h3>
+
+                    <div class="filters-grid"> <div class="filter-column">
+                            <div class="filter-group">
+                                <label for="language-filter">Язык оригинала:</label>
+                                <select id="language-filter" class="form-select"><option value="">Все</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="era-filter">Эра:</label>
+                                <select id="era-filter" class="form-select"><option value="">Все</option></select>
+                            </div>
+                             <div class="filter-group">
+                                <label for="orientation-filter">Тип отношений:</label>
+                                <select id="orientation-filter" class="form-select"><option value="">Все</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="perspective-filter">Перспектива:</label>
+                                <select id="perspective-filter" class="form-select"><option value="">Все</option></select>
+                            </div>
+                        </div>
+
+                        <div class="filter-column">
+                            <div class="filter-group">
+                                <label for="original-status-filter">Статус оригинала:</label>
+                                <select id="original-status-filter" class="form-select"><option value="">Все</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="translation-status-filter">Статус перевода:</label>
+                                <select id="translation-status-filter" class="form-select"><option value="">Все</option></select>
+                            </div>
+                            <div class="filter-group range-filter">
+                                <label>Количество глав:</label>
+                                <div class="range-inputs">
+                                    <input type="number" id="chapters-min" placeholder="От" min="0" class="form-input">
+                                    <span>-</span>
+                                    <input type="number" id="chapters-max" placeholder="До" min="0" class="form-input">
+                                </div>
+                            </div>
+                             <div class="filter-group range-filter">
+                                <label>Количество слов (перевод):</label>
+                                 <div class="range-inputs">
+                                    <input type="number" id="words-min" placeholder="От" min="0" class="form-input">
+                                     <span>-</span>
+                                    <input type="number" id="words-max" placeholder="До" min="0" class="form-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="filter-column filter-column-wide"> <div class="filter-group taxonomy-filter">
+                            <fieldset class="form-section">
+                            <legend>Фильтр по тегам</legend>
+
+                            <div class="form-group">
+                                <label>Режим включения:</label>
+                                <div class="filter-mode-options">
+                                    <label>
+                                        <input type="radio" name="include-tag-mode" value="any" checked onchange="applyFiltersAndSort()"> Любой из выбранных
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="include-tag-mode" value="all" onchange="applyFiltersAndSort()"> Все выбранные
+                                    </label>
+                                </div>
+                                <div class="selected-tags-display" id="selected-include-tags">
+                                    </div>
+                            </div>
+
+                            <hr style="margin: 10px 0;">
+
+                            <div class="form-group">
+                                <label>Режим исключения:</label>
+                                <div class="filter-mode-options">
+                                    <label>
+                                        <input type="radio" name="exclude-tag-mode" value="any" checked onchange="applyFiltersAndSort()"> Любой из выбранных
+                                    </label>
+                                     <label> <input type="radio" name="exclude-tag-mode" value="all" onchange="applyFiltersAndSort()"> Все выбранные
+                                    </label>
+                                </div>
+                                <div class="selected-tags-display" id="selected-exclude-tags">
+                                    </div>
+                            </div>
+
+                             <hr style="margin: 10px 0;">
+
+                            <div class="form-group">
+                                <label>Выберите теги:</label>
+                                <div id="filter-tags-map">
+                                    <p class="text-muted">Загрузка тегов...</p>
+                                </div>
+                              </div>
+                            </fieldset>
+                            </div>
+                        </div>
+            
+                    </div> <div class="filter-actions">
+                        <button id="apply-filters" class="btn btn-primary">Применить</button>
+                        <button id="clear-filters" class="btn btn-secondary">Очистить все</button>
+                    </div>
+                </div>
+            </div>
+            </section>
+
+            <div id="loading" class="loading-container">
+                <div class="loading-spinner">
+                    <div class="spinner" aria-hidden="true"></div>
+                    <p>Загрузка...</p>
+                </div>
+            </div>
+
+            <section id="novels-container" class="novels-container" style="display: none; position: relative;">
+                <div id="stats-bar" class="stats-bar">
+                    <div class="stats-info">
+                        <span id="novels-count">0 новелл</span>
+                        <span id="filter-info" class="filter-info"></span>
+                    </div>
+                    <div class="view-controls">
+                        <button id="grid-view" class="view-btn active" title="Сетка" aria-label="Вид сетки">⊞</button>
+                        <button id="list-view" class="view-btn" title="Список" aria-label="Вид списка">☰</button>
+                    </div>
+                </div>
+
+                <div class="novels-loading-overlay" id="novels-loading-overlay" style="display: none;">
+                  <div class="spinner"></div>
+                </div>
+
+                <div id="novels-grid" class="novels-grid" role="grid" aria-label="Список новелл"></div>
+                <div id="no-results" class="no-results" style="display: none;">
+                    <h3>Новеллы не найдены</h3>
+                    <p>Попробуйте изменить поисковый запрос или фильтры</p>
+                </div>
+
+                <nav id="pagination" class="pagination" style="display: none;" aria-label="Навигация по страницам">
+                    <div class="pagination-wrapper">
+                        <button id="first-page" class="pagination-btn" aria-label="Первая страница">⮜</button>
+                        <button id="prev-page" class="pagination-btn" aria-label="Предыдущая страница">◀</button>
+                        <div id="page-numbers" class="page-numbers"></div>
+                        <button id="next-page" class="pagination-btn" aria-label="Следующая страница">▶</button>
+                        <button id="last-page" class="pagination-btn" aria-label="Последняя страница">⮞</button>
+                    </div>
+                    <div class="pagination-info">
+                        <span id="page-info">Страница 1 из 1</span>
+                        <select id="per-page-select" class="per-page-select" aria-label="Новелл на странице">
+                            <option value="6">6 на странице</option>
+                            <option value="12" selected>12 на странице</option>
+                            <option value="24">24 на странице</option>
+                            <option value="48">48 на странице</option>
+                        </select>
+                    </div>
+                </nav>
+            </section>
+
+            <section id="page-content-container" style="display: none;"></section>
+
+        </main>
+
+        <footer class="footer" role="contentinfo">
+            <div class="footer-content">
+                <p>© 2025 Логово новелл - Система управления библиотекой для "Логова Солёной Рыбки"</p>
+            </div>
+        </footer>
+    </div>
+
+    <div id="auth-modal" class="modal" style="display: none;" role="dialog" aria-modal="true">
+        <div class="modal-content auth-form-container">
+            <button class="close-btn" onclick="hideModal('auth-modal')" aria-label="Закрыть">×</button>
+            
+            <div id="auth-container">
+                <h2>Вход</h2>
+                <div class="auth-method">
+                    <input type="email" id="auth-email" class="form-input" placeholder="Email" required>
+                    <input type="password" id="auth-password" class="form-input" placeholder="Пароль" required>
+                    <button onclick="handleEmailLogin()" class="btn btn-primary">Войти</button>
+                </div>
+                <div class="auth-divider">или</div>
+                <div class="auth-method" id="telegram-login-widget-container">
+                    <script async src="https://telegram.org/js/telegram-widget.js?22"
+                        data-telegram-login="logovo_saltfish_bot"
+                        data-size="large"
+                        data-onauth="onTelegramAuth(user)"
+                        data-request-access="write"></script>
+                </div>
+                <p class="auth-hint">Нет аккаунта? <a href="#" onclick="showRegistration(); return false;">Зарегистрироваться</a></p>
+            </div>
+
+            <div id="registration-container" style="display: none;">
+                <h2>Регистрация</h2>
+                <div class="auth-method">
+                    <input type="text" id="reg-username" class="form-input" placeholder="Имя пользователя" required>
+                    <input type="email" id="reg-email" class="form-input" placeholder="Email" required>
+                    <input type="password" id="reg-password" class="form-input" placeholder="Пароль (минимум 6 символов)" required>
+                    <button onclick="handleRegistration()" class="btn btn-primary">Зарегистрироваться</button>
+                </div>  
+                <p class="auth-hint">Уже есть аккаунт? <a href="#" onclick="showLogin(); return false;">Войти</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="novel-modal" class="modal" role="dialog" aria-labelledby="novel-details-title" aria-hidden="true">
+        <div class="modal-content novel-details">
+            <div class="modal-header">
+                <h2 id="novel-details-title">Детали новеллы</h2>
+                <button class="close-btn" aria-label="Закрыть">×</button>
+            </div>
+            <div id="novel-details-content" class="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="modal" role="dialog" aria-labelledby="admin-title" aria-hidden="true">
+        <div class="modal-content admin-panel">
+            <div class="modal-header">
+                <h2 id="admin-title">Админ-панель</h2>
+                <button class="close-btn" onclick="hideModal('admin-modal')" aria-label="Закрыть">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="admin-content" class="admin-content">
+                    <section id="database-tab" class="tab-content active" role="tabpanel">
+                        <h3>Управление БД</h3>
+                        <div class="admin-actions">
+                            <button id="init-db-btn" class="btn btn-primary owner-only">Инициализировать</button>
+                            <button id="cleanup-trash-btn" class="btn btn-warning">Очистить корзину</button>
+                            <button id="export-data-btn" class="btn btn-secondary">Экспорт</button>
+                        </div>
+                        <div id="db-status" class="status-panel"></div>
+                    </section>
+
+                    <section id="genres-tab" class="tab-content" role="tabpanel">
+                        <h3>Управление жанрами</h3>
+                        <form class="add-item-form">
+                            <input type="text" id="new-genre-name" placeholder="Название" class="form-input" required />
+                            <input type="text" id="new-genre-desc" placeholder="Описание" class="form-input">
+                            <button type="submit" id="add-genre-btn" class="btn btn-primary">Добавить</button>
+                        </form>
+                        <div id="genres-management" class="items-list"></div>
+                    </section>
+
+                    <section id="tags-tab" class="tab-content" role="tabpanel">
+                        <h3>Управление тегами</h3>
+                        <form class="add-item-form">
+                            <input type="text" id="new-tag-name" placeholder="Название" class="form-input" required />
+                            <input type="text" id="new-tag-desc" placeholder="Описание" class="form-input">
+                            <button type="submit" id="add-tag-btn" class="btn btn-primary">Добавить</button>
+                        </form>
+                        <div id="tags-management" class="items-list"></div>
+                    </section>
+
+                    <section id="trash-tab" class="tab-content" role="tabpanel">
+                        <h3>Корзина</h3>
+                        <div class="trash-actions"><button id="empty-trash-btn" class="btn btn-danger">Очистить корзину</button></div>
+                        <div id="trash-items" class="trash-list"></div>
+                    </section>
+
+                    <section id="access-tab" class="tab-content" role="tabpanel">
+                        <h3>Управление доступами</h3>
+                        <p>В разработке...</p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sort-popup" class="sort-popup" style="display: none;">
+        <h4>Сортировать по:</h4>
+        <div class="sort-options">
+            <button class="sort-option" data-value="updated_desc">Дата обновления (Новые)</button>
+            <button class="sort-option" data-value="updated_asc">Дата обновления (Старые)</button>
+            <button class="sort-option" data-value="added_desc">Дата добавления (Новые)</button>
+            <button class="sort-option" data-value="added_asc">Дата добавления (Старые)</button>
+            <button class="sort-option" data-value="title_asc">Название (А → Я)</button>
+            <button class="sort-option" data-value="title_desc">Название (Я → А)</button>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-box">
+            <div class="loading-spinner-large"></div>
+            <h3 id="loading-title">Выполняется операция...</h3>
+            <p id="loading-description">Пожалуйста, подождите</p>
+            <div class="progress-container" id="progress-container" style="display: none;">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <span class="progress-text" id="progress-text">0%</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <div id="shortcuts-info" class="shortcuts-info" style="display: none;">
+        <h4>Горячие клавиши:</h4>
+        <ul>
+            <li><kbd>Ctrl</kbd> + <kbd>K</kbd> - Поиск</li>
+            <li><kbd>Ctrl</kbd> + <kbd>N</kbd> - Добавить новеллу</li>
+            <li><kbd>Esc</kbd> - Закрыть окна</li>
+            <li><kbd>?</kbd> - Помощь</li>
+        </ul>
+    </div>
+    
+    <div class="scrollbar-container">
+        <div class="custom-scrollbar"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

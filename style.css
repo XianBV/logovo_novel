@@ -1,0 +1,7601 @@
+/* ==========================================
+   ЛОГОВО НОВЕЛЛ - СТИЛИ
+   Оптимизированная и очищенная версия
+   ========================================== */
+
+/* ==========================================
+   БЛОК 1: CSS ПЕРЕМЕННЫЕ И ФИНАЛЬНАЯ СИСТЕМА ТЕМ
+   ========================================== */
+
+:root {
+  /* НЕЦВЕТОВЫЕ ПЕРЕМЕННЫЕ (тени, размеры, скругления) */
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+}
+
+/* ==========================================
+   БЛОК 2: ОПРЕДЕЛЕНИЕ ПАЛИТР
+   (Здесь задаются цвета для light и dark версий каждой палитры)
+   ========================================== */
+
+/* ✨ ПАЛИТРА "КЛАССИЧЕСКАЯ" */
+[data-theme="classic"] {
+  /* --- Цвета для светлого режима --- */
+  --palette-bg-light-primary: #FFFFFF;
+  --palette-bg-light-secondary: #f8f9fa;
+  --palette-bg-light-card: #FFFFFF;
+  --palette-bg-light-card-rgb: rgba(255, 255, 255, 0.884);
+  --palette-text-light-primary: #212529;
+  --palette-text-light-secondary: #6c757d;
+  --palette-text-light-inverse: #FFFFFF;
+  --palette-border-light: #dee2e6;
+  
+  --palette-header-light-start: rgba(248, 249, 250, 0.4);
+  --palette-header-light-end: rgb(0, 0, 0);
+  
+  --palette-btn-light-primary-bg: rgba(229, 229, 229, 0.5);
+  --palette-btn-light-primary-text: #212529;
+  --palette-btn-light-primary-border: #dadcde;
+  --palette-btn-light-primary-bg-hover: #e2e2e2;
+  --palette-btn-light-primary-text-hover: #000000;
+  --palette-btn-light-primary-border-hover: #868686;
+  
+  --palette-btn-light-secondary-bg: rgba(0, 0, 0, 0.05);
+  --palette-btn-light-secondary-text: #212529;
+  --palette-btn-light-secondary-border: #dee2e6;
+  --palette-btn-light-secondary-bg-hover: #6c757d;
+  --palette-btn-light-secondary-text-hover: #FFFFFF;
+  --palette-btn-light-secondary-border-hover: #dee2e6;
+
+    /* --- Цвета для кнопки "Войти" в светлом режиме --- */
+  --palette-btn-light-login-bg: #313233;         /* Почти черный фон */
+  --palette-btn-light-login-text: #FFFFFF;       /* Белый текст */
+  --palette-btn-light-login-border: #212529;     /* Черная рамка */
+  --palette-btn-light-login-bg-hover: #000000;   /* Полностью черный при hover */
+  --palette-btn-light-login-text-hover: #FFFFFF; /* Белый текст при hover */
+  --palette-btn-light-login-border-hover: #000000;
+  
+  /* --- Цвета для темного режима --- */
+  --palette-bg-dark-primary: #2d2d2d;
+  --palette-bg-dark-secondary: #383636;
+  --palette-bg-dark-card: #2d2d2d;
+  --palette-bg-dark-card-rgb: 45, 45, 45;
+  --palette-text-dark-primary: #EAEAEA;
+  --palette-text-dark-secondary: #e4e9f1;
+  --palette-text-dark-inverse: #ffffff;
+  --palette-border-dark: #5c5f64;
+  
+  --palette-header-dark-start: rgba(18, 18, 18, 0.5);
+  --palette-header-dark-end: rgba(255, 255, 255, 0.5);
+  
+  --palette-btn-dark-primary-bg: #444446;
+  --palette-btn-dark-primary-text: #ffffff;
+  --palette-btn-dark-primary-border: #484950;
+  --palette-btn-dark-primary-bg-hover: #212123;
+  --palette-btn-dark-primary-text-hover: #FFFFFF;
+  --palette-btn-dark-primary-border-hover: #868686;
+  
+  --palette-btn-dark-secondary-bg: #38383b;
+  --palette-btn-dark-secondary-text: #f0f4fa;
+  --palette-btn-dark-secondary-border: #334155;
+  --palette-btn-dark-secondary-bg-hover: #334155;
+  --palette-btn-dark-secondary-text-hover: #EAEAEA;
+  --palette-btn-dark-secondary-border-hover: #334155;
+
+    /* --- Для темного режима оставляем как обычную primary --- */
+  --palette-btn-dark-login-bg: transparent;
+  --palette-btn-dark-login-text: #000000;
+  --palette-btn-dark-login-border: #b9bec3;
+  --palette-btn-dark-login-bg-hover: #ededed;
+  --palette-btn-dark-login-text-hover: #000000;
+  --palette-btn-dark-login-border-hover: #ffffff;
+
+  --palette-bg-dark-primary-rgb: 45, 45, 45;
+  
+  /* --- Общие акцентные цвета (одинаковы для обоих режимов) --- */
+  --palette-accent-primary: #3B82F6;
+  --palette-accent-primary-hover: #1b1e25;
+  --palette-accent-danger: #EF4444;
+  --palette-accent-warning: #f97316;
+  --palette-accent-success: #22c55e;
+
+  --palette-accent-light-highlight: rgba(255, 229, 100, 0.5); /* Желтый маркер для светлой темы */
+  --palette-accent-dark-highlight: rgba(255, 229, 100, 0.3);
+
+  --bg-read: rgba(255, 229, 100, 0.2); /* Фон выделения для режима чтения */
+  --bg-unread: transparent; /* Фон для непрочитанных в режиме чтения */
+}
+
+/* ✨ ПАЛИТРА "Солнечная" */
+[data-theme="solar"] {
+  /* --- Цвета для светлого режима --- */
+  --palette-bg-light-primary: #c76868;
+  --palette-bg-light-secondary: #f35f4e;
+  --palette-bg-light-card: #a03e3e;
+  --palette-bg-light-card-rgb: rgb(255, 255, 255);
+  --palette-text-light-primary: #212529;
+  --palette-text-light-secondary: #6c757d;
+  --palette-text-light-inverse: #e93c3c;
+  --palette-border-light: #dee2e6;
+  
+  --palette-header-light-start: rgba(248, 249, 250, 0.4);
+  --palette-header-light-end: rgb(0, 0, 0);
+  
+  --palette-btn-light-primary-bg: rgba(229, 229, 229, 0.5);
+  --palette-btn-light-primary-text: #212529;
+  --palette-btn-light-primary-border: #dadcde;
+  --palette-btn-light-primary-bg-hover: #e2e2e2;
+  --palette-btn-light-primary-text-hover: #000000;
+  --palette-btn-light-primary-border-hover: #868686;
+  
+  --palette-btn-light-secondary-bg: rgba(0, 0, 0, 0.05);
+  --palette-btn-light-secondary-text: #212529;
+  --palette-btn-light-secondary-border: #dee2e6;
+  --palette-btn-light-secondary-bg-hover: #6c757d;
+  --palette-btn-light-secondary-text-hover: #FFFFFF;
+  --palette-btn-light-secondary-border-hover: #dee2e6;
+
+    /* --- Цвета для кнопки "Войти" в светлом режиме --- */
+  --palette-btn-light-login-bg: #313233;         /* Почти черный фон */
+  --palette-btn-light-login-text: #FFFFFF;       /* Белый текст */
+  --palette-btn-light-login-border: #212529;     /* Черная рамка */
+  --palette-btn-light-login-bg-hover: #000000;   /* Полностью черный при hover */
+  --palette-btn-light-login-text-hover: #FFFFFF; /* Белый текст при hover */
+  --palette-btn-light-login-border-hover: #000000;
+  
+  /* --- Цвета для темного режима --- */
+  --palette-bg-dark-primary: #2d2d2d;
+  --palette-bg-dark-secondary: #383636;
+  --palette-bg-dark-card: #2d2d2d;
+  --palette-bg-dark-card-rgb: 45, 45, 45;
+  --palette-text-dark-primary: #EAEAEA;
+  --palette-text-dark-secondary: #e4e9f1;
+  --palette-text-dark-inverse: #c51818;
+  --palette-border-dark: #5c5f64;
+  
+  --palette-header-dark-start: rgba(18, 18, 18, 0.5);
+  --palette-header-dark-end: rgba(255, 255, 255, 0.5);
+  
+  --palette-btn-dark-primary-bg: #444446;
+  --palette-btn-dark-primary-text: #ffffff;
+  --palette-btn-dark-primary-border: #484950;
+  --palette-btn-dark-primary-bg-hover: #212123;
+  --palette-btn-dark-primary-text-hover: #FFFFFF;
+  --palette-btn-dark-primary-border-hover: #868686;
+  
+  --palette-btn-dark-secondary-bg: #38383b;
+  --palette-btn-dark-secondary-text: #f0f4fa;
+  --palette-btn-dark-secondary-border: #334155;
+  --palette-btn-dark-secondary-bg-hover: #334155;
+  --palette-btn-dark-secondary-text-hover: #EAEAEA;
+  --palette-btn-dark-secondary-border-hover: #334155;
+
+    /* --- Для темного режима оставляем как обычную primary --- */
+  --palette-btn-dark-login-bg: transparent;
+  --palette-btn-dark-login-text: #000000;
+  --palette-btn-dark-login-border: #b9bec3;
+  --palette-btn-dark-login-bg-hover: #ededed;
+  --palette-btn-dark-login-text-hover: #000000;
+  --palette-btn-dark-login-border-hover: #ffffff;
+  
+  /* --- Общие акцентные цвета (одинаковы для обоих режимов) --- */
+  --palette-accent-primary: #3B82F6;
+  --palette-accent-primary-hover: #1b1e25;
+  --palette-accent-danger: #EF4444;
+}
+
+/* ==========================================
+   БЛОК 3: ПРИМЕНЕНИЕ РЕЖИМОВ
+   (Режимы просто "выбирают" нужные цвета из палитры)
+   ========================================== */
+
+/* ✨ СВЕТЛЫЙ РЕЖИМ - берет -light версии из палитры */
+[data-mode="light"] {
+  --bg-primary: var(--palette-bg-light-primary);
+  --bg-secondary: var(--palette-bg-light-secondary);
+  --bg-card: var(--palette-bg-light-card);
+  --bg-card-rgb: var(--palette-bg-light-card-rgb);
+  
+  --text-primary: var(--palette-text-light-primary);
+  --text-secondary: var(--palette-text-light-secondary);
+  --text-inverse: var(--palette-text-light-inverse);
+  
+  --border-color: var(--palette-border-light);
+  
+  --header-gradient-start: var(--palette-header-light-start);
+  --header-gradient-end: var(--palette-header-light-end);
+  
+  --btn-primary-bg: var(--palette-btn-light-primary-bg);
+  --btn-primary-text: var(--palette-btn-light-primary-text);
+  --btn-primary-border: var(--palette-btn-light-primary-border);
+  --btn-primary-bg-hover: var(--palette-btn-light-primary-bg-hover);
+  --btn-primary-text-hover: var(--palette-btn-light-primary-text-hover);
+  --btn-primary-border-hover: var(--palette-btn-light-primary-border-hover);
+  
+  --btn-secondary-bg: var(--palette-btn-light-secondary-bg);
+  --btn-secondary-text: var(--palette-btn-light-secondary-text);
+  --btn-secondary-border: var(--palette-btn-light-secondary-border);
+  --btn-secondary-bg-hover: var(--palette-btn-light-secondary-bg-hover);
+  --btn-secondary-text-hover: var(--palette-btn-light-secondary-text-hover);
+  --btn-secondary-border-hover: var(--palette-btn-light-secondary-border-hover);
+
+  /* Кнопка входа */
+  --btn-login-bg: var(--palette-btn-light-login-bg);
+  --btn-login-text: var(--palette-btn-light-login-text);
+  --btn-login-border: var(--palette-btn-light-login-border);
+  --btn-login-bg-hover: var(--palette-btn-light-login-bg-hover);
+  --btn-login-text-hover: var(--palette-btn-light-login-text-hover);
+  --btn-login-border-hover: var(--palette-btn-light-login-border-hover);
+  
+  --accent-primary: var(--palette-accent-primary);
+  --accent-primary-hover: var(--palette-accent-primary-hover);
+  --accent-danger: var(--palette-accent-danger);
+  --accent-warning: var(--palette-accent-warning);
+  --accent-success: var(--palette-accent-success);
+
+  --accent-success: var(--palette-accent-success);
+  --accent-highlight: var(--palette-accent-light-highlight); /* <-- ДОБАВИТЬ ЭТУ СТРОКУ */
+
+  --bg-read: transparent; /* Фон выделения для режима чтения */
+  --bg-unread: rgba(0, 183, 255, 0.2);/* Фон для непрочитанных в режиме чтения */
+}
+
+/* ✨ ТЕМНЫЙ РЕЖИМ - берет -dark версии из палитры */
+[data-mode="dark"] {
+  --bg-primary: var(--palette-bg-dark-primary);
+  --bg-secondary: var(--palette-bg-dark-secondary);
+  --bg-card: var(--palette-bg-dark-card);
+  --bg-card-rgb: var(--palette-bg-dark-card-rgb);
+  
+  --text-primary: var(--palette-text-dark-primary);
+  --text-secondary: var(--palette-text-dark-secondary);
+  --text-inverse: var(--palette-text-dark-inverse);
+  
+  --border-color: var(--palette-border-dark);
+  
+  --header-gradient-start: var(--palette-header-dark-start);
+  --header-gradient-end: var(--palette-header-dark-end);
+  
+  --btn-primary-bg: var(--palette-btn-dark-primary-bg);
+  --btn-primary-text: var(--palette-btn-dark-primary-text);
+  --btn-primary-border: var(--palette-btn-dark-primary-border);
+  --btn-primary-bg-hover: var(--palette-btn-dark-primary-bg-hover);
+  --btn-primary-text-hover: var(--palette-btn-dark-primary-text-hover);
+  --btn-primary-border-hover: var(--palette-btn-dark-primary-border-hover);
+  
+  --btn-secondary-bg: var(--palette-btn-dark-secondary-bg);
+  --btn-secondary-text: var(--palette-btn-dark-secondary-text);
+  --btn-secondary-border: var(--palette-btn-dark-secondary-border);
+  --btn-secondary-bg-hover: var(--palette-btn-dark-secondary-bg-hover);
+  --btn-secondary-text-hover: var(--palette-btn-dark-secondary-text-hover);
+  --btn-secondary-border-hover: var(--palette-btn-dark-secondary-border-hover);
+
+  /* Кнопка входа */
+  --btn-login-bg: var(--palette-btn-dark-login-bg);
+  --btn-login-text: var(--palette-btn-dark-login-text);
+  --btn-login-border: var(--palette-btn-dark-login-border);
+  --btn-login-bg-hover: var(--palette-btn-dark-login-bg-hover);
+  --btn-login-text-hover: var(--palette-btn-dark-login-text-hover);
+  --btn-login-border-hover: var(--palette-btn-dark-login-border-hover);
+  
+  --accent-primary: var(--palette-accent-primary);
+  --accent-primary-hover: var(--palette-accent-primary-hover);
+  --accent-danger: var(--palette-accent-danger);
+  --accent-warning: var(--palette-accent-warning);
+  --accent-success: var(--palette-accent-success);
+
+  --accent-success: var(--palette-accent-success);
+  --accent-highlight: var(--palette-accent-dark-highlight); /* <-- ДОБАВИТЬ ЭТУ СТРОКУ */
+
+  --bg-read: rgba(255, 229, 100, 0.2); /* Фон выделения для режима чтения */
+  --bg-unread: transparent; /* Фон для непрочитанных в режиме чтения */
+
+  --accent-danger-rgb: 239, 68, 68
+}
+
+/* ==========================================
+   БЛОК 2: БАЗОВЫЕ СТИЛИ И RESET
+   ========================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  font-size: 16px;
+  scroll-behavior: smooth;
+  /* Не скрываем скроллбар глобально — используем утилиту .hide-scrollbar при необходимости */
+  scrollbar-gutter: stable;
+}
+
+/* Для скрытия скроллбара используйте класс .hide-scrollbar на контейнере */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.hide-scrollbar::-webkit-scrollbar { display: none; } /* WebKit */
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* избегаем 100vw — он может вызвать горизонтальную прокрутку */
+  /* При необходимости скрывайте горизонтальный скролл классом .overflow-x-hidden */
+  overflow-y: auto;
+}
+
+/* ==========================================
+   БЛОК 3: LAYOUT - ОСНОВНАЯ СТРУКТУРА
+   ========================================== */
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  /* Скрывать прокрутку по оси X через утилиту, если нужно */
+}
+
+/* Утилита для скрытия горизонтального скролла без правки базовых селекторов */
+.overflow-x-hidden { overflow-x: hidden; }
+
+/* Основной контент */
+.main {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 1200px;
+  margin: 70px auto 0;
+  padding: 2rem 1rem;
+  overflow-x: hidden;
+}
+
+/* Подвал (Footer) */
+.footer {
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: auto;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  color: var(--text-secondary);
+}
+
+/* ==========================================
+   БЛОК 4: HEADER - ШАПКА САЙТА
+   ========================================== */
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 70px;
+  
+  /* ✨ ИНТЕГРИРОВАННЫЙ СТИЛЬ */
+  background: linear-gradient(135deg,
+      var(--header-gradient-start),
+      var(--header-gradient-end)
+  ) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease !important;
+}
+
+.header.is-hidden {
+    display: none; /* Используем !important здесь для надежности */
+}
+
+/* Header содержимое */
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+/* Для страницы чтения главы - распределяем элементы по краям */
+
+.page-header.space-between {
+    display: flex;
+    justify-content: space-between; /* Распределяет элементы по краям */
+    align-items: center; /* Выравнивает по центру вертикально */
+    width: 100%; /* Убедимся, что занимает всю ширину */
+}
+
+/* Добавим отступ кнопке настроек, чтобы она не прилипала к краю */
+.page-header .reading-settings {
+   margin-left: 1rem; /* Отступ слева от кнопки */
+}
+
+/* --- Панель настроек чтения (попап) --- */
+.reading-settings-panel {
+  position: absolute; /* Абсолютное позиционирование */
+  top: 100%; /* Появляется под кнопкой */
+  right: 0; /* Прижимается к правому краю родителя (.page-header) */
+  z-index: 100; /* Поверх другого контента */
+
+  background: var(--bg-card); /* Фон как у карточек */
+  border: 1px solid var(--border-color); /* Рамка */
+  border-radius: var(--radius-md); /* Скругление */
+  box-shadow: var(--shadow-lg); /* Тень */
+  padding: 1rem; /* Внутренние отступы */
+  width: 280px; /* Фиксированная ширина */
+  display: none; /* По умолчанию скрыта */
+
+  /* Анимация появления */
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Показываем панель, когда она активна */
+.reading-settings-panel.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Стили для группы настроек внутри панели */
+.reading-settings-panel .setting-group {
+  margin-bottom: 1rem;
+}
+.reading-settings-panel .setting-group label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+}
+.reading-settings-panel select,
+.reading-settings-panel input[type="checkbox"] {
+  width: 100%; /* На всю ширину панели */
+}
+.reading-settings-panel .font-size-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.reading-settings-panel .font-size-controls button {
+  padding: 0.3rem 0.8rem;
+}
+
+/* Контейнеру кнопки настроек нужно position: relative */
+.reading-settings {
+    position: relative;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-family: "Brush Script MT", cursive;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+[data-mode="light"] .logo {
+  color: var(--text-primary); /* Делаем текст лого темным */
+  text-shadow: none;          /* Убираем тень */
+}
+
+.logo:hover {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+}
+
+/* ✨ Иконка профиля */
+.header-actions .user-icon {
+  width: 45px;
+  height: 45px;
+  padding: 0;
+  font-size: 0.7rem; /* <-- Теперь этот размер будет работать! Можете его менять. */
+  line-height: 40px; 
+  text-align: center;
+  /* Убираем лишние свойства, которые могут мешать */
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.user-icon:hover {
+  transform: scale(1.1);
+}
+
+/* ==========================================
+   БЛОК 5: ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ
+   ========================================== */
+
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.theme-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.6rem;
+  color: var(--text-inverse);
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.theme-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.theme-icon {
+  font-size: 1.2rem;
+  display: block;
+}
+
+.theme-menu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 1rem;
+  width: 200px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: fadeIn 0.2s ease forwards;
+  max-height: 300px;  /* Например, ограничиваем высоту */
+  overflow-y: auto;   /* Добавляем вертикальную прокрутку, если не помещается */
+}
+
+.theme-menu h4 {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.theme-option {
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s ease;
+  text-align: left;
+}
+
+.theme-option:hover {
+  background: var(--bg-tertiary);
+}
+
+.theme-auto {
+  border-top: 1px solid var(--border-light);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.theme-auto label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+[data-mode="light"] .theme-btn {
+  background: rgba(255, 255, 255, 0.3); /* Легкий белый фон */
+  border: 1px solid rgba(0, 0, 0, 0.1);    /* Тонкая темная рамка */
+}
+
+
+/* ==========================================
+   БЛОК 6: ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ В HEADER
+   ========================================== */
+
+.user-info-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.user-info-badge:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-role-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.user-email {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-role-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+[data-theme="dark"] .user-info-badge {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .user-info-badge:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-primary);
+}
+
+/* Стили для мгновенного отображения правильной кнопки */
+
+/* По умолчанию: кнопка "Войти" видна, а блок профиля скрыт. */
+#login-btn { display: inline-flex; }
+#user-info { display: none; }
+
+/* При залогиненом пользователе — показываем профиль и скрываем кнопку входа.
+   Используем более специфичный селектор и избегаем !important, чтобы JS могла
+   корректно управлять видимостью через inline-стили при необходимости. */
+html.user-logged-in #user-info { display: flex; }
+html.user-logged-in #login-btn { display: none; }
+
+/* По умолчанию скрываем элементы управления, требующие прав. Делаем это явно,
+   затем показываем их для соответствующих классов на html. Это меньше ломает
+   при динамическом изменении классов в JS. */
+/* По умолчанию прячем кнопки критичных действий */
+.btn-add-novel,
+.admin-btn { display: none !important; }
+
+/* Показываем кнопку добавления для тех, кто может создавать */
+/* Показываем кнопку добавления для тех, кто может создавать */
+html.can-create .btn-add-novel,
+.can-create .btn-add-novel { display: inline-flex !important; }
+
+/* Показываем админ кнопку только админам */
+html.is-admin .admin-btn,
+.is-admin .admin-btn { display: inline-flex; }
+
+/* ==========================================
+   БЛОК 7: КАСТОМНЫЙ SCROLLBAR
+   ========================================== */
+
+::-webkit-scrollbar {
+  width: 3px !important;
+  height: 3px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 1.5px;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.7);
+  width: 5px !important;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* ==========================================
+   БЛОК 8: BREADCRUMBS - ХЛЕБНЫЕ КРОШКИ
+   ========================================== */
+
+.breadcrumbs {
+    /* Теперь нам нужен только отступ снизу, т.к. выравнивание даёт родитель .page-content */
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.breadcrumbs a {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================
+   БЛОК 9: ПОИСК И ФИЛЬТРЫ
+   ========================================== */
+
+.search-section {
+  margin-bottom: 2rem;
+}
+
+.search-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.search-box {
+  display: flex;
+  flex: 1;
+  min-width: 280px;
+  gap: 0.5rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Контейнер кнопок действий */
+.action-buttons {
+    display: flex;
+    align-items: center; /* Выравниваем кнопки по вертикали */
+    gap: 0.75rem;      /* Отступ между кнопками */
+    flex-wrap: wrap;   /* Разрешаем перенос на мобильных */
+}
+
+/* Стили для новой кнопки сортировки */
+#sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 150px;
+    justify-content: center;
+}
+
+#sort-btn .sort-icon {
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+/* Попап сортировки */
+.sort-popup {
+    position: absolute; /* Позиционируем относительно ближайшего positioned родителя */
+    z-index: 1010; /* Выше основного контента, но ниже хедера */
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 1rem;
+    min-width: 250px;
+    animation: fadeIn 0.15s ease-out; /* Быстрое появление */
+}
+
+.sort-popup h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.sort-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.sort-option {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    text-align: left;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.sort-option:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* Стиль для активной опции */
+.sort-option.active {
+    background-color: var(--accent-primary);
+    color: var(--text-inverse);
+    font-weight: 500;
+}
+.sort-option.active:hover {
+    background-color: var(--accent-primary-hover);
+}
+
+/* Позиционирование попапа (нужно будет немного доработать в JS) */
+.sort-controls {
+    position: relative; /* Чтобы попап позиционировался относительно этого блока */
+}
+
+/* Панель фильтров */
+.filters-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: var(--shadow-sm);
+  animation: slideDown 0.3s ease;
+}
+
+.filters-content h3 {
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.filter-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+[data-mode="dark"] #filter-toggle {
+    background: var(--btn-primary-bg);
+    border: 2px solid var(--btn-primary-border);
+    color: var(--btn-primary-text);
+}
+[data-mode="dark"] #filter-toggle:hover {
+    background: var(--btn-primary-bg-hover);
+    border-color: var(--btn-primary-border-hover);
+    color: var(--btn-primary-text-hover);
+}
+
+/* Моды и теги */
+.filter-mode {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-mode label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.filter-tag {
+  padding: 0.5rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.filter-tag:hover {
+  background: var(--bg-tertiary);
+}
+
+.filter-tag.active {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+/* Добавь в конец файла или в блок с фильтрами/поиском */
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+}
+
+/* Скрытие label для зрячих пользователей */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Уменьшаем размер селекта */
+.form-select-sm {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.875rem;
+  min-width: 200px; /* Чтобы текст влезал */
+}
+
+/* Добавь в конец файла или в блок со стилями фильтров */
+
+/* Общие стили для расширенной панели */
+.filters-panel.expanded {
+    max-width: 1000px; /* Ограничим максимальную ширину */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.filters-panel.expanded h3 {
+    text-align: center;
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+}
+
+/* Сетка для колонок фильтров */
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Адаптивные колонки */
+    gap: 1.5rem 2rem; /* Отступы между колонками и строками */
+    margin-bottom: 1.5rem;
+}
+
+/* Широкая колонка для жанров/тегов */
+.filter-column-wide {
+    grid-column: span 2; /* Занимает 2 колонки, если есть место */
+}
+@media (max-width: 767px) {
+     .filter-column-wide { grid-column: span 1; } /* На мобильных - одна колонка */
+}
+
+
+/* Фильтры-диапазоны */
+.range-filter .range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.range-filter .range-inputs span {
+    color: var(--text-secondary);
+}
+.range-filter .range-inputs input {
+    /* Можно убрать стрелки у number input */
+    -moz-appearance: textfield;
+}
+.range-filter .range-inputs input::-webkit-outer-spin-button,
+.range-filter .range-inputs input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Секции жанров/тегов */
+.taxonomy-filter {
+    /* Дополнительные стили, если нужны */
+}
+
+.taxonomy-controls {
+    display: flex;
+    flex-direction: column; /* Секции друг под другом */
+    gap: 1.5rem;
+}
+
+.taxonomy-section {
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.taxonomy-title {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+/* Контейнер для тегов/жанров с прокруткой */
+.filter-tags.scrollable {
+    max-height: 150px; /* Ограничиваем высоту */
+    overflow-y: auto; /* Добавляем скролл */
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-sm);
+}
+
+/* Стилизация радио-кнопок */
+.filter-mode label {
+    font-size: 0.9em;
+    font-weight: normal;
+    color: var(--text-secondary);
+    display: inline-flex; /* Чтобы radio и text были в строку */
+    align-items: center;
+    margin-right: 1rem;
+    cursor: pointer;
+}
+.filter-mode input[type="radio"] {
+    margin-right: 0.3rem;
+}
+
+/* --- Стили для новой карты тегов в фильтрах --- */
+
+#filter-tags-map {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* Расстояние между тегами */
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-top: 10px;
+    max-height: 200px; /* Ограничиваем высоту, добавляем скролл */
+    overflow-y: auto;
+}
+
+.filter-tag-item {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    padding: 3px 6px;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid transparent; /* Для плавности при добавлении подсветки */
+}
+
+.filter-tag-item:hover {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.filter-tag-name {
+    margin-right: 5px;
+    cursor: default; /* Чтобы не выглядело как ссылка */
+}
+
+.tag-filter-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%; /* Круглые кнопки */
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: 0.8em;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 3px;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.tag-filter-btn:hover {
+    background-color: var(--bg-hover);
+}
+
+.include-btn {
+    /* Дополнительные стили для кнопки + */
+}
+
+.exclude-btn {
+    /* Дополнительные стили для кнопки - */
+}
+
+/* Подсветка активных кнопок и тега */
+.filter-tag-item.include-active {
+    background-color: #d1e7dd; /* Светло-зеленый */
+    border-color: #a3cfbb;
+}
+html[data-mode="dark"] .filter-tag-item.include-active {
+    background-color: #143625;
+    border-color: #2a5c40;
+}
+.filter-tag-item.include-active .include-btn {
+    background-color: #28a745; /* Зеленый */
+    color: white;
+    border-color: #28a745;
+}
+
+.filter-tag-item.exclude-active {
+    background-color: #f8d7da; /* Светло-красный */
+    border-color: #f1aeae;
+}
+html[data-mode="dark"] .filter-tag-item.exclude-active {
+    background-color: #4d1b20;
+    border-color: #7d2d34;
+}
+.filter-tag-item.exclude-active .exclude-btn {
+    background-color: #dc3545; /* Красный */
+    color: white;
+    border-color: #dc3545;
+}
+
+/* Стили для списков выбранных тегов */
+.selected-tags-display {
+    margin-top: 5px;
+    padding: 5px;
+    min-height: 24px; /* Чтобы контейнер не схлопывался */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.selected-tags-display .selected-tag {
+    font-size: 0.85em;
+    padding: 2px 6px;
+    /* Стили как у .selected-tag в форме новеллы, но без кнопки X */
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+}
+.selected-tags-display .selected-tag.include {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+html[data-mode="dark"] .selected-tags-display .selected-tag.include {
+    background-color: #143625;
+    color: #75b798;
+}
+.selected-tags-display .selected-tag.exclude {
+    background-color: #f8d7da;
+    color: #842029;
+}
+html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
+    background-color: #4d1b20;
+    color: #ea868f;
+}
+
+/* Стили для радио кнопок режимов */
+.filter-mode-options label {
+    margin-right: 15px;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+.filter-mode-options input[type="radio"] {
+    margin-right: 5px;
+}
+
+/* --- Стили для списка тегов в админ-панели --- */
+
+#admin-tab-tags .items-list {
+    margin-top: 1.5rem;
+    border: 1px solid var(--border-color); /* Добавляем рамку вокруг списка */
+    border-radius: var(--radius-md);
+    max-height: 400px; /* Ограничиваем высоту */
+    overflow-y: auto; /* Добавляем скролл */
+}
+
+/* Элемент списка (один тег) */
+#admin-tab-tags .item {
+    display: flex; /* Используем flexbox для выравнивания */
+    justify-content: space-between; /* Распределяем контент по краям */
+    align-items: flex-start; /* Выравниваем по верху */
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color); /* Разделительная линия */
+    gap: 15px; /* Пространство между контентом и кнопкой */
+}
+
+/* Убираем линию у последнего элемента */
+#admin-tab-tags .item:last-child {
+    border-bottom: none;
+}
+
+/* Контейнер для названия и описания */
+#admin-tab-tags .item .tag-content {
+    flex-grow: 1; /* Занимает все доступное пространство */
+}
+
+
+/* Название тега */
+#admin-tab-tags .item span {
+    font-weight: 600; /* Делаем жирнее */
+    color: var(--text-primary); /* Основной цвет текста */
+    display: block; /* Чтобы описание было под ним */
+    margin-bottom: 3px; /* Небольшой отступ снизу */
+}
+
+/* Описание тега */
+#admin-tab-tags .item .item-description {
+    font-size: 0.9em;
+    color: var(--text-secondary); /* Менее яркий цвет */
+    margin: 0; /* Убираем лишние отступы */
+    /* Ограничение высоты описания и добавление многоточия */
+    max-height: 3.6em; /* Примерно 2 строки (1.2em * 3) */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Можно добавить display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; для обрезки по строкам, но это не везде работает */
+}
+
+/* Кнопка "Удалить" */
+#admin-tab-tags .item .btn-danger {
+    flex-shrink: 0; /* Запрещаем кнопке сжиматься */
+    align-self: center; /* Выравниваем кнопку по центру вертикально */
+}
+
+/* --- Стили для формы добавления тега --- */
+#admin-tab-tags .admin-form {
+    display: flex;
+    align-items: flex-start; /* Выравниваем по верху */
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+#admin-tab-tags .admin-form .form-input-container {
+    flex-grow: 1; /* Занимает максимум места */
+    display: flex;
+    flex-direction: column; /* Поля друг под другом */
+    gap: 5px; /* Расстояние между полями */
+}
+
+/* Увеличиваем высоту поля описания */
+#admin-tab-tags #new-tag-desc {
+    min-height: 60px; /* Задаем минимальную высоту */
+    resize: vertical; /* Разрешаем менять высоту вручную */
+}
+
+/* Компактная кнопка "+" */
+#admin-tab-tags .admin-form .btn-add {
+    flex-shrink: 0; /* Не сжимается */
+    padding: 8px 12px; /* Подбираем отступы для кнопки */
+    font-size: 1.2em; /* Размер плюса */
+    line-height: 1; /* Убираем лишнюю высоту строки */
+    align-self: flex-start; /* Выравниваем по верху с полями */
+    margin-top: 5px; /* Небольшой отступ сверху, чтобы выровнять с первым полем */
+}
+
+/* --- Стили для поиска тегов --- */
+#admin-tab-tags .tag-search-container {
+    margin-bottom: 1rem;
+}
+
+#admin-tab-tags .item .table-actions {
+    display: flex;
+    gap: 5px; /* Расстояние между кнопками */
+    align-items: center; /* Выравнивание по центру */
+    flex-shrink: 0; /* Не сжиматься */
+}
+
+/* Адаптивность для сетки фильтров */
+@media (max-width: 991px) { /* Планшеты */
+    .filters-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem 1.5rem;
+    }
+}
+@media (max-width: 575px) { /* Мобильные */
+     .filters-grid {
+        grid-template-columns: 1fr; /* Одна колонка */
+        gap: 1rem;
+    }
+     .filter-column-wide {
+        grid-column: span 1; /* Всегда одна колонка */
+    }
+     .taxonomy-controls {
+        gap: 1rem;
+    }
+     .taxonomy-section {
+        padding: 0.75rem;
+    }
+     .filter-tags.scrollable {
+        max-height: 120px;
+    }
+}
+
+/* ==========================================
+   БЛОК 9.5: АВТОДОПОЛНЕНИЕ ПОИСКА
+   ========================================== */
+
+.search-box {
+  position: relative;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  /* Ширина теперь задается через JavaScript */
+  z-index: 100;
+  
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  margin-top: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.autocomplete-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  /* --- ИЗМЕНЕНИЕ: Добавляем мягкие разделители --- */
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Убираем линию у последнего элемента */
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+.autocomplete-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.autocomplete-author {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 0.1rem;
+}
+
+/* --- ИЗМЕНЕНИЕ: Новый стиль подсветки без отступов --- */
+.autocomplete-item strong {
+  color: inherit; /* Наследуем цвет текста */
+  font-weight: 700;
+  background-color: var(--accent-highlight); /* Используем переменную из темы */
+  /* padding и border-radius убраны, чтобы не было отступов */
+  border-radius: 2px;
+}
+
+/* --- Автодополнение для авторов --- */
+.author-autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%; /* Список будет той же ширины, что и поле ввода */
+  z-index: 100;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  margin-top: 0.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Специфичные для авторов */
+.author-autocomplete {
+    /* Можно добавить специфичные стили если нужно */
+}
+
+.autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    line-height: 1.4;
+}
+
+.autocomplete-item:hover {
+    background-color: #f5f5f5;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+/* ==========================================
+   БЛОК 10: СТАТИСТИКА И ПЕРЕКЛЮЧЕНИЕ ВИДОВ
+   ========================================== */
+
+.stats-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* ✨ ВОТ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ */
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 0.5rem 1.5rem; /* Оставляем уменьшенные вертикальные отступы */
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.stats-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+#novels-count {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.filter-info {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* Кнопки видов (Сетка / Список) */
+.view-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.view-btn {
+  background: var(--bg-secondary);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.view-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.view-btn.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+  font-weight: 600;
+}
+
+
+
+/* ==========================================
+   БЛОК 11: СЕТКА КАРТОЧЕК НОВЕЛЛ
+   ========================================== */
+
+.novels-container {
+  margin: 2rem 0;
+  position: relative;
+}
+
+#novels-grid,
+.novels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  min-height: 0;
+}
+
+.novels-grid:empty {
+  display: none;
+}
+
+/* Анимация появления */
+.novels-grid.fade-in {
+  animation: fadeInGrid 0.4s ease forwards;
+}
+
+.novels-grid.fade-out {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+/* Состояние "Нет результатов" */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.no-results h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ==========================================
+   БЛОК 12: КАРТОЧКА НОВЕЛЛЫ
+   ========================================== */
+
+/* --- Общие стили для всех карточек --- */
+.novel-card {
+    display: flex;
+    position: relative; /* Необходимо для позиционирования бейджей */
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.novel-card:hover {
+  /* Убрали hover-поведение, чтобы карточки не подпрыгивали и не меняли тень */
+  transform: none;
+  box-shadow: none;
+}
+
+.novel-card .novel-cover {
+    position: relative; /* <-- ДОБАВЛЕНО: Включаем z-index для этого блока */
+    z-index: 1;       /* <-- ДОБАВЛЕНО: Отправляем обложку на первый "слой" */
+    flex-shrink: 0;
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.novel-card .novel-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.novel-card:hover .novel-cover img {
+    transform: scale(1.05);
+}
+
+.novel-card .novel-cover .no-cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 3rem;
+    color: var(--text-secondary);
+}
+
+.novel-card .novel-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 1rem;
+}
+
+.novel-card .novel-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+/* --- Стили для режима СЕТКИ (GRID VIEW) --- */
+.novels-grid:not(.list-view) .novel-card.grid-view-card {
+  flex-direction: column;
+  /* Убираем весь "декор" с карточки-обертки */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  /* Высоту теперь определяет только обложка и текст */
+  height: auto; 
+  width: 100%;
+}
+
+.novels-grid:not(.list-view) .novel-card.grid-view-card .novel-cover {
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  /* Весь "декор" переносим сюда: фон, рамка, тень, скругление */
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all 0.25s ease; /* Возвращаем анимацию для обложки */
+}
+
+/* При наведении увеличиваем обложку, а не всю невидимую карточку */
+.novels-grid:not(.list-view) .novel-card.grid-view-card:hover .novel-cover {
+    transform: translateY(-4px);
+}
+
+.novels-grid:not(.list-view) .novel-card.grid-view-card .novel-info {
+  padding: 0.75rem 0.5rem; /* Сделаем вертикальный отступ чуть больше */
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: auto; /* Высота по содержимому */
+  min-height: 48px;
+}
+
+/* --- Стили для режима СПИСКА (LIST VIEW) --- */
+#novels-grid.list-view,
+.novels-grid.list-view {
+    grid-template-columns: 1fr; /* Одна колонка на всю ширину */
+}
+
+.novels-grid.list-view .novel-card.list-view-card {
+    flex-direction: row;
+    align-items: stretch; /* <-- ВАЖНО: Растягиваем дочерние элементы по высоте */
+    width: 100%;
+}
+
+.novels-grid.list-view .novel-card.list-view-card .novel-cover {
+    width: 120px;
+    flex-shrink: 0; /* Запрещаем обложке сжиматься */
+    aspect-ratio: 5 / 7;
+}
+
+.novels-grid.list-view .novel-card.list-view-card .novel-info {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column; /* Выстраиваем контент в колонку */
+    flex-grow: 1; /* Заставляем блок занять все оставшееся место */
+}
+
+/* Название (поднимаем, убирая нижний отступ) */
+.novels-grid.list-view .novel-card.list-view-card .novel-title {
+    font-size: 1.4rem;
+    margin-bottom: 0.1rem; /* <-- Уменьшили отступ */
+}
+
+/* Автор (уменьшаем шрифт) */
+.novels-grid.list-view .novel-card.list-view-card .novel-author {
+    font-size: 0.75rem; /* <-- Уменьшили шрифт */
+    color: var(--text-secondary);
+    margin: 0.1rem 0 0.5rem; /* Добавили отступ снизу */
+}
+
+/* Мета-данные (опускаем вниз) */
+.novels-grid.list-view .novel-card.list-view-card .novel-meta-line {
+    margin-top: auto; /* <-- ГЛАВНЫЙ ФИКС: прижимает этот блок к низу */
+    padding-top: 0.5rem; /* Добавляет немного воздуха сверху */
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+/* Бейджи для языка и статуса */
+.novel-badge {
+    position: absolute;
+    top: 0.5rem;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border-radius: var(--radius-sm);
+    z-index: 2;
+    text-transform: uppercase;
+}
+
+.badge-top-left { left: 0.5rem; }
+.badge-top-right { right: 0.5rem; }
+
+/* Внутренние элементы инфоблока для списка */
+.novel-card .novel-info .novel-meta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* Язык оригинала — простой текст в левом верхнем углу карточки (без фона) */
+.novel-card .novel-language {
+  position: absolute;
+  left: 0.6rem;
+  top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  pointer-events: none;
+  z-index: 2; /* <-- ДОБАВЛЕНО: Поднимаем плашку на слой выше */
+}
+
+/* Статус перевода — цветной бейдж в правом верхнем углу */
+.novel-card .novel-status {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.4rem;
+  padding: 0.25rem 0.6rem; /* Немного увеличим отступы по бокам */
+  font-size: 0.8rem;      /* <-- Увеличили шрифт */
+  font-weight: 600;
+  color: var(--text-inverse);
+  border-radius: var(--radius-sm); /* Используем стандартное скругление */
+  z-index: 2;
+  border: 1px solid rgba(0,0,0,0.05); /* Добавим едва заметную рамку для объёма */
+}
+
+/* Примеры цветовых классов статуса — можно добавлять другие */
+.novel-status.status-ongoing { background: var(--accent-primary); }
+.novel-status.status-hiatus { background: var(--accent-warning); }
+.novel-status.status-completed { background: var(--accent-success); }
+.novel-status.status-unknown { background: var(--text-secondary); }
+
+/* Минимальный вид карточки: только обложка и название; применяется в grid */
+.novels-grid:not(.list-view) .novel-card.grid-view-card .novel-title {
+  background: transparent; /* Убираем фон, если он где-то унаследован */
+  display: block;
+  margin: 0;
+  padding: 0.25rem 0.5rem 0;
+}
+
+/* Стили для удаленной карточки */
+.novel-card.deleted {
+    opacity: 0.6;
+    filter: grayscale(80%);
+}
+.novel-card.deleted:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+}
+.novel-card.deleted .novel-card-overlay {
+    display: flex;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.novel-card.deleted:hover .novel-card-overlay {
+    opacity: 1;
+}
+.restore-icon {
+    font-size: 1.5rem;
+}
+
+/* ==========================================
+   БЛОК 13: SKELETON LOADING АНИМАЦИЯ
+   ========================================== */
+
+/* ✨ Улучшенная shimmer анимация */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Базовый skeleton класс с переливающимся эффектом */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 0%,
+    var(--bg-card) 20%,
+    rgba(255, 255, 255, 0.3) 40%,
+    var(--bg-card) 60%,
+    var(--bg-secondary) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+/* Для темной темы - более заметный блик */
+[data-mode="dark"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 0%,
+    var(--bg-card) 20%,
+    rgba(255, 255, 255, 0.08) 40%,
+    var(--bg-card) 60%,
+    var(--bg-secondary) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Skeleton карточка */
+.skeleton-card {
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.7;
+}
+
+.skeleton-cover {
+  width: 100%;
+  height: 250px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.skeleton-text {
+  height: 1rem;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+.skeleton-title {
+  height: 1.5rem;
+  width: 80%;
+  margin-bottom: 1rem;
+}
+
+.skeleton-image {
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  margin-bottom: 1rem;
+}
+
+/* Дополнительные skeleton элементы */
+.skeleton-tags {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.skeleton-tag {
+  width: 60px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-button {
+  width: 100px;
+  height: 36px;
+  border-radius: var(--radius-md);
+}
+
+/* ==========================================
+   БЛОК 13.5: АНИМАЦИИ ЗАГРУЗКИ СТРАНИЦ
+   ========================================== */
+
+.page-loading-animation {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    color: var(--text-secondary);
+}
+.page-loading-animation p {
+    margin-top: 2rem;
+    font-size: 1.1rem;
+}
+
+/* ==========================================
+   БЛОК 13.5.1: АНИМАЦИЯ ПЕРЕЛИСТЫВАЮЩЕЙСЯ КНИГИ
+   ========================================== */
+
+/* --- 1. Контейнер книги --- */
+.book {
+	--c: var(--text-primary);
+	--s: 9px;
+	--t: 4.5s;
+	color: var(--c);
+	font-size: var(--s);
+	position: relative;
+    width: 12em;
+    height: 8.5em;
+    perspective: 1000px;
+}
+
+/* --- 2. Прячем все ненужные элементы --- */
+.book__pg-shadow,
+.book__pg--2, 
+.book__pg--4 {
+    display: none;
+}
+
+/* --- 3. Базовые стили для всех видимых страниц --- */
+.book__pg, .book__pg--3, .book__pg--5 {
+    position: absolute;
+    top: 1em;
+    left: 1em;
+    width: 5em;
+    height: 6.5em;
+    border: 0.1em solid;
+    background: var(--bg-secondary);
+}
+
+/* --- 4. Стили для конкретных страниц --- */
+
+/* ЛЕВАЯ СТАТИЧНАЯ СТРАНИЦА */
+.book__pg {
+    /* ✨ ИСПРАВЛЕНИЕ: Закругляем внешние (левые) углы */
+    border-radius: 3px 0 0 3px;
+    transform: rotateY(-180deg); 
+    transform-origin: 100% 50%;
+    z-index: 1;
+}
+
+/* ПРАВАЯ СТАТИЧНАЯ СТРАНИЦА */
+.book__pg--5 {
+    /* ✨ ИСПРАВЛЕНИЕ: Закругляем внешние (правые) углы */
+    border-radius: 3px 0 0 3px;
+    transform: rotateY(0deg); 
+    z-index: 1;
+}
+
+/* ЛИСТАЮЩАЯСЯ СТРАНИЦА */
+.book__pg--3 {
+    /* ✨ ИСПРАВЛЕНИЕ: Углы как у правой страницы */
+    border-radius: 3px 0 0 3px;
+    transform-origin: 100% 50%;
+    animation: var(--t) flip-page infinite ease-in-out;
+}
+
+/* --- 5. Сценарий анимации с плавной сменой слоёв --- */
+@keyframes flip-page {
+	0% {
+		transform: rotateY(-180deg);
+		z-index: 2; /* В начале страница сверху */
+	}
+	/* ✨ ИСПРАВЛЕНИЕ: Держим z-index высоким до самого конца */
+	99% {
+		z-index: 2;
+	}
+	100% {
+		transform: rotateY(0deg);
+		z-index: 1; /* В конце страница ложится вниз */
+	}
+}
+
+/* ==========================================
+   БЛОК 14: ПАГИНАЦИЯ
+   ========================================== */
+
+.pagination,
+.pagination-wrapper {
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: row; /* ✨ ИСПРАВЛЕНИЕ: Ставим кнопки в ряд */
+  flex-wrap: wrap;       /* ✨ ДОБАВЛЕНО: Разрешаем перенос на новую строку */
+  justify-content: center; /* Центрируем всю группу кнопок */
+  align-items: center;
+  gap: 0.5rem; /* Уменьшим отступ между кнопками */
+}
+
+.pagination-controls {
+  display: flex;
+  flex-wrap: wrap; /* Позволяем переноситься на новую строку на маленьких экранах */
+  justify-content: center; /* Центрируем кнопки */
+  align-items: center;
+  gap: 0.5rem; /* Отступ между кнопками */
+}
+
+.pagination-btn {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+  min-width: 38px;
+  text-align: center;
+  user-select: none;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn.active {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+  font-weight: 600;
+}
+
+/* Номера страниц */
+.page-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.page-number {
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.page-number.active {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.page-number:hover:not(.active) {
+  background: var(--accent-primary-hover);
+  color: var(--text-inverse);
+}
+
+.page-number.ellipsis,
+.pagination-ellipsis {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: bold;
+  cursor: default;
+}
+
+/* Информация и селектор */
+.pagination-info,
+.pagination-stats {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-secondary);
+  padding: 0.4rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.per-page-select {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.per-page-select:hover {
+  border-color: var(--accent-primary);
+}
+
+/* ==========================================
+   БЛОК 15: МОДАЛЬНЫЕ ОКНА
+   ========================================== */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal.show,
+.modal.visible {
+  display: flex !important;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Контейнер содержимого */
+.modal-content {
+  background: var(--bg-card);
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 700px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  transform: translateY(30px);
+  opacity: 0;
+  animation: modalSlideUp 0.3s ease forwards;
+}
+
+/* ✨ СТИЛИ ДЛЯ ФОРМЫ АВТОРИЗАЦИИ */
+/* 1. Задаем окну входа нужную ширину и отступы */
+#auth-modal .modal-content {
+  max-width: 480px; /* Оптимальная ширина для формы */
+  padding: 3rem 2.5rem;
+}
+
+/* Убираем пустой селектор .auth-form-container — если в будущем понадобится,
+   можно добавить конкретные правила сюда. */
+
+/* 2. Делаем контейнеры форм гибкими (это ключевой фикс!) */
+#auth-container,
+#registration-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* 3. Центрируем заголовок */
+#auth-modal h2 {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: var(--text-primary);
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+/* 4. Задаем отступы между полями ввода и кнопками */
+.auth-method {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; /* Отступ между полями */
+}
+
+/* 5. Стили для разделителя "или" */
+.auth-divider {
+  text-align: center;
+  color: var(--text-secondary);
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: var(--border-color);
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after { right: 0; }
+
+/* 6. Стили для ссылки "Нет аккаунта?" */
+.auth-hint {
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.auth-hint a {
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-hint a:hover {
+  text-decoration: underline;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 767px) {
+  #auth-modal .modal-content {
+    width: 95%;
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* ✨ КОНЕЦ ИСПРАВЛЕННЫХ СТИЛЕЙ ДЛЯ ФОРМЫ АВТОРИЗАЦИИ ✨ */
+
+
+/* Для админ-панели — шире окно */
+#admin-modal .modal-content {
+  width: 900px;
+  max-width: 90%;
+  height: 85vh;
+  overflow-y: auto;
+  z-index: 1001;
+}
+
+.modal-content.novel-details {
+  max-width: 800px;
+}
+
+.confirm-modal,
+.prompt-modal {
+  max-width: 400px;
+  text-align: center;
+}
+
+.admin-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
+
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    border-bottom: 2px solid var(--border-color); /* Возвращаем нижнюю границу */
+    margin-bottom: 1.5rem; /* Возвращаем отступ */
+    
+    /* Стилизация скроллбара, как на всём сайте */
+    scrollbar-width: none; /* Для Firefox */
+    -ms-overflow-style: none; /* Для IE/Edge */
+}
+
+/* Стили для табов из профиля подойдут и сюда */
+.admin-tabs .tab-btn {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+.admin-tabs .tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+.admin-tabs .tab-btn.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--accent-primary);
+}
+
+.admin-tab-content {
+    animation: fadeIn 0.3s;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.admin-tabs::-webkit-scrollbar {
+    height: 3px !important; /* Тонкая полоса */
+    width: 3px !important;
+}
+.admin-tabs::-webkit-scrollbar-track {
+    background: transparent; /* Невидимый фон */
+}
+.admin-tabs::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.4); /* Полупрозрачный ползунок */
+    border-radius: 1.5px;
+}
+[data-mode="dark"] .admin-tabs::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4); /* Светлый ползунок для тёмной темы */
+}
+
+/* Кнопка закрытия */
+.close-btn,
+.close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.5rem;
+}
+
+.close-btn:hover,
+.close:hover {
+  color: var(--accent-primary);
+  background: var(--bg-tertiary);
+}
+
+/* Заголовок и текст */
+.modal-title,
+.alert-title {
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.modal-text,
+.alert-text {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+/* Кнопки действий */
+.modal-actions,
+.alert-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.modal-actions button,
+.alert-actions button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+}
+
+.modal-actions .btn-primary,
+.alert-actions .btn-primary {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+}
+
+.modal-actions .btn-primary:hover,
+.alert-actions .btn-primary:hover {
+  background: var(--accent-primary-hover);
+  transform: translateY(-1px);
+}
+
+.modal-actions .btn-secondary,
+.alert-actions .btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.modal-actions .btn-secondary:hover,
+.alert-actions .btn-secondary:hover {
+  background: var(--bg-tertiary);
+  transform: translateY(-1px);
+}
+
+.modal-actions .btn-danger,
+.alert-actions .btn-danger {
+  background: var(--accent-danger);
+  color: var(--text-inverse);
+}
+
+.modal-actions .btn-danger:hover,
+.alert-actions .btn-danger:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.modal-loading-overlay {
+  position: absolute;
+  inset: 0; /* Растягивает на всю область родителя (top:0, left:0, right:0, bottom:0) */
+  background: rgba(var(--bg-card-rgb), 0.8); /* Полупрозрачный фон в цвет модалки */
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10; /* Чтобы был поверх содержимого */
+  border-radius: var(--radius-lg); /* Скругляем углы как у модалки */
+}
+
+#admin-content {
+    position: relative;
+    min-height: 300px; /* Минимальная высота, чтобы спиннер не сжимался */
+}
+
+[data-mode="light"] {
+  /* ... все твои существующие переменные и стили для светлой темы ... */
+
+  /* ✨ FIX: Корректные стили ховера для кнопок в модалках (светлая тема) ✨ */
+  .modal-actions .btn-primary:hover,
+  .alert-actions .btn-primary:hover {
+    background-color: var(--btn-primary-bg-hover);   /* Используем переменную фона ховера для primary */
+    color: var(--btn-primary-text-hover);      /* Используем переменную текста ховера для primary */
+    border-color: var(--btn-primary-border-hover); /* Добавим и рамку на всякий случай */
+  }
+
+  .modal-actions .btn-secondary:hover,
+  .alert-actions .btn-secondary:hover {
+    background-color: var(--btn-secondary-bg-hover); /* Используем переменную фона ховера для secondary */
+    color: var(--btn-secondary-text-hover);     /* Используем переменную текста ховера для secondary */
+    border-color: var(--btn-secondary-border-hover);/* Добавим и рамку */
+  }
+  /* ✨ КОНЕЦ FIX ✨ */
+}
+
+/* ==========================================
+   СТИЛИ ДЛЯ МОДАЛЬНОГО ОКНА "ПОДЕЛИТЬСЯ"
+   ========================================== */
+
+/* Контейнер с относительным позиционированием */
+.share-tab-content {
+  position: relative;
+  display: none;
+  min-height: 300px; /* Минимальная высота для центрирования */
+  animation: fadeIn 0.3s ease;
+}
+
+.share-tab-content.active {
+  display: block !important;
+}
+
+/* ✅ НОВОЕ: Центрируем спинер внутри .share-tab-content */
+.share-tab-content .loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Стили для самого спинера */
+.loading-spinner .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 0.5rem;
+}
+
+.loading-spinner p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Анимация вращения */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* Контейнер для ссылки */
+.share-link-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.share-link-container input {
+  flex: 1;
+}
+
+/* Форма добавления доступа */
+.add-permission-form {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Список доступов */
+#permissions-list {
+  margin-top: 1rem;
+}
+
+/* Большое модальное окно */
+.large-modal {
+  max-width: 700px;
+  width: 90%;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .add-permission-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .share-link-container {
+    flex-direction: column;
+  }
+}
+
+/* ==========================================
+   БЛОК 16: УВЕДОМЛЕНИЯ (ТОСТЫ)
+   ========================================== */
+
+.toast-container {
+  position: fixed;
+  top: 90px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+/* ✨ НОВЫЕ СТИЛИ ДЛЯ ТОСТОВ В СТИЛЕ GLASSMORPHISM ✨ */
+
+.toast {
+  /* Эффект матового стекла */
+  background: rgba(20, 20, 20, 0.75); /* Полупрозрачный тёмный фон */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Тонкая светлая рамка для эффекта стекла */
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg); /* Более выраженная тень */
+  
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  
+  /* Анимации появления/исчезновения (остаются без изменений) */
+  transform: translateX(400px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  max-height: 0;
+  overflow: hidden;
+}
+
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+  max-height: 200px;
+}
+
+.toast.hide {
+  transform: translateX(400px);
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Иконки тостов */
+.toast-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.toast-success .toast-icon {
+  color: var(--accent-success);
+}
+
+.toast-error .toast-icon {
+  color: var(--accent-danger);
+}
+
+.toast-warning .toast-icon {
+  color: var(--accent-warning);
+}
+
+.toast-info .toast-icon {
+  color: var(--accent-primary);
+}
+
+/* Контент тоста */
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #FFFFFF; /* Белый цвет для заголовка */
+  font-size: 0.95rem;
+}
+
+.toast-message {
+  color: #EAEAEA; /* Светло-серый цвет для основного текста */
+  font-size: 0.9rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Кнопка закрытия */
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.toast-close:hover {
+  color: var(--text-primary);
+}
+
+/* ==========================================
+   БЛОК 17: КНОПКИ
+   ========================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Варианты кнопок */
+.btn-primary {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border: 2px solid var(--btn-primary-border); /* Делаем рамку чуть толще для заметности */
+}
+
+.btn-primary:hover {
+  background-color: var(--btn-primary-bg-hover);
+  color: var(--btn-primary-text-hover);
+  border-color: var(--btn-primary-border-hover);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--btn-secondary-border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--btn-secondary-bg-hover);
+  color: var(--btn-secondary-text-hover);
+  border-color: var(--btn-secondary-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ✨ Особые стили для кнопок в шапке, чтобы они вели себя как btn-login */
+
+/* --- Общие стили для обеих тем --- */
+.header .btn-secondary {
+    background: var(--btn-login-bg);
+    color: var(--btn-login-text);
+    border: 2px solid var(--btn-login-border);
+}
+.header .btn-secondary:hover {
+    background: var(--btn-login-bg-hover);
+    color: var(--btn-login-text-hover);
+    border-color: var(--btn-login-border-hover);
+}
+
+/* Специальная кнопка для входа/авторизации */
+.btn-login {
+  background: var(--btn-login-bg);
+  color: var(--btn-login-text);
+  border: 2px solid var(--btn-login-border);
+  font-weight: 150;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-login:hover {
+  background: var(--btn-login-bg-hover);
+  color: var(--btn-login-text-hover);
+  border-color: var(--btn-login-border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-login:active {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-danger {
+  background: var(--accent-danger);
+  color: var(--text-inverse);
+}
+
+.btn-danger:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-success {
+  background: var(--accent-success);
+  color: var(--text-inverse);
+}
+
+.btn-success:hover {
+  background: #157347;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-warning {
+  background: var(--accent-warning);
+  color: var(--text-inverse);
+}
+
+.btn-warning:hover {
+  background: #fd9843;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.btn-link {
+  background: transparent;
+  color: var(--accent-primary);
+  text-decoration: underline;
+  padding: 0.5rem;
+}
+
+.btn-link:hover {
+  color: var(--accent-primary-hover);
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-telegram {
+  background: #0088cc;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-telegram:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Размеры кнопок */
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  border-radius: var(--radius-lg);
+}
+
+/* Состояния кнопок */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-icon {
+  padding: 0.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.btn-loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.btn-loading::after {
+  content: '';
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 0.5rem;
+}
+
+/* Группа кнопок */
+.btn-group {
+  display: inline-flex;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-group .btn {
+  border-radius: 0;
+  margin: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-group .btn:last-child {
+  border-right: none;
+}
+
+.btn-group .btn:hover {
+  transform: none;
+}
+
+.creator-only {
+    display: none;
+}
+
+.btn:focus,
+.btn:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+/* ==========================================
+   БЛОК 18: ФОРМЫ И ИНПУТЫ
+   ========================================== */
+
+.form-group {
+  margin-bottom: 1.5rem;
+   position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.form-group .required {
+  color: var(--accent-danger);
+}
+
+/* Текстовые инпуты */
+.form-input,
+.form-textarea,
+.form-select,
+.auth-form-container input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus,
+.auth-form-container input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Текстовое поле */
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+/* Селект */
+.form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+/* Чекбоксы и радио */
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.form-check-input {
+  width: 1.1em;
+  height: 1.1em;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-check-input:checked {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.form-check-label {
+  font-weight: normal;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* Радио кнопки */
+.form-radio .form-check-input {
+  border-radius: 50%;
+}
+
+.form-radio .form-check-input:checked {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+/* Файловый инпут */
+.form-file {
+  width: 100%;
+}
+
+.file-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.file-input:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-tertiary);
+}
+
+.file-input.has-file {
+  border-style: solid;
+  background: var(--bg-primary);
+}
+
+/* Валидация */
+.form-input.invalid,
+.form-textarea.invalid,
+.form-select.invalid {
+  border-color: var(--accent-danger);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+.form-input.valid,
+.form-textarea.valid,
+.form-select.valid {
+  border-color: var(--accent-success);
+  box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.25);
+}
+
+.error-message {
+  color: var(--accent-danger);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.help-text {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Группа инпутов */
+.input-group {
+  display: flex;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.input-group .form-input {
+  border-radius: 0;
+  border: none;
+  flex: 1;
+}
+
+.input-group .btn {
+  border-radius: 0;
+  border: none;
+}
+
+/* ==========================================
+   БЛОК 19: СПЕЦИФИЧЕСКИЕ КОМПОНЕНТЫ
+   ========================================== */
+
+/* Детали новеллы */
+.novel-details-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.novel-details-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.novel-details-cover {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.novel-details-cover img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.novel-details-meta {
+  background: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.novel-details-meta h3 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.meta-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.meta-item:last-child {
+  border-bottom: none;
+}
+
+.meta-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.meta-value {
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.novel-details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.novel-details-header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.novel-details-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.novel-details-info .novel-author {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.novel-details-info .novel-creator {
+  margin-bottom: 1rem;
+}
+
+.novel-details-description {
+  line-height: 1.6;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+}
+
+.novel-details-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Админ панель */
+.admin-panel {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.admin-header {
+  background: var(--gradient-primary);
+  color: var(--text-inverse);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.admin-header h2 {
+  margin: 0;
+  font-weight: 700;
+}
+
+.admin-content {
+  padding: 1.5rem;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.admin-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.action-card {
+  background: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: var(--bg-tertiary);
+}
+
+.action-card h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.action-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Форма добавления/редактирования */
+.form-section {
+  background: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.form-section h3 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+/* Таблица администрирования */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.admin-table th {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tr:hover {
+  background: var(--bg-secondary);
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* Загрузка файлов */
+.upload-area {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  text-align: center;
+  background: var(--bg-secondary);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.upload-area:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-tertiary);
+}
+
+.upload-area.dragover {
+  border-color: var(--accent-primary);
+  background: var(--bg-tertiary);
+  transform: scale(1.02);
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.upload-text {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.upload-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Прогресс бар */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Рейтинг */
+.rating {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 0.1rem;
+}
+
+.rating-star {
+  color: var(--border-color);
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
+}
+
+.rating-star.filled {
+  color: #ffc107;
+}
+
+.rating-value {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-left: 0.5rem;
+}
+
+/* ==========================================
+   БЛОК 20: СТРАНИЦЫ И ВИРТУАЛЬНАЯ НАВИГАЦИЯ
+   ========================================== */
+
+/* --- Стили страницы чтения главы --- */
+
+.chapter-content-wrapper {
+  padding-top: 1rem;
+  margin-top: 1rem; /* Добавляем небольшой отступ сверху для всего контента */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* ✨ ЗАМЕНЯЕМ 'min-height: 60vh;' ЭТОЙ СТРОКОЙ ✨ */
+}
+
+h1.chapter-title {
+  /* Уменьшаем отступ сверху, увеличиваем снизу */
+  margin-top: 0.5rem; /* Ближе к хедеру */
+  margin-bottom: 2rem; /* Дальше от текста */
+  font-size: 1.8rem; /* Можно немного уменьшить, если был слишком большой */
+  text-align: center; /* Центрируем заголовок */
+  line-height: 1.3;
+  font-weight: 700; /* ✨ ДОБАВЛЯЕМ ЭТУ СТРОКУ ✨ */
+}
+
+/* Убираем особое форматирование первого параграфа в тексте главы */
+.chapter-text p:first-child {
+  font-weight: normal; /* Обычная жирность */
+  font-size: inherit;   /* Наследуем размер от .chapter-text */
+  margin-top: 0;        /* Убираем доп. отступ сверху, если был */
+  /* Добавь сюда другие свойства, которые нужно сбросить, если первый параграф был стилизован иначе */
+}
+
+.chapter-text {
+  /* Уменьшаем базовый размер шрифта */
+  font-size: 17px; /* Попробуй 17px или 16px */
+  /* Стили для выравнивания и прочего остаются здесь */
+  flex-grow: 1; /* ✨ ДОБАВЛЯЕМ ЭТУ СТРОКУ ✨ */
+}
+
+/* Отступ между параграфами (убедись, что он есть) */
+.chapter-text p {
+  margin-bottom: 1em;
+}
+.chapter-text p:last-child {
+  margin-bottom: 0;
+}
+
+.page-content {
+  max-width: 1200px;
+  margin: 0 auto 2rem; /* Убираем верхний отступ, оставляем нижний */
+  padding: 0 1rem;
+  animation: fadeIn 0.5s ease;
+  /* ✨ ДОБАВЛЯЕМ ЭТИ ТРИ СТРОКИ ✨ */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+/* Вкладки на странице профиля */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+/* Оформление страниц профиля и создателя */
+.profile-page {
+  max-width: 1000px; /* Ограничиваем ширину для лучшей читаемости */
+  margin: 0 auto;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+/* Выравнивание крошек и кнопки Настройки в профиле */
+.profile-page-header {
+    display: flex;
+    justify-content: space-between; /* Элементы по краям */
+    align-items: center;       /* Выровнять по вертикали */
+    margin-bottom: 1.5rem;     /* Отступ снизу */
+    gap: 1rem;                 /* Отступ между крошками и кнопкой */
+}
+
+/* --- "Заглушка" для аватара --- */
+.profile-avatar-placeholder {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem; /* Размер для смайлика ( ´ ∀ ` ) */
+    font-weight: bold;
+    flex-shrink: 0; /* Запрещаем сжиматься на маленьких экранах */
+}
+
+/* --- Стили для аватара на странице профиля --- */
+.profile-avatar-container {
+    position: relative; /* Для позиционирования кнопок */
+    width: 100px;     /* Размер контейнера */
+    height: 100px;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}
+
+.profile-avatar-display {
+    width: 100%;
+    height: 100%;
+    width: 90px;     /* Размер контейнера */
+    height: 90px;
+    border-radius: 50%; /* Круглый */
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Обрезаем изображение */
+    border: 2px solid var(--border-color); /* Небольшая рамка */
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-avatar-image { /* Стиль для самого <img> */
+    display: block; /* Убирает лишние отступы */
+    width: 100%;    /* Заполняет контейнер по ширине */
+    height: 100%;   /* Заполняет контейнер по высоте */
+    object-fit: cover; /* ✨ Масштабирует с сохранением пропорций и обрезает лишнее ✨ */
+}
+
+.avatar-placeholder-emoji {
+    font-size: 1rem; /* Размер смайлика-заглушки */
+}
+
+
+
+/* Кнопки управления аватаром */
+.change-avatar-btn,
+.delete-avatar-btn {
+    position: absolute;
+    bottom: 0;
+    width: 28px; /* Маленькие круглые кнопки */
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.change-avatar-btn {
+    right: 15px; /* Справа */
+}
+
+.delete-avatar-btn {
+    right: -5px; /* Правее кнопки редактирования */
+}
+
+.upload-avatar-btn {
+    /* Дополнительные стили, если нужны */
+}
+
+/* --- Стили для аватара в шапке (header) --- */
+.header-avatar-image {
+    width: 100%; /* Заполняем родительскую кнопку */
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%; /* Делаем круглым */
+}
+/* Убираем внутренние отступы у кнопки-иконки, если внутри картинка */
+#user-info .user-icon:has(img) {
+    padding: 0;
+    border: none;
+    /*border: 1px solid var(--border-color); /* Добавляем рамку для img */
+}
+
+/* --- Стили для страницы настроек --- */
+.settings-page h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.settings-tabs {
+    /* Стили как у .tabs в профиле */
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    justify-content: center; /* Центрируем вкладки */
+}
+
+.settings-content-container .tab-content {
+    display: none; /* Скрываем по умолчанию */
+    animation: fadeIn 0.3s ease;
+}
+.settings-content-container .tab-content.active {
+    display: block; /* Показываем активную */
+}
+
+/* Секция загрузки аватара */
+.avatar-upload-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.avatar-upload-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start; /* Выравниваем по левому краю */
+}
+
+/* Стили для .profile-avatar-container, .profile-avatar-display и т.д.
+   УЖЕ ДОЛЖНЫ БЫТЬ ДОБАВЛЕНЫ РАНЕЕ. Убедись, что они есть. */
+
+/* Стили для кнопки настроек на странице профиля */
+.profile-settings-btn {
+    margin-top: 0.5rem; /* Небольшой отступ сверху */
+}
+
+/* Адаптивность для секции аватара */
+@media (max-width: 576px) {
+    .avatar-upload-section {
+        flex-direction: column;
+        align-items: center; /* Центрируем на мобильных */
+        text-align: center;
+    }
+    .avatar-upload-controls {
+        align-items: center;
+    }
+}
+
+/* --- Блок с информацией о пользователе --- */
+.profile-info {
+    flex-grow: 1; /* Занимает всё доступное пространство */
+}
+
+.profile-username {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.profile-user-id {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+.profile-email, .profile-role {
+    color: var(--text-secondary);
+    margin: 0.25rem 0;
+}
+
+/* --- "Утончённый" дизайн для кнопки "Выйти" --- */
+.btn-logout-profile {
+    background: transparent;
+    border: 2px solid var(--accent-danger);
+    color: var(--accent-danger);
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    align-self: flex-start; /* Кнопка будет прижата к верху */
+}
+
+.btn-logout-profile:hover {
+    background: var(--accent-danger);
+    color: var(--text-inverse); /* В большинстве тем это белый */
+}
+
+.profile-header h1 {
+  margin-bottom: 1rem;
+}
+
+.profile-bio {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  max-width: 70ch;
+}
+
+.reading-list-section h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* --- Стили для нового двухколоночного раздела "Мои полки" --- */
+.shelves-layout {
+    display: grid;
+    grid-template-columns: 180px 1fr; /* Левая колонка - 220px, правая - всё остальное */
+    gap: 2rem;
+}
+
+/* Левая колонка (навигация) */
+.shelves-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border-right: 1px solid var(--border-color);
+    padding-right: 1rem;
+}
+
+.shelf-nav-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-md);
+    text-align: left;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shelf-nav-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.shelf-nav-btn.active {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 500; /* ✨ Сделали шрифт чуть менее жирным (полужирный) */
+}
+
+.shelf-count {
+    font-size: 0.8rem;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-sm);
+}
+
+.shelf-nav-btn.active .shelf-count {
+    background: var(--btn-primary-bg);
+    border: 1px solid var(--border-color); /* ✨ Добавили тонкую рамку для контраста */
+    color: var(--text-primary);
+}
+
+/* Правая колонка (карточки новелл) */
+.shelves-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 1.5rem 1rem;
+    align-content: start;
+}
+
+/* ✨ Центрируем сообщение "На этой полке пока пусто" ✨ */
+.shelves-content .text-muted {
+    grid-column: 1 / -1; /* Растягиваем элемент на всю ширину сетки */
+    text-align: center;  /* Центрируем текст по горизонтали */
+    padding: 4rem 1rem;  /* Добавляем вертикальные отступы, чтобы сместить надпись к центру */
+    font-size: 1rem;     /* Немного увеличим шрифт для заметности */
+    color: var(--text-secondary);
+}
+
+.shelf-novel-item {
+    cursor: pointer;
+}
+
+.shelf-novel-cover {
+  aspect-ratio: 5 / 7;
+    width: 100%;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-secondary);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+.shelf-novel-item:hover .shelf-novel-cover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.shelf-novel-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.shelf-novel-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+/* Стили для новых скелетонов */
+.shelf-novel-item.skeleton-card .shelf-novel-title {
+    height: 1rem;
+    width: 80%;
+    margin: 0.5rem auto 0;
+    border-radius: var(--radius-sm);
+}
+
+/* --- Стили для содержимого вкладок профиля --- */
+
+/* 1. Центрируем спиннер загрузки на вкладках */
+.reading-lists-container .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Центрируем по вертикали */
+    align-items: center;   /* Центрируем по горизонтали */
+    min-height: 250px;       /* Даем контейнеру высоту, чтобы было где центрироваться */
+    width: 100%;
+}
+
+/* 2. Центрируем и увеличиваем текст "Вы еще не создали..." и "На этой полке пусто" */
+.reading-lists-container .text-muted {
+    display: block;          /* Делаем блочным элементом для отступов */
+    text-align: center;      /* Центрируем текст */
+    font-size: 1.1rem;       /* Немного увеличиваем шрифт */
+    padding: 4rem 1rem;      /* Добавляем вертикальные отступы для центрирования */
+    color: var(--text-secondary);
+}
+
+/* ✨ Увеличиваем спиннер на вкладках профиля ✨ */
+.reading-lists-container .spinner {
+    width: 40px;  /* Задаём новый, больший размер */
+    height: 40px;
+    border-width: 4px; /* Делаем линии чуть толще */
+}
+
+/* Стили для форм, которые стали страницами */
+.form-page {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.form-page > h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+
+
+/* ==========================================
+   БЛОК 21: СИСТЕМА РОЛЕЙ
+   ========================================== */
+
+/* Бейджи ролей */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.role-owner {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #000;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.role-admin {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.role-creator {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.role-reader {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(149, 165, 166, 0.3);
+}
+
+/* Таблица пользователей */
+.users-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.users-filters input,
+.users-filters select {
+  flex: 1;
+  min-width: 200px;
+}
+
+.users-table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-card);
+}
+
+.users-table thead {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.users-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.users-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+
+.users-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+.users-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+[data-theme="dark"] .users-table {
+  background: var(--bg-primary);
+}
+
+[data-theme="dark"] .users-table thead {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .users-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Модальное окно изменения роли */
+.user-info-box {
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--accent-primary);
+}
+
+.user-info-box strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .user-info-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: var(--accent-primary);
+}
+
+/* Сообщение "Нет доступа" */
+.no-access-message {
+  padding: 2rem;
+  text-align: center;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  margin: 2rem auto;
+  max-width: 500px;
+}
+
+.no-access-message h3 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.no-access-message p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+/* ==========================================
+   БЛОК 22: ЭКРАН ЗАГРУЗКИ
+   ========================================== */
+
+/* Контейнер для кастомной анимации внутри оверлея */
+#custom-loading-animation {
+    position: absolute;
+    inset: 0;
+    display: flex; /* Добавлено */
+    justify-content: center; /* Добавлено */
+    align-items: center; /* Добавлено */
+    flex-direction: column; /* Добавлено, чтобы текст был под книгой */
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Опционально: Можно сделать фон оверлея темнее, когда показывается кастомная анимация */
+#loading-overlay.custom-animation-mode {
+  /* background: rgba(0, 0, 0, 0.6); */ /* Например, чуть темнее */
+}
+
+#loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-primary);
+  z-index: 4000;
+}
+
+#loading-overlay {
+  position: fixed; /* <-- ВОТ РЕШЕНИЕ! */
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+
+  /* ✨ Эффект размытия фона (Glassmorphism) */
+  background: rgba(0, 0, 0, 0.3); /* Затемнение для контраста */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* Для Safari */
+
+  /* ✨ Плавное появление */
+  animation: fadeIn 0.3s ease;
+}
+
+#chapter-load-overlay {
+    position: fixed; /* Поверх всего */
+    inset: 0; /* Растягиваем на весь экран */
+    background: rgba(0, 0, 0, 0.3); /* Цвет фона как у страницы */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px); /* Для Safari */
+    z-index: 4500; /* Выше основного хедера, ниже оверлея загрузки */
+    display: none; /* По умолчанию скрыт */
+}
+
+/* Стили для "коробки" с текстом и спиннером */
+.loading-box {
+  /* ✨ Стеклянный вид для самой карточки */
+  background: rgba(var(--bg-card-rgb), 0.5); /* Полупрозрачный фон из темы */
+  border: 1px solid rgba(var(--bg-card-rgb), 0.1);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
+  
+  padding: 2.5rem 3.5rem;
+  text-align: center;
+  color: var(--text-primary); 
+  
+  /* ✨ Анимация появления карточки */
+  animation: zoomIn 0.3s ease;
+}
+
+.loading-spinner-large {
+  width: 48px;
+  height: 48px;
+  border: 5px solid var(--border-color); /* Толщина и цвет фона */
+  border-top-color: var(--accent-primary); /* Акцентный цвет темы */
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+
+
+/* --- ТЕКСТ --- */
+#loading-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+#loading-description {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* --- ПРОГРЕСС-БАР (если используется) --- */
+.progress-container {
+    margin-top: 1.5rem;
+    width: 200px;
+}
+
+.progress-bar {
+    background: rgba(var(--text-primary-rgb, 0.1));
+}
+.progress-fill {
+    background: var(--accent-primary);
+}
+
+
+#loading .loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#loading .spinner {
+  width: 48px;
+  height: 48px;
+}
+
+#loading p {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+.novels-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(3px);
+  z-index: 10;
+  border-radius: var(--radius-lg);
+}
+
+[data-theme="dark"] .novels-loading-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Spinner */
+.spinner {
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--accent-primary);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-lg {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+}
+
+.spinner-sm {
+  width: 16px;
+  height: 16px;
+  border-width: 1px;
+}
+
+/* --- Анимация пузырьков (теперь прямо на оверлее) --- */
+.bubbles-container {
+    position: absolute; /* Позиционируем относительно #loading-overlay */
+    inset: 0; /* Растягиваем на весь оверлей */
+    overflow: hidden; /* Скрываем вылетающие пузырьки */
+    z-index: 1; /* Под текстом/спиннером, если он есть */
+    pointer-events: none; /* Не мешает кликам */
+}
+
+.bubble {
+position: absolute;
+    bottom: -50px; /* Начинают снизу */
+    width: 20px;
+    height: 20px;
+    /* ✨ ГОЛУБОЙ ЦВЕТ ПО УМОЛЧАНИЮ (для темной темы) */
+    background-color: rgba(173, 216, 230, 0.25); /* Light Blue с 25% прозрачностью */
+    border-radius: 50%;
+    animation: rise linear infinite;
+    opacity: 0;
+    /* ✨ Слегка более яркая голубая рамка */
+    border: 1px solid rgba(173, 216, 230, 0.4);
+}
+
+@keyframes rise {
+    0% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-110vh); /* Улетают за верхний край */
+        opacity: 0;
+    }
+}
+
+[data-mode="light"] .bubble {
+    /* ✨ Используем более темный синий для контраста */
+    background-color: rgba(0, 134, 243, 0.15); /* Steel Blue с 15% прозрачностью */
+    /* ✨ И рамку потемнее */
+    border: 1px solid rgba(0, 49, 88, 0.25);
+}
+
+/* ==========================================
+   КЛИКАБЕЛЬНЫЕ БЕЙДЖИ С TOOLTIP
+========================================== */
+
+.custom-tooltip {
+    position: absolute;
+    visibility: hidden; /* Изначально полностью скрыт и неактивен */
+    opacity: 0; /* Изначально полностью прозрачен */
+    background: var(--bg-overlay);
+    color: var(--text-primary);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    max-width: 250px;
+    white-space: pre-wrap;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    z-index: 10000;
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+    transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out; /* Плавный переход для прозрачности и видимости */
+    transform: translate(5px, 5px); /* Добавляем небольшой отступ, чтобы не появлялся прямо под курсором */
+}
+
+/* Стиль для видимого состояния */
+.custom-tooltip.show {
+    visibility: visible; /* Делаем видимым и активным */
+    opacity: 1; /* Делаем непрозрачным */
+}
+
+.genre-badge.clickable,
+.tag-badge.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.genre-badge.clickable:hover,
+.tag-badge.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    filter: brightness(1.1);
+}
+
+.genre-badge.clickable:active,
+.tag-badge.clickable:active {
+    transform: translateY(0);
+}
+
+/* Улучшенный tooltip (работает через title attribute) */
+.genre-badge[title]:not([title=""]),
+.tag-badge[title]:not([title=""]) {
+    position: relative;
+}
+
+/* Можно добавить иконку для визуального указания кликабельности */
+.genre-badge.clickable::after,
+.tag-badge.clickable::after {
+    content: ' 🔍';
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 0.8em;
+}
+
+.genre-badge.clickable:hover::after,
+.tag-badge.clickable:hover::after {
+    opacity: 0.6;
+}
+
+/* ==========================================
+   БЛОК 23: АНИМАЦИИ
+   ========================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInGrid {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+@keyframes flipInX {
+  from {
+    transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    opacity: 0;
+  }
+  to {
+    transform: perspective(400px);
+    opacity: 1;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(13, 110, 253, 0.8);
+  }
+}
+
+/* Применение анимаций */
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.3s ease forwards;
+}
+
+.slide-in-down {
+  animation: slideInDown 0.3s ease forwards;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.3s ease forwards;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease forwards;
+}
+
+.bounce {
+  animation: bounce 1s ease;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+.shake {
+  animation: shake 0.6s ease;
+}
+
+.rotate {
+  animation: rotate 2s linear infinite;
+}
+
+.zoom-in {
+  animation: zoomIn 0.3s ease forwards;
+}
+
+.zoom-out {
+  animation: zoomOut 0.3s ease forwards;
+}
+
+.flip-in-x {
+  animation: flipInX 0.6s ease forwards;
+}
+
+.animated-gradient {
+  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.typewriter {
+  overflow: hidden;
+  border-right: 2px solid var(--accent-primary);
+  white-space: nowrap;
+  animation: typewriter 3s steps(40) forwards;
+}
+
+.glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.stagger-item {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideInUp 0.5s ease forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.1s; }
+.stagger-item:nth-child(2) { animation-delay: 0.2s; }
+.stagger-item:nth-child(3) { animation-delay: 0.3s; }
+.stagger-item:nth-child(4) { animation-delay: 0.4s; }
+.stagger-item:nth-child(5) { animation-delay: 0.5s; }
+.stagger-item:nth-child(6) { animation-delay: 0.6s; }
+.stagger-item:nth-child(7) { animation-delay: 0.7s; }
+.stagger-item:nth-child(8) { animation-delay: 0.8s; }
+.stagger-item:nth-child(9) { animation-delay: 0.9s; }
+.stagger-item:nth-child(10) { animation-delay: 1s; }
+
+/* ==========================================
+   БЛОК 24: УТИЛИТАРНЫЕ КЛАССЫ
+   ========================================== */
+
+/* Текст */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-inverse { color: var(--text-inverse); }
+
+.text-success { color: var(--accent-success); }
+.text-warning { color: var(--accent-warning); }
+.text-danger { color: var(--accent-danger); }
+.text-info { color: var(--accent-primary); }
+
+.text-sm { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+/* Отступы */
+.m-0 { margin: 0; }
+.m-1 { margin: 0.25rem; }
+.m-2 { margin: 0.5rem; }
+.m-3 { margin: 1rem; }
+.m-4 { margin: 1.5rem; }
+.m-5 { margin: 3rem; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 1rem; }
+.mt-4 { margin-top: 1.5rem; }
+.mt-5 { margin-top: 3rem; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.mb-4 { margin-bottom: 1.5rem; }
+.mb-5 { margin-bottom: 3rem; }
+
+.ml-0 { margin-left: 0; }
+.ml-1 { margin-left: 0.25rem; }
+.ml-2 { margin-left: 0.5rem; }
+.ml-3 { margin-left: 1rem; }
+.ml-4 { margin-left: 1.5rem; }
+.ml-5 { margin-left: 3rem; }
+
+.mr-0 { margin-right: 0; }
+.mr-1 { margin-right: 0.25rem; }
+.mr-2 { margin-right: 0.5rem; }
+.mr-3 { margin-right: 1rem; }
+.mr-4 { margin-right: 1.5rem; }
+.mr-5 { margin-right: 3rem; }
+
+.p-0 { padding: 0; }
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 1rem; }
+.p-4 { padding: 1.5rem; }
+.p-5 { padding: 3rem; }
+
+.pt-0 { padding-top: 0; }
+.pt-1 { padding-top: 0.25rem; }
+.pt-2 { padding-top: 0.5rem; }
+.pt-3 { padding-top: 1rem; }
+.pt-4 { padding-top: 1.5rem; }
+.pt-5 { padding-top: 3rem; }
+
+.pb-0 { padding-bottom: 0; }
+.pb-1 { padding-bottom: 0.25rem; }
+.pb-2 { padding-bottom: 0.5rem; }
+.pb-3 { padding-bottom: 1rem; }
+.pb-4 { padding-bottom: 1.5rem; }
+.pb-5 { padding-bottom: 3rem; }
+
+.pl-0 { padding-left: 0; }
+.pl-1 { padding-left: 0.25rem; }
+.pl-2 { padding-left: 0.5rem; }
+.pl-3 { padding-left: 1rem; }
+.pl-4 { padding-left: 1.5rem; }
+.pl-5 { padding-left: 3rem; }
+
+.pr-0 { padding-right: 0; }
+.pr-1 { padding-right: 0.25rem; }
+.pr-2 { padding-right: 0.5rem; }
+.pr-3 { padding-right: 1rem; }
+.pr-4 { padding-right: 1.5rem; }
+.pr-5 { padding-right: 3rem; }
+
+/* Flexbox */
+.d-flex { display: flex; }
+.d-inline-flex { display: inline-flex; }
+.d-block { display: block; }
+.d-inline-block { display: inline-block; }
+.d-none { display: none; }
+
+.flex-row { flex-direction: row; }
+.flex-column { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+
+.align-start { align-items: flex-start; }
+.align-end { align-items: flex-end; }
+.align-center { align-items: center; }
+.align-stretch { align-items: stretch; }
+
+.flex-1 { flex: 1; }
+.flex-auto { flex: auto; }
+.flex-none { flex: none; }
+
+/* Позиционирование */
+.position-static { position: static; }
+.position-relative { position: relative; }
+.position-absolute { position: absolute; }
+.position-fixed { position: fixed; }
+.position-sticky { position: sticky; }
+
+/* Видимость */
+.visible { visibility: visible; }
+.invisible { visibility: hidden; }
+
+.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.opacity-0 { opacity: 0; }
+.opacity-25 { opacity: 0.25; }
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+.opacity-100 { opacity: 1; }
+
+/* Ширина и высота */
+.w-25 { width: 25%; }
+.w-50 { width: 50%; }
+.w-75 { width: 75%; }
+.w-100 { width: 100%; }
+.w-auto { width: auto; }
+
+.h-25 { height: 25%; }
+.h-50 { height: 50%; }
+.h-75 { height: 75%; }
+.h-100 { height: 100%; }
+.h-auto { height: auto; }
+
+/* Границы */
+.border { border: 1px solid var(--border-color); }
+.border-0 { border: none; }
+.border-top { border-top: 1px solid var(--border-color); }
+.border-bottom { border-bottom: 1px solid var(--border-color); }
+.border-left { border-left: 1px solid var(--border-color); }
+.border-right { border-right: 1px solid var(--border-color); }
+
+.rounded { border-radius: var(--radius-md); }
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-full { border-radius: 50%; }
+
+/* Тени */
+
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-none { box-shadow: none; }
+
+/* Фон */
+.bg-primary { background: var(--bg-primary); }
+.bg-secondary { background: var(--bg-secondary); }
+.bg-tertiary { background: var(--bg-tertiary); }
+.bg-card { background: var(--bg-card); }
+
+.bg-success { background: var(--accent-success); }
+.bg-warning { background: var(--accent-warning); }
+.bg-danger { background: var(--accent-danger); }
+.bg-info { background: var(--accent-primary); }
+
+/* Scroll */
+.overflow-auto { overflow: auto; }
+.overflow-hidden { overflow: hidden; }
+.overflow-visible { overflow: visible; }
+.overflow-scroll { overflow: scroll; }
+
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+.overflow-x-hidden { overflow-x: hidden; }
+.overflow-y-hidden { overflow-y: hidden; }
+
+/* Cursor */
+.cursor-pointer { cursor: pointer; }
+.cursor-default { cursor: default; }
+.cursor-not-allowed { cursor: not-allowed; }
+.cursor-text { cursor: text; }
+
+/* Select */
+.select-none { user-select: none; }
+.select-text { user-select: text; }
+.select-all { user-select: all; }
+
+/* Transitions */
+.transition { transition: all 0.3s ease; }
+.transition-fast { transition: all 0.15s ease; }
+.transition-slow { transition: all 0.5s ease; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.empty-state h3 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+/* ==========================================
+   БЛОК 24.5: СТРАНИЦА ДЕТАЛЕЙ НОВЕЛЛЫ
+   ========================================== */
+
+/* ==========================================
+   СТИЛИ ДЛЯ ЗАГОЛОВКА СТРАНИЦЫ И КНОПОК
+   ========================================== */
+
+/* Контейнер, который выравнивает крошки и кнопки */
+.page-header {
+  display: flex;
+  justify-content: space-between; /* Самое важное: расталкивает элементы по краям */
+  align-items: center;            /* Выравнивает их по вертикали */
+  margin-bottom: 1.5rem;          /* Отступ снизу */
+  gap: 1rem;                      /* Пространство между элементами */
+  flex-wrap: wrap;                /* Позволяет переноситься на мобильных */
+}
+
+/* Контейнер для самих кнопок */
+.novel-actions-bar {
+  display: flex;
+  gap: 0.5rem; /* Расстояние между кнопками */
+  flex-shrink: 0; /* Запрещаем кнопкам сжиматься */
+}
+
+/* Новый стиль для кнопок действий */
+.novel-actions-bar .action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem; /* Расстояние между иконкой и текстом */
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color-secondary);
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Эффект при наведении */
+.novel-actions-bar .action-btn:hover {
+  background-color: var(--background-color-hover);
+  border-color: var(--primary-color-light);
+}
+
+/* Цвет для кнопки "Редактировать" при наведении */
+.novel-actions-bar .action-btn.edit:hover {
+  color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+/* Цвет для кнопки "Удалить" при наведении */
+.novel-actions-bar .action-btn.delete:hover {
+  color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+/* --- ОБЛОЖКА С FLOAT --- */
+.novel-cover-float {
+    float: left;
+    width: 250px;
+    margin: 0 1.5rem 1rem 0;
+    shape-outside: margin-box;
+}
+
+.novel-cover-float img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    display: block;
+}
+
+.novel-cover-float .no-cover {
+    width: 100%;
+    aspect-ratio: 5 / 7;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--text-tertiary);
+}
+
+/* КНОПКА НАЧАТЬ ЧТЕНИЕ */
+.start-reading-container {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.start-reading-btn {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.reading-progress small {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* --- ОПИСАНИЕ С ОБТЕКАНИЕМ --- */
+.novel-description-float {
+    min-height: 300px;
+}
+
+/* Табы */
+.description-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.tab-btn.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--accent-primary);
+}
+
+/* Контент вкладок */
+.tab-content {
+    display: none;
+    line-height: 1.7;
+    text-align: justify;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Стили для текста описания */
+#float-description p {
+    margin-bottom: 1rem;
+}
+
+/* Информационная таблица */
+#float-info .info-table,
+.novel-info-desktop .info-table {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.info-table > div {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-table span:first-child {
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 160px;
+}
+
+.info-table span:last-child {
+    text-align: right;
+    flex: 1;
+}
+
+.info-table .additional-links-display {
+    white-space: pre-wrap; /* Сохраняем переносы строк */
+    word-break: break-word; /* Переносим длинные ссылки */
+}
+.info-table .additional-links-display a {
+    color: var(--link-color);
+    text-decoration: underline;
+}
+.info-table .additional-links-display a:hover {
+    text-decoration: none;
+}
+
+/* --- САЙДБАР ИНФОРМАЦИИ ДЛЯ ДЕСКТОПА --- */
+.novel-info-desktop {
+    display: none;
+    float: right;
+    width: 320px;
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+}
+
+.novel-info-desktop h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+/* Рейтинг в сайдбаре */
+.rating-container {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.rating-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.rating-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.rating-value {
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.rating-stars {
+    display: flex;
+    gap: 0.1rem;
+    align-items: center;
+}
+
+.star {
+    color: #FFD700;
+    font-size: 1.1rem;
+}
+
+.star.empty {
+    color: var(--text-tertiary);
+}
+
+/* ЦЕНТРИРОВАННЫЙ ЗАГОЛОВОК И АВТОР */
+.novel-header-center {
+    text-align: center;
+    margin: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.novel-main-title {
+    margin: 0;
+    font-size: 2.2rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    line-height: 1.2;
+    position: relative;
+}
+
+.novel-main-title:hover {
+    transform: scale(1.02); /* Немного увеличиваем заголовок */
+    transition: transform 0.2s ease-in-out; /* Плавный переход */
+    cursor: pointer; /* Оставляем курсор-указатель, т.к. элемент кликабельный */
+}
+
+.author-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.author-label {
+    font-weight: 600;
+}
+
+.author-name {
+    color: var(--accent-primary);
+    cursor: pointer;
+}
+
+.author-name:hover {
+    text-decoration: underline;
+}
+
+.author-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.author-link:hover {
+    background: var(--bg-secondary);
+    transform: translateY(-1px);
+}
+
+a.novel-card-link {
+    text-decoration: none;
+    color: inherit; /* Наследовать цвет от родителя */
+    display: block; /* Чтобы ссылка занимала место как блок */
+}
+
+/* ==========================================
+   ССЫЛКИ НА АВТОРА И СОЗДАТЕЛЯ (УЛУЧШЕННАЯ ВЕРСИЯ)
+   ========================================== */
+
+/* Применяем стили к ссылкам:
+  1. В списке новелл (.author-link-inline)
+  2. В таблице информации на странице новеллы (.info-table .author-name a)
+  3. В центральном заголовке на странице новеллы (.author-container .author-name a)
+*/
+
+a.author-link-inline,
+a.creator-link-inline,
+.info-table .author-name a,
+.author-container .author-name a {
+    text-decoration: none;        /* Убираем подчеркивание в обычном состоянии */
+    color: var(--accent-primary); /* Задаем стандартный СИНИЙ цвет */
+}
+
+/* Убираем фиолетовый (visited) цвет */
+a.author-link-inline:visited,
+a.creator-link-inline:visited,
+.info-table .author-name a:visited,
+.author-container .author-name a:visited {
+    color: var(--accent-primary); /* Цвет ВСЕГДА СИНИЙ */
+}
+
+/* Возвращаем подчеркивание при наведении */
+a.author-link-inline:hover,
+a.creator-link-inline:hover,
+.info-table .author-name a:hover,
+.author-container .author-name a:hover {
+    text-decoration: underline;
+    color: var(--accent-primary); /* Убедимся, что цвет остается синим */
+}
+
+/* НОВОЕ ПРАВИЛО: 
+  Убираем красный цвет при правом/активном клике (:active).
+  Теперь при клике ссылка будет выглядеть так же, как при наведении.
+*/
+a.author-link-inline:active,
+a.creator-link-inline:active,
+.info-table .author-name a:active,
+.author-container .author-name a:active {
+    color: var(--accent-primary) !important; /* !important для перекрытия общих правил */
+    text-decoration: underline;
+    background: none !important; /* Убираем любой фон, который мог вызвать красный */
+}
+
+/* ВСПЛЫВАЮЩЕЕ ОКНО АЛЬТЕРНАТИВНЫХ НАЗВАНИЙ */
+.alt-titles-popup {
+    display: none;
+    position: absolute;
+    bottom: 100%; /* Появляется над элементом */
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+    min-width: 300px;
+    max-width: 90vw;
+    margin-bottom: 0.5rem; /* Отступ от названия */
+}
+
+.alt-titles-popup.show {
+    display: block;
+}
+
+.alt-titles-popup .popup-content {
+    text-align: center;
+}
+
+.alt-titles-list {
+    margin-top: 0.5rem;
+    font-style: italic;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.alt-title-badge {
+    display: inline-block;
+    background: var(--bg-secondary);
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-sm);
+    margin: 0.25rem;
+    font-style: normal;
+}
+
+/* Стрелочка для всплывающего окна */
+.alt-titles-popup::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: var(--bg-card);
+}
+
+/* Убираем стандартную синюю обводку у поля ввода альт. названий */
+#alt-title-input:focus {
+  outline: none; /* Убирает стандартную обводку */
+  box-shadow: none; /* Убирает тень, которую некоторые браузеры добавляют */
+  /* Оставляем только изменение цвета рамки, если оно есть в :focus для .form-input */
+  border-color: var(--border-focus); /* Используй переменную цвета рамки при фокусе, если она есть */
+}
+
+/* Дополнительно: убедимся, что рамка у группы инпутов не мешает */
+.input-group:focus-within {
+   /* Можно добавить стили для всей группы при фокусе, если нужно, */
+   /* но главное - не добавлять конфликтующий box-shadow */
+   /* Например, можно усилить внешнюю рамку группы */
+   /* border-color: var(--border-focus); */
+   /* box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15); /* Мягкая тень для группы */
+}
+
+/* Контейнер для плашек (общий для жанров, тегов, альт. названий) */
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary); /* Или var(--bg-secondary) */
+    min-height: 40px; /* Чтобы пустой контейнер был виден */
+}
+
+/* Стили для плашки (общие) */
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: var(--bg-secondary); /* Или var(--bg-tertiary) */
+    color: var(--text-primary);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    border: 1px solid var(--border-color);
+}
+
+/* Кнопка удаления внутри плашки */
+.remove-tag-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0;
+    margin-left: 0.2rem;
+}
+.remove-tag-btn:hover {
+    color: var(--accent-danger);
+}
+
+/* Убираем фон у плашек альт. названий, оставляем рамку */
+.selected-tag.alt-title-tag {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary); /* Можно сделать текст менее ярким */
+}
+
+/* Улучшаем вид кнопки удаления для прозрачных плашек */
+.selected-tag.alt-title-tag .remove-tag-btn {
+    color: var(--text-secondary);
+}
+.selected-tag.alt-title-tag .remove-tag-btn:hover {
+    color: var(--accent-danger);
+    background-color: rgba(var(--accent-danger-rgb), 0.1); /* Легкий фон при наведении */
+    border-radius: 50%;
+}
+
+/* ЖАНРЫ И ТЕГИ */
+.novel-taxonomy {
+    margin: 1.5rem 0;
+}
+
+.genres-list, .tags-list {
+    margin-bottom: 1rem;
+}
+
+.genre-badge, .tag-badge {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-full);
+    margin: 0.2rem;
+    font-size: 0.9rem;
+}
+
+/* РАЗДЕЛИТЕЛЬ */
+.section-divider {
+    border: none;
+    height: 2px;
+    background: var(--border-color);
+    margin: 1.5rem 0;
+}
+
+/* ГЛАВЫ */
+/* ФИКС ДЛЯ ВЕРТИКАЛЬНЫХ ЛИНИЙ В ТАБЛИЦЕ ГЛАВ */
+.chapters-list-container-v2 {
+    margin-top: 1rem;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* ОСНОВНЫЕ СТИЛИ ДЛЯ ТАБЛИЦЫ */
+.chapters-list-header,
+.chapter-item-v2 {
+    display: grid;
+    /* ОПТИМИЗИРОВАННЫЕ ШИРИНЫ: №(50px), Название(1fr), Слов(80px), Обновлено(130px), Действия(90px) */
+    grid-template-columns: 50px minmax(200px, 1fr) 80px 130px 90px;
+    align-items: center;
+    gap: 0;
+    min-height: 3rem;
+    width: 100%;
+}
+
+/* ИСПРАВЛЕНИЕ ДЛЯ ЗАГОЛОВКА СЕКЦИИ ГЛАВ */
+.chapters-header-v2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+}
+
+.chapter-count {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--text-secondary);
+    flex-shrink: 0; /* Запрещаем сжиматься */
+}
+
+.chapters-controls-v2 {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex: 1; /* Занимает доступное пространство */
+}
+
+/* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ */
+@media (max-width: 768px) {
+    .chapters-header-v2 {
+        flex-direction: row; /* ВАЖНО: оставляем горизонтальное направление */
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .chapters-controls-v2 {
+        justify-content: flex-start;
+        width: auto;
+    }
+}
+
+/* Для очень маленьких экранов - переносим на новую строку если нужно */
+@media (max-width: 480px) {
+    .chapters-header-v2 {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .chapters-controls-v2 {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .chapter-count {
+        text-align: center;
+    }
+}
+
+/* Скрытие последней колонки для не-owner */
+html:not([data-user-role="owner"]) .chapters-list-header,
+html:not([data-user-role="owner"]) .chapter-item-v2 {
+    grid-template-columns: 50px minmax(200px, 1fr) 80px 130px;
+}
+
+/* УСИЛЕННЫЕ СТИЛИ ДЛЯ ЗАГОЛОВКА ТАБЛИЦЫ */
+.chapters-list-header {
+    background-color: transparent !important;
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+}
+
+/* УСИЛЕННЫЕ СТИЛИ ДЛЯ ЯЧЕЕК */
+.chapters-list-header > div,
+.chapter-item-v2 > div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0.75rem 0.5rem;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    min-height: 3rem;
+    
+    /* ВЕРТИКАЛЬНЫЕ ЛИНИИ */
+    border-right: 1px solid var(--border-color) !important;
+    border-left: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+}
+
+/* Убираем правую границу у последней ячейки */
+.chapters-list-header > div:last-child,
+.chapter-item-v2 > div:last-child {
+    border-right: none !important;
+}
+
+/* ВЫРАВНИВАНИЕ ТЕКСТА */
+.chapters-list-header .ch-num,
+.chapter-item-v2 .ch-num { 
+    justify-content: center;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+}
+
+.chapters-list-header .ch-words,
+.chapters-list-header .ch-updated,
+.chapters-list-header .ch-actions,
+.chapter-item-v2 .ch-words,
+.chapter-item-v2 .ch-updated,
+.chapter-item-v2 .ch-actions { 
+    justify-content: flex-end;
+    padding-right: 0.75rem;
+}
+
+/* СТИЛИ ДЛЯ КОНТЕНТА */
+.chapter-item-v2 .ch-num { 
+    font-weight: 500; 
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+.chapter-item-v2 .ch-title a { 
+    color: var(--text-primary); 
+    text-decoration: none; 
+    font-weight: 500; 
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 0.5rem;
+}
+
+.chapter-item-v2 .ch-title a:hover { 
+    color: var(--primary-color); 
+    text-decoration: underline; 
+}
+
+.chapter-item-v2 .ch-words,
+.chapter-item-v2 .ch-updated { 
+    font-size: 0.85em; 
+    color: var(--text-secondary);
+}
+
+.chapter-item-v2 .ch-actions { 
+    gap: 0.25rem;
+}
+
+.chapter-item-v2 .ch-actions a { 
+    font-size: 0.8em; 
+    white-space: nowrap;
+}
+
+/* АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ */
+@media (max-width: 1024px) {
+    .chapters-list-header,
+    .chapter-item-v2 {
+        grid-template-columns: 45px minmax(150px, 1fr) 70px 110px 80px;
+    }
+    
+    html:not([data-user-role="owner"]) .chapters-list-header,
+    html:not([data-user-role="owner"]) .chapter-item-v2 {
+        grid-template-columns: 45px minmax(150px, 1fr) 70px 110px;
+    }
+    
+    .chapters-list-header > div,
+    .chapter-item-v2 > div {
+        padding: 0.6rem 0.4rem;
+    }
+    
+    .chapter-item-v2 .ch-title a {
+        font-size: 0.95em;
+    }
+}
+
+/* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ */
+@media (max-width: 768px) {
+    .chapters-list-header,
+    .chapter-item-v2 {
+        /* ЕЩЁ БОЛЬШЕ МЕСТА ДЛЯ НАЗВАНИЯ: №(40px), Название(minmax(120px, 1fr)), Слов(60px), Обновлено(90px), Действия(70px) */
+        grid-template-columns: 40px minmax(120px, 1fr) 60px 90px 70px;
+        min-height: 2.5rem;
+    }
+    
+    html:not([data-user-role="owner"]) .chapters-list-header,
+    html:not([data-user-role="owner"]) .chapter-item-v2 {
+        grid-template-columns: 40px minmax(120px, 1fr) 60px 90px;
+    }
+    
+    .chapters-list-header > div,
+    .chapter-item-v2 > div {
+        padding: 0.5rem 0.3rem;
+        min-height: 2.5rem;
+        font-size: 0.85em;
+    }
+    
+    .chapters-list-header .ch-num,
+    .chapter-item-v2 .ch-num {
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
+        font-size: 0.85em;
+    }
+    
+    .chapter-item-v2 .ch-title a { 
+        font-size: 0.9em;
+        padding: 0 0.3rem;
+    }
+    
+    .chapter-item-v2 .ch-words,
+    .chapter-item-v2 .ch-updated { 
+        font-size: 0.8em;
+    }
+    
+    .chapter-item-v2 .ch-actions a { 
+        font-size: 0.75em;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .chapters-header-v2 { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 1rem;
+    }
+    
+    .chapters-controls-v2 { 
+        width: 100%; 
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}
+
+/* ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ */
+@media (max-width: 480px) {
+    .chapters-list-header,
+    .chapter-item-v2 {
+        /* МИНИМАЛЬНЫЕ ШИРИНЫ: сохраняем приоритет для названия */
+        grid-template-columns: 35px minmax(100px, 1fr) 50px 80px 60px;
+    }
+    
+    html:not([data-user-role="owner"]) .chapters-list-header,
+    html:not([data-user-role="owner"]) .chapter-item-v2 {
+        grid-template-columns: 35px minmax(100px, 1fr) 50px 80px;
+    }
+    
+    .chapters-list-header > div,
+    .chapter-item-v2 > div {
+        padding: 0.4rem 0.2rem;
+        font-size: 0.8em;
+    }
+    
+    .chapter-item-v2 .ch-title a { 
+        font-size: 0.85em;
+        padding: 0 0.2rem;
+    }
+    
+    /* Скрываем полные слова в датах, оставляем только иконку или сокращения */
+    .ch-updated {
+        font-size: 0.75em;
+    }
+    
+    .ch-words {
+        font-size: 0.75em;
+    }
+}
+
+/* Стили для томов */
+.volume-section-v2 { 
+    border-top: 1px solid var(--border-color); 
+}
+#chapters-list-v2 > .volume-section-v2:first-child { 
+    border-top: none; 
+}
+
+.volume-header-v2 { 
+    background-color: var(--bg-light); 
+    padding: 0.8rem 1rem; 
+    font-weight: 600; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    transition: background-color 0.2s ease; 
+    margin-top: 1rem;
+}
+
+.volume-header-v2:hover { 
+    background-color: var(--bg-hover); 
+}
+
+.volume-chapter-count { 
+    font-size: 0.85em; 
+    color: var(--text-secondary); 
+    margin-left: auto; 
+    margin-right: 0.5rem; 
+}
+
+.volume-toggle-icon { 
+    transition: transform 0.2s ease; 
+    display: inline-block; 
+}
+
+.volume-section-v2.collapsed .volume-toggle-icon { 
+    transform: rotate(-90deg); 
+}
+
+.volume-section-v2.collapsed .volume-chapters-v2 { 
+    display: none; 
+}
+
+/* Сообщение "Нет глав" */
+.no-chapters { 
+    text-align: center; 
+    padding: 2rem; 
+    color: var(--text-secondary); 
+}
+
+/* Стили для Tooltip V2 */
+.tooltip-v2 { 
+    position: absolute; 
+    display: none; 
+    background-color: rgba(0, 0, 0, 0.8); 
+    color: white; 
+    padding: 5px 10px; 
+    border-radius: 4px; 
+    font-size: 0.85em; 
+    white-space: nowrap; 
+    z-index: 1000; 
+    pointer-events: none; 
+}
+
+/* СТИЛИ ДЛЯ ПРОЧИТАННЫХ И НЕПРОЧИТАННЫХ ГЛАВ */
+.chapter-item-v2.unread {
+    background-color: var(--bg-unread, rgba(0, 183, 255, 0.05));
+}
+
+.chapter-item-v2.read {
+    background-color: var(--bg-read, transparent);
+}
+
+.chapter-item-v2.read .ch-title a {
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+.chapter-item-v2.read .ch-num,
+.chapter-item-v2.read .ch-words,
+.chapter-item-v2.read .ch-updated {
+    color: var(--text-tertiary);
+    opacity: 0.7;
+}
+
+/* Для светлой темы */
+[data-mode="light"] {
+    --bg-unread: rgba(0, 100, 255, 0.03);
+    --bg-read: #f8f9fa;
+}
+
+/* Для темной темы */
+[data-mode="dark"] {
+    --bg-unread: rgba(100, 150, 255, 0.05);
+    --bg-read: #1a1a1a;
+}
+
+/* Убедимся, что ховер работает для всех глав */
+.chapter-item-v2:hover {
+    background-color: var(--bg-hover) !important;
+}
+
+.chapter-item-v2.unread:hover {
+    background-color: color-mix(in srgb, var(--bg-unread) 70%, var(--bg-hover) 30%) !important;
+}
+
+/* ========================
+   Режим редактирования глав
+   ======================== */
+
+/* При включении режима, добавляем отступ для кнопок */
+#chapters-list-v2.edit-mode .chapter-item-v2 {
+    padding-right: 80px; /* Место для 2-х кнопок */
+    position: relative;
+}
+
+/* Стилизуем кнопки */
+#chapters-list-v2.edit-mode .ch-actions {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 5px;
+    background-color: var(--bg-color-light); /* Фон, чтобы перекрыть дату */
+    padding: 5px;
+}
+
+/* Стили для кнопок-иконок */
+.btn-icon {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color-secondary);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+.btn-icon:hover {
+    background-color: var(--bg-color-hover);
+    color: var(--text-color-primary);
+}
+.btn-icon.btn-danger:hover {
+    background-color: var(--color-danger-light);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+/* Прячем колонки "Слов" и "Обновлено" в режиме редактирования */
+#chapters-list-v2.edit-mode .ch-words,
+#chapters-list-v2.edit-mode .ch-updated {
+    opacity: 0; /* ✨ Делаем полностью прозрачными */
+    pointer-events: none; /* ✨ Делаем некликабельными (на всякий случай) */
+    /* Важно: не используем visibility: hidden */
+}
+
+/* Убираем правую границу у колонки "Название" в режиме редактирования */
+#chapters-list-v2.edit-mode .ch-title {
+    border-right: none !important; /* Убираем границу */
+}
+
+/* Компенсируем отступ, который мы делали ранее */
+#chapters-list-v2.edit-mode .chapter-item-v2 {
+    padding-right: 90px; /* Немного увеличим, чтобы кнопки точно влезли */
+}
+
+/* КНОПКА "ДОБАВИТЬ НА ПОЛКУ" */
+.floating-shelf-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+}
+
+.floating-shelf-button .btn-float {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 2rem; /* Увеличим размер плюса */
+    line-height: 1;
+    border: none;
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold; /* Сделаем плюс жирнее */
+}
+
+.floating-shelf-button .btn-float:hover {
+    transform: scale(1.1) rotate(90deg);
+    background: var(--accent-primary-hover);
+}
+
+.floating-shelf-button .dropdown-menu {
+    position: absolute;
+    bottom: 110%;
+    right: 0;
+    min-width: 220px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    padding: 0.75rem;
+    display: none;
+}
+
+.floating-shelf-button.dropdown-menu {
+    display: block;
+}
+
+.floating-shelf-button.menu-visible .dropdown-menu {
+    display: block;
+    /* Можно добавить анимацию появления */
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+}
+
+/* Стили для скрытого меню (для анимации) */
+.floating-shelf-button .dropdown-menu {
+    /* ... (твои существующие стили: position, bottom, right, min-width и т.д.) ... */
+    display: block; /* Убери display: none;, если он был */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px); /* Небольшой сдвиг для анимации */
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    pointer-events: none; /* Не мешает кликам, пока скрыто */
+}
+.floating-shelf-button.menu-visible .dropdown-menu {
+    pointer-events: auto; /* Разрешаем клики, когда видно */
+}
+
+.floating-shelf-button .dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+}
+
+.floating-shelf-button .dropdown-menu a:hover {
+    background: var(--bg-secondary);
+}
+
+.floating-shelf-button .dropdown-menu a.active-shelf {
+    background-color: var(--bg-secondary); /* Легкий фон для выделения */
+    font-weight: 500; /* Немного жирнее */
+    /* Можно добавить рамку слева для акцента */
+    border-left: 3px solid var(--accent-primary);
+    padding-left: calc(1rem - 3px); /* Компенсируем сдвиг от рамки */
+}
+
+/* Добавляем галочку перед текстом активной полки */
+.floating-shelf-button .dropdown-menu a.active-shelf span::before {
+    content: '✓ '; /* Галочка и пробел */
+    color: var(--accent-success); /* Зеленый цвет */
+    font-weight: bold;
+    margin-right: 0.4em; /* Небольшой отступ */
+}
+
+/* Скрываем ссылку "Убрать с полок", если добавлен класс hidden */
+.floating-shelf-button .dropdown-menu a.remove-link.hidden {
+    display: none;
+}
+/* Также скрываем разделитель <hr>, если ссылка "Убрать" скрыта */
+.floating-shelf-button .dropdown-menu a.remove-link.hidden + hr,
+.floating-shelf-button .dropdown-menu hr:has(+ a.remove-link.hidden) /* Поддержка :has() для будущих браузеров */
+{
+    display: none;
+}
+/* Если :has() не работает, можно использовать JS для скрытия <hr> */
+
+/* ==========================================
+   ПОПАП АЛЬТЕРНАТИВНЫХ НАЗВАНИЙ (Bottom Sheet)
+   ========================================== */
+
+.custom-alt-titles-popup.bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10000;
+    /* Начальное состояние (скрыт внизу) */
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    /* Добавляем фон-затемнение */
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    height: 100%; /* Занимает весь экран для фона */
+    display: flex; /* Используем flex для позиционирования контента внизу */
+    align-items: flex-end; /* Прижимаем контент к низу */
+    pointer-events: none; /* Не перехватывает клики, пока не видим */
+}
+
+.custom-alt-titles-popup.bottom-sheet.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto; /* Перехватывает клики, когда виден */
+}
+
+/* Контентная часть попапа */
+.bottom-sheet .popup-content {
+    background: var(--bg-card);
+    /* Скругление только верхних углов */
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2); /* Тень сверху */
+    max-width: 800px; /* Ограничиваем ширину на десктопах */
+    width: 100%;
+    margin: 0 auto; /* Центрируем */
+    max-height: 70vh; /* Ограничиваем высоту */
+    overflow: hidden; /* Важно для border-radius */
+    display: flex;
+    flex-direction: column;
+    /* Убираем рамку, т.к. есть тень */
+    border: none;
+}
+
+/* Шапка остается почти такой же */
+.bottom-sheet .popup-header {
+    padding: 0.75rem 1.5rem; /* Уменьшим паддинг */
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bottom-sheet .popup-header h3 {
+    margin: 0;
+    font-size: 1rem; /* ✨ Уменьшаем шрифт заголовка */
+    color: var(--text-secondary); /* ✨ Делаем цвет менее ярким */
+    font-weight: 500; /* ✨ Убираем жирность */
+}
+
+.bottom-sheet .popup-close {
+    /* Стили кнопки закрытия остаются прежними */
+    background: none; border: none; font-size: 1.8rem; line-height: 1;
+    cursor: pointer; color: var(--text-secondary); padding: 0;
+    width: 30px; height: 30px; display: flex; align-items: center;
+    justify-content: center; border-radius: 50%; transition: all 0.2s ease;
+}
+.bottom-sheet .popup-close:hover {
+    background: var(--bg-tertiary); color: var(--text-primary);
+}
+
+/* Тело попапа с прокруткой */
+.bottom-sheet .popup-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Стили для параграфов с названиями */
+.bottom-sheet .popup-body p {
+    margin: 0;
+    padding: 0.75rem 0; /* ✨ Увеличиваем вертикальный отступ */
+    font-size: 1.1rem; /* ✨ Увеличиваем шрифт названий */
+    line-height: 1.5;
+    color: var(--text-primary);
+    font-weight: 500; /* ✨ Делаем немного жирнее */
+}
+/* Стили для сообщения "нет названий" (остаются как были) */
+ .bottom-sheet .popup-body p.text-muted {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 2rem 0;
+    font-size: 1rem; /* Возвращаем стандартный размер */
+    font-weight: normal; /* Убираем жирность */
+}
+
+/* Стили для разделителя */
+.bottom-sheet .popup-body hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 0; /* ✨ Убираем стандартные отступы у hr */
+}
+
+/* Адаптивность */
+@media (max-width: 767px) {
+    .bottom-sheet .popup-content {
+        max-height: 85vh; /* На мобильных разрешаем занимать больше высоты */
+        border-radius: var(--radius-md) var(--radius-md) 0 0; /* Чуть меньше скругление */
+    }
+    .bottom-sheet .popup-header {
+        padding: 0.75rem 1rem;
+    }
+     .bottom-sheet .popup-header h3 {
+        font-size: 1.1rem;
+    }
+     .bottom-sheet .popup-body {
+        padding: 1rem;
+    }
+     .bottom-sheet .popup-body p {
+        font-size: 0.95rem;
+    }
+}
+
+/* АДАПТИВНОСТЬ */
+
+/* Мобильные устройства (до 767px) */
+@media (max-width: 767px) {
+    .novel-details-page {
+        padding: 0 0.5rem;
+    }
+    
+    .novel-cover-float {
+        float: none;
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .novel-description-float {
+        min-height: auto;
+    }
+    
+    .description-tabs {
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .tab-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+        flex: 0 1 auto;
+    }
+    
+    .novel-main-title {
+        font-size: 1.5rem;
+    }
+    
+    .chapters-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .chapters-controls {
+        justify-content: center;
+    }
+    
+    .floating-shelf-button {
+        bottom: 1rem;
+        right: 1rem;
+    }
+    
+    .floating-shelf-button .btn-float {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    .floating-shelf-button .btn-float:hover {
+        transform: scale(1.05) rotate(90deg);
+    }
+}
+    
+    .alt-titles-popup {
+        min-width: 250px;
+    }
+
+
+/* Планшеты (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .novel-cover-float {
+        width: 220px;
+    }
+    
+    .description-tabs {
+        justify-content: center;
+    }
+}
+
+/* Десктопы (1024px+) */
+@media (min-width: 1024px) {
+    .novel-cover-float {
+        width: 280px;
+        margin-right: 2rem;
+    }
+    
+    .novel-info-desktop {
+        display: block;
+    }
+    
+    #info-tab-button {
+        display: none;
+    }
+    
+    #float-info {
+        display: none !important;
+    }
+    
+    .description-tabs {
+        justify-content: flex-start;
+    }
+}
+
+/* Очень широкие экраны (1200px+) */
+@media (min-width: 1200px) {
+    .novel-cover-float {
+        width: 300px;
+    }
+    
+    .novel-info-desktop {
+        width: 350px;
+    }
+}
+
+@media (max-width: 767px) {
+    .novel-main-title {
+        font-size: 1.6rem;
+    }
+    
+    .author-container {
+        font-size: 1rem;
+    }
+    
+    .alt-titles-popup {
+        min-width: 250px;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .novel-main-title {
+        font-size: 1.8rem;
+    }
+}
+
+
+/* ==========================================
+   ПРЕДПРОСМОТР ОБЛОЖКИ
+   ========================================== */
+
+.cover-preview {
+    margin-top: 1rem;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--bg-secondary);
+}
+
+.cover-preview.hidden {
+    display: none;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.cover-preview img {
+    max-width: 100%;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.25rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.btn-icon:hover {
+    opacity: 1;
+}
+
+/* ==========================================
+   БЛОК 25: АДАПТИВНОСТЬ
+   ========================================== */
+
+/* Планшеты (768px - 1023px) */
+@media (max-width: 1023px) {
+  .main {
+    margin-top: 70px;
+    padding: 1.5rem 1rem;
+  }
+
+  .header {
+    height: 60px;
+  }
+
+  .header-content {
+    padding: 0.75rem 1rem;
+  }
+
+  .logo {
+    font-size: 1.3rem;
+  }
+
+  /* Сетка карточек */
+  #novels-grid,
+  .novels-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+  }
+
+  /* Вид списка на планшете */
+  #novels-grid.list-view .novel-card,
+  .novels-grid.list-view .novel-card {
+    height: 180px;
+  }
+
+  #novels-grid.list-view .novel-header,
+  .novels-grid.list-view .novel-header {
+    width: 130px;
+  }
+
+  /* Статистика */
+  .stats-bar {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .view-controls {
+    align-self: flex-end;
+  }
+
+  /* Поиск */
+  .search-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    min-width: auto;
+  }
+
+  /* Модальные окна */
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  #admin-modal .modal-content {
+    width: 95%;
+    height: 90vh;
+  }
+
+  /* Пагинация */
+  .pagination-controls {
+    gap: 4px;
+  }
+
+  .pagination-btn,
+  .page-number {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    min-width: 36px;
+  }
+
+  .pagination-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Таблица пользователей */
+  .users-table {
+    font-size: 0.85rem;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 0.6rem 0.8rem;
+  }
+}
+
+/* Мобильные устройства (до 767px) */
+@media (max-width: 767px) {
+  .main {
+    margin-top: 60px;
+    padding: 1rem 0.75rem;
+  }
+
+  .header {
+    height: 55px;
+  }
+
+  .header-content {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .theme-btn {
+    padding: 0.4rem 0.5rem;
+  }
+
+  /* Информация о пользователе */
+  .user-info-badge {
+    padding: 0.4rem 0.6rem;
+  }
+  
+  .user-email {
+    display: none;
+  }
+  
+  .user-role-icon {
+    font-size: 1.2rem;
+  }
+
+  /* Сетка карточек */
+  #novels-grid,
+  .novels-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+
+  /* Вид списка на мобильных */
+  #novels-grid.list-view .novel-card,
+  .novels-grid.list-view .novel-card {
+    flex-direction: column;
+    height: auto;
+  }
+
+  #novels-grid.list-view .novel-header,
+  .novels-grid.list-view .novel-header {
+    width: 100%;
+    height: 200px;
+  }
+
+  /* Контент карточки */
+  .novel-body {
+    padding: 0.75rem;
+  }
+
+  .novel-title {
+    font-size: 1rem;
+  }
+
+  .novel-author {
+    font-size: 0.85rem;
+  }
+
+  .novel-description {
+    font-size: 0.8rem;
+  /* Кросс-браузерное ограничение строк: сначала стандартное, затем префикс */
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  }
+
+  /* Статистика */
+  .stats-bar {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .stats-info {
+    font-size: 0.9rem;
+    gap: 0.75rem;
+  }
+
+  .view-controls {
+    align-self: flex-end;
+    justify-content: center;
+  }
+
+  /* Фильтры */
+  .filters-panel {
+    padding: 1rem;
+  }
+
+  .filter-mode {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+  }
+
+  /* Модальные окна */
+  .modal-content {
+    width: 98%;
+    margin: 1rem;
+    padding: 1.25rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+
+  /* Тосты */
+  .toast-container {
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .toast {
+    padding: 0.75rem;
+  }
+
+  /* Пагинация */
+  .pagination-controls {
+    flex-wrap: wrap;
+  }
+
+  .page-numbers {
+    order: 1;
+    width: 100%;
+    margin-top: 0.5rem;
+    justify-content: center;
+  }
+
+  .pagination-btn:not(.page-number) {
+    order: 0;
+  }
+
+  .pagination-info {
+    order: 2;
+    width: 100%;
+    margin-top: 0.5rem;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  /* Детали новеллы */
+  .novel-details-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Формы */
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Очень маленькие экраны (до 359px) */
+@media (max-width: 359px) {
+  .main {
+    padding: 0.75rem 0.5rem;
+  }
+
+  #novels-grid,
+  .novels-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .novel-body {
+    padding: 0.5rem;
+  }
+
+  .novel-metadata {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .novel-stats {
+    gap: 0.75rem;
+  }
+
+  .header-actions {
+    gap: 0.5rem;
+  }
+
+  .theme-btn {
+    padding: 0.35rem 0.45rem;
+  }
+}
+
+/* Поддержка ориентации */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-content {
+    max-height: 70vh;
+  }
+
+  #admin-modal .modal-content {
+    height: 70vh;
+  }
+
+  .novels-grid.list-view .novel-card {
+    height: 150px;
+  }
+
+  .novels-grid.list-view .novel-header {
+    width: 120px;
+  }
+}
+
+/* Поддержка hover на мобильных */
+@media (hover: none) {
+  .novel-card:hover {
+    transform: none;
+  }
+
+  .btn:hover {
+    transform: none !important;
+  }
+
+  .pagination-btn:hover,
+  .page-number:hover:not(.active) {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    transform: none;
+  }
+
+  .pagination-btn:hover:not(:disabled) {
+    background: var(--accent-primary);
+    color: var(--text-inverse);
+  }
+}
+
+/* Высокочастотные экраны */
+@media (min-resolution: 192dpi) {
+  .novel-cover {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Поддержка reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .novel-card,
+  .btn,
+  .pagination-btn,
+  .page-number {
+    transition: none !important;
+  }
+
+  .modal-content {
+    animation: none !important;
+  }
+
+  .toast {
+    transition: none !important;
+  }
+}
+
+/* Исправление для кнопки "Выйти" в профиле */
+@media (max-width: 490px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    .btn-logout-profile {
+        align-self: center;
+        margin-top: 1rem;
+    }
+}
+
+/* Исправление для кнопки "Админ-панель" в шапке */
+@media (max-width: 440px) {
+    .header .admin-btn span {
+        display: none; /* Скрываем текст, оставляем иконку */
+    }
+    .header .admin-btn {
+        padding: 0.5rem; /* Делаем кнопку квадратной */
+        min-width: 40px;
+    }
+}
+
+/* ==========================================
+   БЛОК 26: ХЕДЕР ДЛЯ СТРАНИЦЫ ЧТЕНИЯ
+   ========================================== */
+
+/* Компенсируем отступ для контента, 
+   т.к. хедер теперь position: fixed.
+   Мы уже добавили 'padding-top: 80px;' в JS, 
+   но этот стиль - хороший запасной вариант.
+*/
+/* Remove this rule entirely or comment it out */
+/*
+.chapter-read-page {
+    padding-top: 80px;
+}
+*/
+
+.reader-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1001; /* Выше, чем главный хедер (1000) */
+    
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr; /* 3 колонки: лево, центр, право */
+    align-items: center;
+    gap: 1rem;
+    
+    height: 60px;
+    padding: 0 1rem;
+    
+    /* Стеклянный фон */
+    background: rgba(var(--bg-card-rgb), 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    
+    /* Анимация показа/скрытия */
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Состояние "скрыто" */
+.reader-header.is-hidden {
+    transform: translateY(-100%);
+}
+
+/* Левая часть (Кнопка Назад) - УПРОЩЕННАЯ */
+.reader-header-left {
+    justify-self: start;
+}
+
+.btn-reader-back {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Центрируем стрелку */
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    width: 40px; /* Фикс. ширина */
+    height: 40px; /* Фикс. высота */
+    border-radius: 50%; /* Делаем круглой */
+    transition: background 0.2s ease;
+}
+.btn-reader-back:hover {
+    background: var(--bg-secondary);
+}
+.btn-reader-back span:first-child {
+    font-size: 1.8rem; /* Крупная стрелка */
+    line-height: 1;
+}
+/* Убираем .back-text, он нам больше не нужен */
+.btn-reader-back .back-text {
+    display: none;
+}
+
+/* Центральная часть (Кликабельное название) */
+.reader-header-center {
+    text-align: center;
+    overflow: hidden; 
+}
+
+/* Стилизуем <button> как текст */
+.btn-reader-title {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    transition: background 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 100%;
+}
+.btn-reader-title:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+.btn-reader-title span:first-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.btn-reader-title .title-caret {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+
+/* Правая часть (Настройки) */
+.reader-header-right {
+    justify-self: end;
+    position: relative;
+}
+
+/* ✨ НОВЫЙ СТИЛЬ: Хлебные крошки внутри контента */
+.chapter-read-page .breadcrumbs {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+}
+.chapter-read-page .breadcrumbs a {
+    color: var(--text-primary);
+}
+
+/* Адаптивность для планшетов и ПК */
+@media (min-width: 768px) {
+    .btn-reader-back .back-text {
+        display: inline; /* Показываем название новеллы */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px; /* Ограничим ширину */
+    }
+    
+    .chapter-title-text {
+        font-size: 1rem;
+    }
+
+    .reader-header {
+        padding: 0 1.5rem;
+    }
+}
+
+/* ==========================================
+   БЛОК 27: НИЖНЯЯ НАВИГАЦИЯ ГЛАВЫ
+   ========================================== */
+
+.reader-bottom-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* Три равные колонки */
+    gap: 1rem;
+    align-items: center;
+    margin-top: auto; /* ✨ ЗАМЕНЯЕМ 3rem НА auto ✨ */
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.reader-bottom-nav a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+}
+
+/* Стили для кнопок "Вперед/Назад" */
+.btn-nav-prev,
+.btn-nav-next {
+    color: var(--accent-primary);
+}
+.btn-nav-prev:hover,
+.btn-nav-next:hover {
+    background: var(--bg-secondary);
+}
+
+/* Кнопка "Оглавление" */
+.btn-nav-toc {
+    /* Remove background, border */
+    background: transparent;
+    border: none;
+    /* Set color like prev/next */
+    color: var(--accent-primary);
+    /* Keep padding and alignment */
+    padding: 0.75rem 1rem; /* Keep existing padding */
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s ease;
+    justify-self: center; /* Keep centering */
+    font-size: 1rem; /* Ensure consistent font size */
+}
+.btn-nav-toc:hover {
+    /* Add hover effect like prev/next */
+    background: var(--bg-secondary);
+    border: none; /* Ensure no border on hover */
+}
+
+/* Выравнивание кнопок */
+.btn-nav-prev {
+    justify-self: start;
+}
+.btn-nav-toc {
+    justify-self: center;
+}
+.btn-nav-next {
+    justify-self: end;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 600px) {
+    .reader-bottom-nav {
+        gap: 0.5rem;
+    }
+    .reader-bottom-nav a {
+        font-size: 0.85rem;
+        padding: 0.75rem 0.5rem;
+    }
+    .btn-nav-toc {
+        /* На мобильных можно скрыть текст, оставив иконку */
+        font-size: 1rem;
+    }
+
+    /* ✨ ДОБАВЛЯЕМ ЭТО ПРАВИЛО ✨ */
+    .reader-bottom-nav .nav-text {
+        display: none;
+    }
+}
+
+/* ==========================================
+   БЛОК 28: БЫСТРЫЙ ПЕРЕХОД ПО ГЛАВАМ (OVERLAY)
+   ========================================== */
+
+#quick-nav-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    
+    background: rgba(var(--bg-primary-rgb, 255, 255, 255), 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    display: flex;
+    flex-direction: column;
+    
+    /* Скрыто по умолчанию */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#quick-nav-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.quick-nav-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+}
+
+.quick-nav-footer .btn {
+    /* Make it look like the bottom nav buttons */
+    background: transparent;
+    border: none;
+    color: var(--accent-primary);
+    padding: 0.75rem 1rem; /* Adjust padding if needed */
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+.quick-nav-footer .btn:hover {
+    background: var(--bg-secondary);
+    text-decoration: none; /* Ensure no underline on hover */
+}
+
+#quick-nav-search {
+    flex-grow: 1;
+}
+
+.quick-nav-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0 0.5rem;
+}
+
+.quick-nav-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.quick-nav-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.2s ease;
+}
+.quick-nav-item:hover {
+    background: var(--bg-secondary);
+}
+
+.quick-nav-number {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    flex-basis: 80px;
+    flex-shrink: 0;
+}
+
+.quick-nav-title {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quick-nav-footer {
+    padding: 1rem;
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+}
+
+[data-mode="dark"] #quick-nav-overlay {
+    /* Use dark background variables */
+    background: rgba(var(--palette-bg-dark-primary-rgb, 45, 45, 45), 0.9);
+}
+
+[data-mode="dark"] .quick-nav-header,
+[data-mode="dark"] .quick-nav-footer {
+    background: var(--palette-bg-dark-secondary); /* Slightly lighter dark */
+    border-color: var(--palette-border-dark);
+}
+
+[data-mode="dark"] #quick-nav-search {
+    background: var(--palette-bg-dark-primary); /* Darker input background */
+    color: var(--palette-text-dark-primary);
+    border-color: var(--palette-border-dark);
+}
+[data-mode="dark"] #quick-nav-search::placeholder {
+    color: var(--palette-text-dark-secondary);
+    opacity: 0.6;
+}
+
+[data-mode="dark"] .quick-nav-close {
+    color: var(--palette-text-dark-secondary);
+}
+[data-mode="dark"] .quick-nav-close:hover {
+    color: var(--palette-text-dark-primary);
+}
+
+[data-mode="dark"] .quick-nav-item {
+    color: var(--palette-text-dark-primary);
+}
+[data-mode="dark"] .quick-nav-item:hover {
+    background: var(--palette-bg-dark-secondary);
+}
+
+[data-mode="dark"] .quick-nav-number {
+    color: var(--palette-text-dark-secondary);
+    opacity: 0.7;
+}
+
+/* Use --palette variables directly for consistency */
+[data-mode="dark"] .quick-nav-footer .btn {
+   color: var(--accent-primary); /* Keep accent color */
+   background: transparent;
+}
+[data-mode="dark"] .quick-nav-footer .btn:hover {
+   background: var(--palette-bg-dark-secondary); /* Use dark secondary bg */
+}
+
+/* ==========================================
+   БЛОК 29: СКЕЛЕТОН ДЛЯ ДЕТАЛЕЙ НОВЕЛЛЫ
+   ========================================== */
+
+.novel-details-page-skeleton .skeleton {
+    opacity: 0.7; /* Make skeletons slightly transparent */
+    margin-bottom: 1rem; /* Default bottom margin */
+}
+
+.novel-details-page-skeleton .breadcrumbs-skeleton { height: 1.5rem; width: 40%; }
+.novel-details-page-skeleton .page-header-skeleton { display: flex; justify-content: space-between; height: 36px; margin-bottom: 1.5rem;}
+
+.novel-content-wrapper-skeleton { overflow: hidden; /* Clear floats */ margin-bottom: 1.5rem; }
+
+.novel-cover-float-skeleton {
+    float: left;
+    width: 280px; /* Match cover width */
+    aspect-ratio: 5 / 7; /* Match cover aspect ratio */
+    border-radius: var(--radius-lg);
+    margin: 0 2rem 1rem 0;
+}
+
+.novel-info-desktop-skeleton {
+    display: none; /* Hide on mobile initially */
+    float: right;
+    width: 320px; /* Match sidebar width */
+    height: 400px; /* Approx height */
+    border-radius: var(--radius-lg);
+    margin-left: 2rem;
+}
+
+.novel-description-float-skeleton { min-height: 200px; }
+.novel-description-float-skeleton .tabs-skeleton { height: 3rem; width: 60%; margin-bottom: 1.5rem; }
+.novel-description-float-skeleton .text-skeleton { height: 1rem; margin-bottom: 0.75rem; border-radius: 4px;}
+
+.novel-details-page-skeleton .taxonomy-skeleton { height: 4rem; width: 100%; border-radius: var(--radius-md); }
+.novel-details-page-skeleton .chapters-header-skeleton { height: 3rem; width: 100%; margin-top: 1.5rem; }
+.novel-details-page-skeleton .chapters-list-skeleton { margin-top: 1rem; }
+
+/* Desktop adjustments for skeleton */
+@media (min-width: 1024px) {
+    .novel-info-desktop-skeleton { display: block; }
+}
+
+/* Mobile adjustments for skeleton */
+@media (max-width: 767px) {
+    .novel-cover-float-skeleton { float: none; width: 200px; margin: 0 auto 1.5rem; }
+    .novel-description-float-skeleton .tabs-skeleton { width: 100%; }
+}
+
+/* ==========================================
+   БЛОК 30: СТРАНИЦА АВТОРА (Дополнения)
+   ========================================== */
+
+.author-page .author-header {
+    display: flex; /* Используем flex для удобного выравнивания */
+    flex-direction: column; /* Элементы идут друг под другом */
+    align-items: center; /* Центрируем всё по горизонтали */
+    text-align: center; /* Центрируем текст внутри элементов */
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    position: relative; /* Для позиционирования кнопки "Назад" */
+}
+
+/* Кнопка "Назад" */
+.author-page .author-back-btn {
+    position: absolute; /* Позиционируем абсолютно относительно .author-header */
+    left: 0; /* Прижимаем к левому краю */
+    top: 0; /* Прижимаем к верху */
+    /* Стили из btn-ghost и btn-sm уже применены через JS */
+}
+
+/* Заголовок с именем автора */
+.author-page .author-header h1 {
+    font-size: 2rem; /* Размер шрифта */
+    font-weight: 600;
+    margin-top: 0; /* Убираем верхний отступ, т.к. кнопка спозиционирована */
+    margin-bottom: 0.5rem; /* Небольшой отступ снизу */
+}
+
+/* Блок с алиасами */
+.author-page .author-aliases {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    max-width: 600px; /* Ограничиваем ширину для читаемости */
+}
+.author-page .author-aliases small {
+    display: block; /* Заголовок на своей строке */
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+.author-page .author-aliases span {
+    font-style: italic; /* Сами алиасы курсивом */
+}
+
+/* ✨ СТИЛИ ДЛЯ КОЛИЧЕСТВА НОВЕЛЛ (ТЕПЕРЬ И ДЛЯ СОЗДАТЕЛЯ) ✨ */
+.author-page .author-novel-count,
+.creator-page .author-novel-count { /* <-- Добавили селектор */
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    /* ✨ Центрируем блок под именем */
+    justify-content: center;
+}
+
+.author-page .count-value,
+.creator-page .count-value { /* <-- Добавили селектор */
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.author-page .count-separator,
+.creator-page .count-separator { /* <-- Добавили селектор */
+    font-weight: bold;
+}
+
+.author-page .count-label,
+.creator-page .count-label { /* <-- Добавили селектор */
+    /* Стиль для подписи (Новелла/ы/ел) */
+}
+
+/* Секция произведений */
+.author-page .author-novels h2 {
+    margin-bottom: 1.5rem;
+    text-align: center; /* Заголовок тоже по центру */
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 767px) {
+    .author-page .author-header h1 {
+        font-size: 1.6rem;
+    }
+    .author-page .author-back-btn {
+        position: static; /* Возвращаем кнопку в поток */
+        margin-bottom: 1rem; /* Добавляем отступ снизу */
+        align-self: flex-start; /* Выравниваем по левому краю */
+    }
+    .author-page .author-header {
+         align-items: center; /* Центрируем все еще раз */
+    }
+}
+
+/* ==========================================
+   БЛОК 31: СТРАНИЦА СОЗДАТЕЛЯ (Дополнения)
+   ========================================== */
+
+/* Используем стили хедера профиля, но центрируем */
+.creator-page .profile-header {
+    /* Наследуем стили от .profile-header (уже есть) */
+    flex-direction: column; /* Элементы друг под другом */
+    align-items: center; /* Центрируем всё */
+    text-align: center;
+    position: relative; /* Для кнопки "Назад" */
+    padding-top: 3rem; /* Добавим отступ сверху для кнопки "Назад" */
+    margin-bottom: 2.5rem; /* Отступ до списка новелл */
+}
+
+/* Кнопка "Назад" для страницы создателя */
+.creator-page .creator-back-btn {
+    position: absolute;
+    left: 1rem; /* Отступ слева */
+    top: 1rem;  /* Отступ сверху */
+}
+
+/* Аватарка */
+.creator-page .profile-avatar-placeholder {
+    width: 100px; /* Размер аватарки */
+    height: 100px;
+    font-size: 2.5rem; /* Размер буквы внутри */
+    margin-bottom: 1rem; /* Отступ снизу */
+}
+
+/* Имя пользователя */
+.creator-page .profile-username {
+    font-size: 1.8rem; /* Размер имени */
+    margin-bottom: 0.25rem;
+}
+
+/* ID пользователя */
+.creator-page .profile-user-id {
+    font-size: 1rem; /* Размер ID */
+}
+
+/* Секция произведений */
+.creator-page .creator-novels h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 767px) {
+    .creator-page .profile-header {
+        padding-top: 4rem; /* Увеличим отступ для кнопки */
+    }
+    .creator-page .creator-back-btn {
+        left: 0.5rem;
+        top: 0.5rem;
+    }
+    .creator-page .profile-avatar-placeholder {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+    .creator-page .profile-username {
+        font-size: 1.5rem;
+    }
+     .creator-page .profile-user-id {
+        font-size: 0.9rem;
+    }
+
+    #novels-grid,
+    .novels-grid {
+      /* ✨ ИЗМЕНЕНИЕ ЗДЕСЬ: Уменьшаем минимальную ширину ✨ */
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Было 160px */
+      gap: 0.75rem; /* Можно немного уменьшить отступ, если нужно */
+    }
+
+    .search-input {
+      font-size: 0.85rem; /* Уменьшаем размер шрифта (был 1rem) */
+      padding: 0.5rem 0.5rem; /* Можно немного уменьшить отступы */
+    }
+
+    .chapter-text {
+      font-size: 14px;  /* Set font size to 14px */
+      line-height: 1.1; /* Set line height to narrow (1.4) */
+    }
+
+    .chapter-text p {
+      margin-bottom: 0.75em; /* Уменьшаем отступ снизу (был 1em) */
+      /* margin-top: 0.75em; */ /* Можно добавить и верхний, если нужно */
+    }
+}
+
+@media (max-width: 767px) {
+
+    /* --- Общие отступы страницы --- */
+    .profile-page {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    /* --- Шапка профиля (над табами) --- */
+    .profile-page-header {
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .profile-page .breadcrumbs { font-size: 0.8em; }
+    .profile-settings-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    /* --- Блок с аватаром и информацией --- */
+    .profile-header {
+        padding: 1rem;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-direction: row;
+        align-items: center;
+        position: relative;
+    }
+
+    .profile-avatar-display,
+    .profile-avatar-placeholder {
+        width: 60px;
+        height: 60px;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+
+    /* Кнопки управления аватаром */
+    .change-avatar-btn, .delete-avatar-btn {
+        width: 22px; height: 22px; font-size: 0.75rem;
+    }
+    .change-avatar-btn { right: 10px; }
+    .delete-avatar-btn { right: -5px; }
+
+
+    .profile-info {
+        flex-grow: 1;
+        min-width: 0;
+        text-align: left;
+    }
+
+    .profile-username {
+        font-size: 1.1rem;
+        margin-bottom: 0.1rem;
+        word-break: break-word;
+    }
+    .profile-user-id { font-size: 0.75rem; }
+
+    /* ✨ ИЗМЕНЕНИЕ: Убираем .profile-role из правила ниже */
+    .profile-email {
+        font-size: 0.8rem;
+        margin: 0.1rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+    }
+    /* ✨ ИЗМЕНЕНИЕ: Отдельное правило для роли, без усечения */
+    .profile-role {
+        font-size: 0.8rem; /* Уменьшаем шрифт */
+        margin: 0.1rem 0;
+        /* Убираем white-space, overflow, text-overflow, max-width */
+        word-break: break-word; /* Позволяем переноситься, если очень длинное */
+    }
+
+    .btn-logout-profile {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+
+    /* --- Табы (Полки / Созданные) --- */
+    .tabs { margin-bottom: 1rem; }
+    .tab-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    /* --- Секция "Мои полки" (Shelves) --- */
+    .shelves-layout {
+        grid-template-columns: 100px 1fr;
+        gap: 1rem;
+    }
+
+    .shelves-nav {
+        border-right: 1px solid var(--border-color);
+        padding-right: 0.75rem;
+        border-bottom: none;
+        padding-bottom: 0;
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+
+    .shelf-nav-btn {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.65em;
+        /* ✨ ИЗМЕНЕНИЕ: Выравниваем текст влево */
+        /* Позволяем тексту кнопки немного сжиматься */
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        position: relative;
+    }
+    .shelf-nav-btn > span:first-of-type { /* Выбираем первый span (текст полки) */
+        white-space: nowrap;      /* Запрещаем перенос текста */
+        overflow: hidden;         /* Скрываем лишнее */
+        text-overflow: ellipsis;  /* Добавляем троеточие */
+        padding-right: 5px;             /* Позволяем занимать доступное место */
+        min-width: 0;     /* Небольшой отступ справа от текста */
+    }
+    .shelf-count {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.3rem;
+        /* ✨ ИЗМЕНЕНИЕ: Прижимаем счетчик к правому краю */
+        position: absolute;
+        right: 0.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border-radius: var(--radius-sm);
+    }
+
+    .shelves-content {
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+        gap: 1rem 0.6rem;
+    }
+    .shelf-novel-title {
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+    }
+    .shelves-content .text-muted {
+        font-size: 0.85rem;
+        padding: 2rem 0.5rem;
+    }
+
+    /* --- Секция "Созданные новеллы" --- */
+    .profile-page .novels-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.8rem;
+    }
+    .profile-page .novel-card.grid-view-card .novel-title {
+         font-size: 0.8rem;
+         min-height: 34px;
+    }
+    .reading-lists-container .text-muted {
+        font-size: 0.85rem;
+        padding: 2rem 0.5rem;
+    }
+     .reading-lists-container .text-muted .btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.9rem;
+    }
+
+    /* --- ✨ НОВОЕ: Уменьшение текста в футере --- */
+    .footer-content {
+        font-size: 0.8rem;
+    }
+
+    /* --- Уменьшение логотипа (уже было в файле, но для наглядности) --- */
+    .logo { font-size: 0.9rem; } /* Уже есть в @media (max-width: 767px) */
+
+    /* Уменьшаем кнопку темы */
+  .header .theme-btn {
+    padding: 0.3rem 0.4rem; /* Уменьшаем отступы */
+    font-size: 0.7rem; /* Уменьшаем иконку */
+  }
+
+  /* Уменьшаем иконку/аватар пользователя */
+  .header .user-icon {
+    width: 35px; /* Меньше ширина */
+    height: 35px; /* Меньше высота */
+    font-size: 0.7rem; /* Уменьшаем текст/иконку внутри, если есть */
+    line-height: 30px; /* Корректируем line-height под новую высоту */
+  }
+
+  /* Уменьшаем отступы между элементами в хедере */
+  .header-actions {
+    gap: 0.3rem; /* Меньше расстояние */
+  }
+
+  /* Уменьшаем кнопку Админ-панели */
+  .header #admin-btn { /* Используем .admin-btn или #admin-btn, смотря что у тебя в HTML */
+    padding: 0.3rem 0.6rem; /* Уменьшаем отступы */
+    font-size: 1rem;   /* Уменьшаем текст/иконку */
+  }
+} /* Конец @media (max-width: 767px) */
+
+
+/* ==========================================
+   КОНЕЦ ФАЙЛА СТИЛЕЙ
+   ========================================== */
+
