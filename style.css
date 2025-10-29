@@ -2274,6 +2274,20 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   text-decoration: underline;
 }
 
+#telegram-login-widget-container {
+  display: flex; /* Используем flexbox */
+  justify-content: center; /* Выравниваем содержимое по центру */
+  width: 100%; /* Занимаем всю ширину родителя */
+  margin-top: 1rem; /* Добавляем отступ сверху, если нужно */
+  margin-bottom: 1rem; /* Добавляем отступ снизу, если нужно */
+}
+
+/* Опционально: можно немного настроить саму кнопку, если нужно */
+#telegram-login-widget-container iframe {
+  /* Стили для iframe виджета, если потребуется */
+  /* Например, можно добавить рамку или тень */
+}
+
 /* Адаптивность для мобильных */
 @media (max-width: 767px) {
   #auth-modal .modal-content {
