@@ -314,6 +314,8 @@ function goBackInHistory() {
 }
 
 function navigateTo(page, params = {}) {
+    window.scrollTo(0, 0);
+    
     // ✨ ГЛАВНОЕ ИСПРАВЛЕНИЕ: Создаём URL с чистого листа
     const url = new URL(window.location.origin + window.location.pathname);
     
