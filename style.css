@@ -2283,10 +2283,10 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   margin-bottom: 1rem; /* Добавляем отступ снизу, если нужно */
 }
 
-/* Опционально: можно немного настроить саму кнопку, если нужно */
 #telegram-login-widget-container iframe {
-  /* Стили для iframe виджета, если потребуется */
-  /* Например, можно добавить рамку или тень */
+  margin-left: auto !important; /* !important для переопределения */
+  margin-right: auto !important;
+  display: block !important; /* Убедимся, что он блочный */
 }
 
 /* Адаптивность для мобильных */
