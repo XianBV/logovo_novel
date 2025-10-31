@@ -314,8 +314,7 @@ function goBackInHistory() {
 }
 
 function navigateTo(page, params = {}) {
-    window.scrollTo(0, 0);
-    
+
     // ✨ ГЛАВНОЕ ИСПРАВЛЕНИЕ: Создаём URL с чистого листа
     const url = new URL(window.location.origin + window.location.pathname);
     
@@ -358,12 +357,27 @@ window.addEventListener('popstate', (e) => {
 });
 
 // Главный роутер страниц
+// ЗАМЕНИТЕ ВАШУ ФУНКЦИЮ renderPage НА ЭТУ:
 async function renderPage(page, params = {}) {
+    /// ✨ ИСПРАВЛЕНИЕ №1: Выполняем с нулевой задержкой, чтобы обойти очередь
+    setTimeout(() => {
+        window.scrollTo(0, 0);
+    }, 0);
+
+    // ✨ ИСПРАВЛЕНИЕ №2: Принудительно включаем скролл
+    // (на случай, если модальное окно не закрылось и оставило overflow: hidden)
+    try {
+        document.body.style.overflow = 'auto';
+        document.documentElement.style.overflow = 'auto'; // И для <html> на всякий случай
+    } catch (e) {}
+
     if (isRendering) {
         console.warn('Рендеринг уже идёт, новый вызов заблокирован:', page);
         return;
     }
     isRendering = true;
+
+    // --- Дальше идет ВЕСЬ ВАШ КОД ИЗ renderPage без изменений ---
 
     // --- ✨ НОВЫЙ БЛОК: Удаление плавающей кнопки полки ---
     const floatingButton = document.querySelector('.floating-shelf-button');
@@ -7683,55 +7697,6 @@ async function handleEmailLogin() {
 }
 
 /**
- * Обработчик данных, полученных от Telegram Login Widget
- * @param {object} user - Объект с данными пользователя от Telegram
- */
-async function onTelegramAuth(user) {
-    console.log('Данные от Telegram получены:', user);
-
-    // 1. Проверка hash (Критически важно для безопасности!)
-    // TODO: Реализовать проверку hash на стороне сервера (Code.js)
-    // Сейчас мы просто доверяем данным, но это небезопасно для продакшена.
-
-    showLoading(true, { title: 'Аутентификация через Telegram...' });
-
-    try {
-        // 2. Отправляем данные на бэкенд
-        const response = await apiRequest('authenticateTelegram', user, true); // true - пропустить кэш
-
-        if (response && response.success && response.user) {
-            // 3. Успешный вход/регистрация
-            localStorage.setItem('session_token', response.session_token);
-            localStorage.setItem('currentUser', JSON.stringify(response.user));
-            localStorage.setItem('userRole', response.user.role);
-            localStorage.setItem('userFeatures', JSON.stringify(response.user.features || []));
-
-            STATE.currentUser = response.user;
-
-            updateUserDisplay();
-            hideModal('auth-modal'); // Закрываем модальное окно входа
-            showToast('Успешный вход через Telegram, ' + response.user.username + '!', 'success');
-
-            // Перезагрузка для обновления состояния
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
-
-        } else {
-            // 4. Ошибка от бэкенда
-            throw new Error(response.error || 'Не удалось войти через Telegram');
-        }
-
-    } catch (error) {
-        // 5. Ошибка сети или другая проблема
-        console.error('Ошибка входа через Telegram:', error);
-        showToast('Ошибка: ' + error.message, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-/**
  * Регистрация нового пользователя
  */
 async function handleRegistration() {
@@ -7814,11 +7779,47 @@ async function handleLogout() {
 }
 
 /**
- * Telegram вход (заглушка пока)
+ * ✅ НОВАЯ ФУНКЦИЯ
+ * Вызывается автоматически виджетом Telegram после успешной авторизации.
+ * Разместите эту функцию в глобальной области видимости (не внутри других функций).
  */
-function handleTelegramLogin() {
-    showToast('Telegram вход скоро будет доступен!', 'info');
-    // Делаем то же самое: сохраняем токен и пользователя
+window.onTelegramAuth = async function(user) {
+    console.log('Данные от виджета Telegram:', user);
+    showLoading(true, { title: 'Вход через Telegram...' });
+
+    try {
+        // Отправляем ВСЕ данные от Telegram (включая 'hash') на сервер
+        // для проверки подлинности в функции 'authenticateTelegram'.
+        const response = await apiRequest('authenticateTelegram', user);
+
+        if (response && response.success && response.user) {
+            // Эта та же логика, что и в handleEmailLogin
+            
+            localStorage.setItem('session_token', response.session_token);
+            localStorage.setItem('currentUser', JSON.stringify(response.user));
+            localStorage.setItem('userRole', response.user.role);
+            localStorage.setItem('userFeatures', JSON.stringify(response.user.features || []));
+
+            STATE.currentUser = response.user;
+            
+            updateUserDisplay();
+            hideModal('auth-modal'); // Закрываем модальное окно
+            showToast('Добро пожаловать, ' + response.user.username + '!', 'success');
+
+            // Перезагрузка страницы для чистого обновления состояния
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+
+        } else {
+            // Сервер отклонил вход (например, неверный hash)
+            throw new Error(response.error || 'Не удалось войти. Сервер отклонил данные.');
+        }
+    } catch (error) {
+        console.error('Ошибка входа через Telegram (onTelegramAuth):', error);
+        showToast('Ошибка: ' + error.message, 'error');
+        showLoading(false); // Прячем загрузку при ошибке
+    }
 }
 
 /**

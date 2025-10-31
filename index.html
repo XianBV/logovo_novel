@@ -360,12 +360,14 @@
                     <button onclick="handleEmailLogin()" class="btn btn-primary">Войти</button>
                 </div>
                 <div class="auth-divider">или</div>
-                <div class="auth-method" id="telegram-login-widget-container">
-                    <script async src="https://telegram.org/js/telegram-widget.js?22"
+                <div class="auth-method">
+                    <div class="telegram-widget-container" style="margin-top: 1rem; text-align: center;">
+                        <script async src="https://telegram.org/js/telegram-widget.js?22"
                         data-telegram-login="logovo_saltfish_bot"
                         data-size="large"
                         data-onauth="onTelegramAuth(user)"
-                        data-request-access="write"></script>
+                        a-request-access="write">
+                    </script>
                 </div>
                 <p class="auth-hint">Нет аккаунта? <a href="#" onclick="showRegistration(); return false;">Зарегистрироваться</a></p>
             </div>

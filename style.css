@@ -29,7 +29,7 @@
   --palette-bg-light-primary: #FFFFFF;
   --palette-bg-light-secondary: #f8f9fa;
   --palette-bg-light-card: #FFFFFF;
-  --palette-bg-light-card-rgb: rgba(255, 255, 255, 0.884);
+  --palette-bg-light-card-rgb: 255, 255, 255;
   --palette-text-light-primary: #212529;
   --palette-text-light-secondary: #6c757d;
   --palette-text-light-inverse: #FFFFFF;
@@ -109,6 +109,8 @@
 
   --bg-read: rgba(255, 229, 100, 0.2); /* Фон выделения для режима чтения */
   --bg-unread: transparent; /* Фон для непрочитанных в режиме чтения */
+
+  --overlay-bg: rgba(0, 0, 0, 0.5); /* Фон оверлея */
 }
 
 /* ✨ ПАЛИТРА "Солнечная" */
@@ -243,6 +245,8 @@
 
   --bg-read: transparent; /* Фон выделения для режима чтения */
   --bg-unread: rgba(0, 183, 255, 0.2);/* Фон для непрочитанных в режиме чтения */
+
+  --overlay-bg: var(--overlay-bg); /* Фон оверлея */
 }
 
 /* ✨ ТЕМНЫЙ РЕЖИМ - берет -dark версии из палитры */
@@ -296,6 +300,8 @@
   --bg-unread: transparent; /* Фон для непрочитанных в режиме чтения */
 
   --accent-danger-rgb: 239, 68, 68
+
+  --overlay-bg: var(--overlay-bg);
 }
 
 /* ==========================================
@@ -314,6 +320,12 @@ html {
   scroll-behavior: smooth;
   /* Не скрываем скроллбар глобально — используем утилиту .hide-scrollbar при необходимости */
   scrollbar-gutter: stable;
+}
+
+/* Фикс прокрутки и "залипшего" overflow */
+html, body {
+  scroll-behavior: auto !important; /* Отключаем плавную прокрутку */
+  overflow: auto !important; /* Гарантируем, что скролл всегда включен */
 }
 
 /* Для скрытия скроллбара используйте класс .hide-scrollbar на контейнере */
@@ -2274,21 +2286,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   text-decoration: underline;
 }
 
-#telegram-login-widget-container {
-  display: flex; /* Используем flexbox */
-  justify-content: center; /* Выравниваем содержимое по центру */
-  text-align: center;
-  width: 100%; /* Занимаем всю ширину родителя */
-  margin-top: 1rem; /* Добавляем отступ сверху, если нужно */
-  margin-bottom: 1rem; /* Добавляем отступ снизу, если нужно */
-}
-
-#telegram-login-widget-container iframe {
-  margin-left: auto !important; /* !important для переопределения */
-  margin-right: auto !important;
-  display: block !important; /* Убедимся, что он блочный */
-}
-
 /* Адаптивность для мобильных */
 @media (max-width: 767px) {
   #auth-modal .modal-content {
@@ -4141,7 +4138,7 @@ h1.chapter-title {
 
 /* Опционально: Можно сделать фон оверлея темнее, когда показывается кастомная анимация */
 #loading-overlay.custom-animation-mode {
-  /* background: rgba(0, 0, 0, 0.6); */ /* Например, чуть темнее */
+  background: rgba(0, 0, 0, 0.6); /* Например, чуть темнее */
 }
 
 #loading {
@@ -4184,7 +4181,7 @@ h1.chapter-title {
 /* Стили для "коробки" с текстом и спиннером */
 .loading-box {
   /* ✨ Стеклянный вид для самой карточки */
-  background: rgba(var(--bg-card-rgb), 0.5); /* Полупрозрачный фон из темы */
+  background: rgba(var(--bg-card-rgb), 0.2); /* Полупрозрачный фон из темы */
   border: 1px solid rgba(var(--bg-card-rgb), 0.1);
   box-shadow: var(--shadow-lg);
   border-radius: var(--radius-lg);
@@ -7609,6 +7606,65 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
   }
 } /* Конец @media (max-width: 767px) */
 
+/* ==========================================
+   АДАПТАЦИЯ (Добавьте в конец style.css)
+   ========================================== */
+
+/* Стили для экранов шире 768px (планшеты и ПК) */
+@media (min-width: 769px) {
+  .reader-header .reader-header-left,
+  .reader-header .reader-header-right {
+    flex-basis: 150px; /* Фиксируем ширину боковых блоков */
+  }
+}
+
+/* Стили для экранов ДО 768px (мобильные) */
+@media (max-width: 768px) {
+
+  /* --- Страница чтения --- */
+  .chapter-read-page .chapter-content-wrapper {
+    /* Убираем лишние отступы на мобильных */
+    padding: 1rem 1rem 5rem 1rem; /* 5rem снизу для кнопок */
+  }
+
+  .chapter-read-page .chapter-text {
+    /* Текст главы занимает всю ширину */
+    max-width: 100%;
+    padding: 0;
+    /* Можно сделать шрифт чуть меньше для мобильных */
+    font-size: 16px; 
+  }
+
+  /* --- Хедер чтения --- */
+  .reader-header {
+    padding: 0 0.5rem; /* Уменьшаем боковые отступы хедера */
+  }
+  
+  .reader-header-center .btn-reader-title {
+    padding: 0.5rem; /* Уменьшаем кнопку с названием */
+  }
+
+  .reader-header .btn-reader-back {
+    font-size: 1.5rem; /* Делаем стрелку "назад" крупнее */
+  }
+
+  /* --- Нижняя навигация --- */
+  .reader-bottom-nav {
+    /* Скрываем текст, оставляем только стрелки */
+    font-size: 1.25rem;
+    padding: 1rem 0.5rem;
+  }
+
+  .reader-bottom-nav .nav-text {
+    display: none; /* Прячем текст "Предыдущая" / "Следующая" */
+  }
+
+  /* --- Панель настроек --- */
+  .reading-settings-panel {
+    width: 300px; /* Делаем панель чуть уже */
+    right: 5px;
+  }
+}
 
 /* ==========================================
    КОНЕЦ ФАЙЛА СТИЛЕЙ
