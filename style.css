@@ -53,7 +53,7 @@
   --palette-btn-light-secondary-border-hover: #dee2e6;
 
     /* --- Цвета для кнопки "Войти" в светлом режиме --- */
-  --palette-btn-light-login-bg: #313233;         /* Почти черный фон */
+  --palette-btn-light-login-bg: transparent;         /* Почти черный фон */
   --palette-btn-light-login-text: #FFFFFF;       /* Белый текст */
   --palette-btn-light-login-border: #212529;     /* Черная рамка */
   --palette-btn-light-login-bg-hover: #000000;   /* Полностью черный при hover */
@@ -4138,7 +4138,7 @@ h1.chapter-title {
 
 /* Опционально: Можно сделать фон оверлея темнее, когда показывается кастомная анимация */
 #loading-overlay.custom-animation-mode {
-  background: rgba(0, 0, 0, 0.6); /* Например, чуть темнее */
+  background: rgba(0, 0, 0, 0.3); /* Например, чуть темнее */
 }
 
 #loading {

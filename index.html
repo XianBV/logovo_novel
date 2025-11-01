@@ -58,6 +58,7 @@
     <div id="chapter-load-overlay"></div>
 
     <div id="app" class="app">
+        <!-- Header -->
         <header class="header is-hidden" role="banner" id="main-header">
             <div class="header-content">
                 <h1 class="logo">Логово новелл</h1>
@@ -77,8 +78,10 @@
                             </div>
                         </div>
                     </div>
+                    <!-- ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ -->
                     <div id="user-info" class="user-info-display">
 
+                        <!-- ✨ Кнопка профиля -->
                         <button id="profile-btn" class="btn btn-secondary user-icon" onclick="navigateTo('profile')" title="Мой профиль">
                             (°ロ°) !
                         </button>
@@ -88,84 +91,86 @@
                     <button id="login-btn" class="btn btn-login" onclick="showModal('auth-modal')">Войти</button>
 
                     <button id="admin-btn" class="btn btn-secondary admin-only" style="display: none;" aria-label="Открыть админ-панель">
-                        <span>Админ-панель</span>
+                        Админ-панель
                     </button>
                 </div>
             </div>
         </header>
 
-<script>
-(function() {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const page = urlParams.get('page') || 'home';
-        const header = document.getElementById('main-header');
-        // Используем твой ID оверлея из этого скрипта
-        const overlay = document.getElementById('chapter-load-overlay');
+        <script>
+        (function() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const page = urlParams.get('page') || 'home';
+                const header = document.getElementById('main-header');
+                // Используем твой ID оверлея из этого скрипта
+                const overlay = document.getElementById('chapter-load-overlay');
 
-        if (page === 'chapter-read') {
-            if (overlay) {
-                // 1. ПОКАЗЫВАЕМ ОВЕРЛЕЙ
-                overlay.style.display = 'block';
+                if (page === 'chapter-read') {
+                    if (overlay) {
+                        // 1. ПОКАЗЫВАЕМ ОВЕРЛЕЙ
+                        overlay.style.display = 'block';
 
-                // ✨ 2. ОБНОВЛЕННАЯ ГЕНЕРАЦИЯ ПУЗЫРЬКОВ ✨
-                let bubblesHtml = '<div class="bubbles-container">';
+                        // ✨ 2. ОБНОВЛЕННАЯ ГЕНЕРАЦИЯ ПУЗЫРЬКОВ ✨
+                        let bubblesHtml = '<div class="bubbles-container">';
+                        
+                        const bubbleCount = 50;     // Количество
+                        const blurProbability = 0.4; // Шанс размытия (40%)
+                        const blurAmount = '3.5px';    // Сила размытия
 
-                const bubbleCount = 50;     // Количество
-                const blurProbability = 0.4; // Шанс размытия (40%)
-                const blurAmount = '3.5px';    // Сила размытия
+                        for (let i = 0; i < bubbleCount; i++) {
+                            const size = 5 + Math.random() * 25;
+                            const left = Math.random() * 100;
+                            const delay = Math.random() * 5;
+                            const duration = 5 + Math.random() * 5;
+                            let opacity = 0.1 + Math.random() * 0.3; // Начальная прозрачность
 
-                for (let i = 0; i < bubbleCount; i++) {
-                    const size = 5 + Math.random() * 25;
-                    const left = Math.random() * 100;
-                    const delay = Math.random() * 5;
-                    const duration = 5 + Math.random() * 5;
-                    let opacity = 0.1 + Math.random() * 0.3; // Начальная прозрачность
+                            let individualStyle = ''; // Строка для доп. стилей
 
-                    let individualStyle = ''; // Строка для доп. стилей
+                            // Решаем, будет ли пузырек размыт
+                            if (Math.random() < blurProbability) {
+                                individualStyle += `filter: blur(${blurAmount});`;
+                                // Затемняем (уменьшаем opacity) размытые
+                                opacity = Math.max(0.02, opacity * 0.4);
+                            }
 
-                    // Решаем, будет ли пузырек размыт
-                    if (Math.random() < blurProbability) {
-                        individualStyle += `filter: blur(${blurAmount});`;
-                        // Затемняем (уменьшаем opacity) размытые
-                        opacity = Math.max(0.02, opacity * 0.4);
+                            // Добавляем opacity и individualStyle в style
+                            bubblesHtml += `
+                                <div class="bubble" style="
+                                    left: ${left}%;
+                                    width: ${size}px;
+                                    height: ${size}px;
+                                    opacity: ${opacity}; /* Задаем рассчитанную прозрачность */
+                                    animation-delay: ${delay}s;
+                                    animation-duration: ${duration}s;
+                                    ${individualStyle} /* Добавляем размытие, если нужно */
+                                "></div>`;
+                        }
+                        bubblesHtml += '</div>';
+                        // ✨ КОНЕЦ ОБНОВЛЕННОЙ ГЕНЕРАЦИИ ✨
+
+                        // 3. Вставляем HTML в оверлей
+                        overlay.innerHTML = bubblesHtml;
                     }
-
-                    // Добавляем opacity и individualStyle в style
-                    bubblesHtml += `
-                        <div class="bubble" style="
-                            left: ${left}%;
-                            width: ${size}px;
-                            height: ${size}px;
-                            opacity: ${opacity}; /* Задаем рассчитанную прозрачность */
-                            animation-delay: ${delay}s;
-                            animation-duration: ${duration}s;
-                            ${individualStyle} /* Добавляем размытие, если нужно */
-                        "></div>`;
+                } else {
+                    // Другая страница: УБИРАЕМ КЛАСС СКРЫТИЯ С ХЕДЕРА
+                    if (header) header.classList.remove('is-hidden');
                 }
-                bubblesHtml += '</div>';
-                // ✨ КОНЕЦ ОБНОВЛЕННОЙ ГЕНЕРАЦИИ ✨
-
-                // 3. Вставляем HTML в оверлей
-                overlay.innerHTML = bubblesHtml;
+            } catch (e) {
+                console.error('Inline overlay/header script error:', e);
+                // Запасной вариант: показать хедер, если НЕ страница чтения
+                if (!window.location.search.includes('page=chapter-read')) {
+                    const header = document.getElementById('main-header');
+                    if (header) header.classList.remove('is-hidden');
+                }
             }
-        } else {
-            // Другая страница: УБИРАЕМ КЛАСС СКРЫТИЯ С ХЕДЕРА
-            if (header) header.classList.remove('is-hidden');
-       }
-    } catch (e) {
-        console.error('Inline overlay/header script error:', e);
-         // Запасной вариант: показать хедер, если НЕ страница чтения
-         if (!window.location.search.includes('page=chapter-read')) {
-            const header = document.getElementById('main-header');
-            if (header) header.classList.remove('is-hidden');
-        }
-   }
-})();
-</script>
-        
+        })();
+        </script>
+
+        <!-- Main Content -->
         <main class="main" role="main">
 
+            <!-- Search and Filters -->
             <section id="search-section" class="search-section" style="display: none;">
                 <div class="search-container">
                     <div class="search-box">
@@ -176,7 +181,7 @@
                         <button id="filter-toggle" class="btn btn-secondary">Фильтры</button>
 
                         <div class="sort-controls">
-                            <label for="sort-select" class="visually-hidden">Сортировать по:</label>
+                            <label for="sort-btn" class="visually-hidden">Сортировать по:</label>
                             <button id="sort-btn" class="btn btn-secondary">
                                 <span class="sort-icon">⇅</span>
                             </button>
@@ -185,6 +190,8 @@
                         <button id="add-novel-btn" class="btn btn-primary btn-add-novel">Добавить новеллу</button>
                     </div>
                 </div>
+
+                <!-- Filters Panel -->
 
                 <div id="filters-panel" class="filters-panel expanded" style="display: none;"> <div class="filters-content">
                     <h3><i class="fas fa-filter"></i> Расширенные Фильтры</h3>
@@ -288,6 +295,7 @@
             </div>
             </section>
 
+            <!-- Loading State -->
             <div id="loading" class="loading-container">
                 <div class="loading-spinner">
                     <div class="spinner" aria-hidden="true"></div>
@@ -295,6 +303,7 @@
                 </div>
             </div>
 
+            <!-- Novels Container -->
             <section id="novels-container" class="novels-container" style="display: none; position: relative;">
                 <div id="stats-bar" class="stats-bar">
                     <div class="stats-info">
@@ -307,16 +316,20 @@
                     </div>
                 </div>
 
+                <!-- Overlay (мягкий фон при загрузке страниц) -->
                 <div class="novels-loading-overlay" id="novels-loading-overlay" style="display: none;">
                   <div class="spinner"></div>
                 </div>
 
+                <!-- Novels Grid -->
                 <div id="novels-grid" class="novels-grid" role="grid" aria-label="Список новелл"></div>
+                <!-- No Results -->
                 <div id="no-results" class="no-results" style="display: none;">
                     <h3>Новеллы не найдены</h3>
                     <p>Попробуйте изменить поисковый запрос или фильтры</p>
                 </div>
 
+                <!-- Dynamic Pagination -->
                 <nav id="pagination" class="pagination" style="display: none;" aria-label="Навигация по страницам">
                     <div class="pagination-wrapper">
                         <button id="first-page" class="pagination-btn" aria-label="Первая страница">⮜</button>
@@ -341,6 +354,7 @@
 
         </main>
 
+        <!-- Footer -->
         <footer class="footer" role="contentinfo">
             <div class="footer-content">
                 <p>© 2025 Логово новелл - Система управления библиотекой для "Логова Солёной Рыбки"</p>
@@ -352,6 +366,7 @@
         <div class="modal-content auth-form-container">
             <button class="close-btn" onclick="hideModal('auth-modal')" aria-label="Закрыть">×</button>
             
+            <!-- ФОРМА ВХОДА/РЕГИСТРАЦИИ -->
             <div id="auth-container">
                 <h2>Вход</h2>
                 <div class="auth-method">
@@ -361,13 +376,8 @@
                 </div>
                 <div class="auth-divider">или</div>
                 <div class="auth-method">
-                    <div class="telegram-widget-container" style="margin-top: 1rem; text-align: center;">
-                        <script async src="https://telegram.org/js/telegram-widget.js?22"
-                        data-telegram-login="logovo_saltfish_bot"
-                        data-size="large"
-                        data-onauth="onTelegramAuth(user)"
-                        a-request-access="write">
-                    </script>
+                    <div class="telegram-widget-container" id="telegram-widget-placeholder">
+                        </div>
                 </div>
                 <p class="auth-hint">Нет аккаунта? <a href="#" onclick="showRegistration(); return false;">Зарегистрироваться</a></p>
             </div>
@@ -385,6 +395,8 @@
         </div>
     </div>
     
+    <!-- Modals -->
+    <!-- Novel Details Modal -->
     <div id="novel-modal" class="modal" role="dialog" aria-labelledby="novel-details-title" aria-hidden="true">
         <div class="modal-content novel-details">
             <div class="modal-header">
@@ -395,6 +407,7 @@
         </div>
     </div>
 
+    <!-- Admin Panel Modal -->
     <div id="admin-modal" class="modal" role="dialog" aria-labelledby="admin-title" aria-hidden="true">
         <div class="modal-content admin-panel">
             <div class="modal-header">
@@ -403,6 +416,7 @@
             </div>
             <div class="modal-body">
                 <div id="admin-content" class="admin-content">
+                    <!-- Database Tab -->
                     <section id="database-tab" class="tab-content active" role="tabpanel">
                         <h3>Управление БД</h3>
                         <div class="admin-actions">
@@ -413,6 +427,7 @@
                         <div id="db-status" class="status-panel"></div>
                     </section>
 
+                    <!-- Genres Tab -->
                     <section id="genres-tab" class="tab-content" role="tabpanel">
                         <h3>Управление жанрами</h3>
                         <form class="add-item-form">
@@ -423,6 +438,7 @@
                         <div id="genres-management" class="items-list"></div>
                     </section>
 
+                    <!-- Tags Tab -->
                     <section id="tags-tab" class="tab-content" role="tabpanel">
                         <h3>Управление тегами</h3>
                         <form class="add-item-form">
@@ -433,12 +449,14 @@
                         <div id="tags-management" class="items-list"></div>
                     </section>
 
+                    <!-- Trash Tab -->
                     <section id="trash-tab" class="tab-content" role="tabpanel">
                         <h3>Корзина</h3>
                         <div class="trash-actions"><button id="empty-trash-btn" class="btn btn-danger">Очистить корзину</button></div>
                         <div id="trash-items" class="trash-list"></div>
                     </section>
 
+                    <!-- Access Tab -->
                     <section id="access-tab" class="tab-content" role="tabpanel">
                         <h3>Управление доступами</h3>
                         <p>В разработке...</p>
@@ -460,6 +478,7 @@
         </div>
     </div>
 
+    <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay" style="display: none;">
         <div class="loading-box">
             <div class="loading-spinner-large"></div>
@@ -472,6 +491,7 @@
         </div>
     </div>
     
+    <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <div id="shortcuts-info" class="shortcuts-info" style="display: none;">
@@ -488,6 +508,7 @@
         <div class="custom-scrollbar"></div>
     </div>
     
+    <!-- Ваш скрипт -->
     <script src="script.js"></script>
 </body>
 </html>

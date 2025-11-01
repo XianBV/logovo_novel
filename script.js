@@ -96,6 +96,7 @@ let lastCheckedNumber = null;
 let isRendering = false;
 let tooltipElement = null
 let currentScrollHandler = null;
+let isTelegramWidgetLoaded = false;
 
 console.log('📦 Script.js загружен - ПОЛНАЯ версия');
 
@@ -335,7 +336,7 @@ function navigateTo(page, params = {}) {
     
     // Обновляем адресную строку и рендерим страницу
     window.history.pushState({ page, params }, '', url);
-    renderPage(page, params);
+    renderPage(page, params, { scrollToTop: true });
 }
 
 // Обработка кнопок Назад/Вперёд браузера
@@ -352,17 +353,16 @@ window.addEventListener('popstate', (e) => {
             if (key !== 'page') params[key] = value;
         });
         
-        renderPage(page, params);
+        renderPage(page, params, { scrollToTop: false });
     }
 });
 
 // Главный роутер страниц
 // ЗАМЕНИТЕ ВАШУ ФУНКЦИЮ renderPage НА ЭТУ:
-async function renderPage(page, params = {}) {
-    /// ✨ ИСПРАВЛЕНИЕ №1: Выполняем с нулевой задержкой, чтобы обойти очередь
-    setTimeout(() => {
-        window.scrollTo(0, 0);
-    }, 0);
+async function renderPage(page, params = {}, options = {}) {
+    const { scrollToTop = false } = options;
+
+    window.scrollTo(0, 0);
 
     // ✨ ИСПРАВЛЕНИЕ №2: Принудительно включаем скролл
     // (на случай, если модальное окно не закрылось и оставило overflow: hidden)
@@ -511,6 +511,14 @@ async function renderPage(page, params = {}) {
         console.error('Ошибка рендеринга:', error);
         showToast('Не удалось загрузить страницу', 'error');
     } finally {
+        // --- (Логика прокрутки) ---
+        if (scrollToTop) {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0; 
+            document.body.scrollTop = 0; 
+        }
+        // --- КОНЕЦ ВСТАВКИ ---
+
         isRendering = false; // ✨ Снимаем блокировку в конце
     }
 }
@@ -4379,8 +4387,34 @@ function showModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.add('show', 'visible');
-        modal.setAttribute('aria-hidden', 'false'); // ✨ Добавлено
+        modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+
+        // ✨ НАЧАЛО ИСПРАВЛЕНИЯ: Динамическая загрузка виджета ✨
+        if (modalId === 'auth-modal' && !isTelegramWidgetLoaded) {
+            const placeholder = document.getElementById('telegram-widget-placeholder');
+            
+            // Проверяем, что плейсхолдер существует
+            if (placeholder) { 
+                console.log('Загрузка виджета Telegram...');
+                isTelegramWidgetLoaded = true; // Ставим флаг, чтобы не грузить дважды
+
+                const script = document.createElement('script');
+                script.async = true; // async здесь уже безопасен
+                script.src = 'https://telegram.org/js/telegram-widget.js?22';
+                
+                // Все data-атрибуты из твоего HTML
+                script.dataset.telegramLogin = 'logovo_saltfish_bot';
+                script.dataset.size = 'large';
+                script.dataset.onauth = 'onTelegramAuth(user)';
+                script.dataset.requestAccess = 'write';
+
+                // Добавляем скрипт ВНУТРЬ плейсхолдера
+                // Теперь document.write() сработает только внутри этого div
+                placeholder.appendChild(script);
+            }
+        }
+        // ✨ КОНЕЦ ИСПРАВЛЕНИЯ ✨
     }
 }
 
@@ -4844,6 +4878,7 @@ function renderAdminPanel(stats, users, genresAndTags) {
     const tabs = {
         stats: '📊 Статистика',
         users: '👥 Пользователи',
+        access: '🔒 Доступы',
         genres: '🏷️ Жанры',
         tags: '🔖 Теги',
         trash: '🗑️ Корзина',
@@ -4863,6 +4898,7 @@ function renderAdminPanel(stats, users, genresAndTags) {
         <nav class="admin-tabs">${tabsHtml}</nav>
         <div id="admin-tab-stats" class="admin-tab-content" style="display: block;"></div>
         <div id="admin-tab-users" class="admin-tab-content" style="display: none;"></div>
+        <div id="admin-tab-access" class="admin-tab-content" style="display: none;"></div> <div id="admin-tab-genres" class="admin-tab-content" style="display: none;"></div>
         <div id="admin-tab-genres" class="admin-tab-content" style="display: none;"></div>
         <div id="admin-tab-tags" class="admin-tab-content" style="display: none;"></div>
         <div id="admin-tab-trash" class="admin-tab-content" style="display: none;"></div>
@@ -4919,6 +4955,15 @@ function renderAdminPanel(stats, users, genresAndTags) {
 
         // 2. ОТДЕЛЬНЫЙ обработчик для клика по кнопке "Найти"
         document.querySelector('#admin-tab-users .btn-primary').addEventListener('click', handleSearchUsers);
+    }
+
+    // Вкладка "Доступы"
+    const accessContent = document.getElementById('admin-tab-access');
+    if (accessContent) {
+        accessContent.innerHTML = `
+            <h3>Управление доступами</h3>
+            <p>В разработке...</p>
+        `;
     }
 
     // Вкладка "Жанры"
