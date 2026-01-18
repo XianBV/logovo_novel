@@ -4822,28 +4822,45 @@ async function loadAdminData() {
     `;
 
     try {
-        const [statsResponse, usersResponse, genresAndTagsResponse] = await Promise.all([
-            apiRequest('getSystemStats'),
+        const [
+            dashboardResponse,
+            usersResponse, 
+            genresAndTagsResponse,
+            limitPersonalResponse,
+            limitCommunityResponse
+        ] = await Promise.all([
+            apiRequest('getDashboardData'),
             apiRequest('getAllUsers'),
-            apiRequest('getGenresAndTags')
+            apiRequest('getGenresAndTags'),
+            apiRequest('getSetting', { key: 'global_limit_personal' }),
+            apiRequest('getSetting', { key: 'global_limit_community' })
         ]);
 
         // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
         // Проверяем успех каждого запроса и извлекаем нужные данные
-        const statsData = statsResponse?.success ? statsResponse.stats : null;
+        const dashboardData = dashboardResponse?.success ? dashboardResponse : null;
         const usersData = usersResponse?.success ? usersResponse.users : [];
         // Извлекаем genres и tags ТОЛЬКО если запрос был успешным
         const genresAndTagsData = genresAndTagsResponse?.success
                                     ? genresAndTagsResponse // Передаем весь объект {genres: [], tags: []}
                                     : { genres: [], tags: [] }; // Передаем пустые массивы при ошибке
 
+        const limitsData = {
+            personal: limitPersonalResponse?.success && limitPersonalResponse.value !== null
+                ? limitPersonalResponse.value
+                : 10, // Лимит по умолчанию, если в БД нет
+            community: limitCommunityResponse?.success && limitCommunityResponse.value !== null
+                ? limitCommunityResponse.value
+                : 50
+        };
+
         // Логируем ошибки, если были
-        if (!statsResponse?.success) console.error("Ошибка загрузки статистики:", statsResponse?.error);
+        if (!dashboardResponse?.success) console.error("Ошибка загрузки статистики:", dashboardResponse?.error);
         if (!usersResponse?.success) console.error("Ошибка загрузки пользователей:", usersResponse?.error);
         if (!genresAndTagsResponse?.success) console.error("Ошибка загрузки жанров/тегов:", genresAndTagsResponse?.error);
 
         // Передаем извлеченные данные
-        renderAdminPanel(statsData, usersData, genresAndTagsData);
+        renderAdminPanel(dashboardData, usersData, genresAndTagsData, limitsData);
         // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     } catch (error) { // Эта ошибка ловит проблемы с самим apiRequest (например, сеть)
@@ -4870,13 +4887,13 @@ function renderUsersTableRows(users) {
         </tr>`).join('');
 }
 
-function renderAdminPanel(stats, users, genresAndTags) {
+function renderAdminPanel(dashboardData, users, genresAndTags, limits) {
     const content = document.getElementById('admin-content');
     if (!content) return;
 
     // Определяем наши вкладки
     const tabs = {
-        stats: '📊 Статистика',
+        stats: '📊 Дашборд',
         users: '👥 Пользователи',
         access: '🔒 Доступы',
         genres: '🏷️ Жанры',
@@ -4912,14 +4929,51 @@ function renderAdminPanel(stats, users, genresAndTags) {
     const statsContent = document.getElementById('admin-tab-stats');
     if (statsContent) {
         statsContent.innerHTML = `
-            <h3>Статистика системы</h3>
+            <h3>Дашборд</h3>
+
             <div class="stats-grid">
-                <div class="stat-card"><div class="stat-value">${stats?.novels || 0}</div><div class="stat-label">Новелл</div></div>
-                <div class="stat-card"><div class="stat-value">${stats?.chapters || 0}</div><div class="stat-label">Глав</div></div>
-                <div class="stat-card"><div class="stat-value">${stats?.genres || 0}</div><div class="stat-label">Жанров</div></div>
-                <div class="stat-card"><div class="stat-value">${stats?.tags || 0}</div><div class="stat-label">Тегов</div></div>
-                <div class="stat-card"><div class="stat-value">${stats?.trashItems || 0}</div><div class="stat-label">В корзине</div></div>
-            </div>`;
+                <div class="stat-card"><div class="stat-value">${dashboardData?.stats?.novels || 0}</div><div class="stat-label">Новелл</div></div>
+                <div class="stat-card"><div class="stat-value">${dashboardData?.stats?.chapters || 0}</div><div class="stat-label">Глав</div></div>
+                <div class="stat-card"><div class="stat-value">${dashboardData?.stats?.tags || 0}</div><div class="stat-label">Тегов</div></div>
+                <div class="stat-card"><div class="stat-value">${dashboardData?.stats?.trashItems || 0}</div><div class="stat-label">В корзине</div></div>
+            </div>
+
+            <hr class="section-divider">
+
+            <div class="dashboard-columns">
+
+                <div class="dashboard-column">
+                    <h4>Требуется внимание (Ошибки)</h4>
+                    <div class="dashboard-list">
+                        ${dashboardData?.errorNovels?.length > 0 
+                            ? dashboardData.errorNovels.map(novel => `
+                                <div class="dashboard-item error-item" onclick="navigateTo('edit-novel', {id: '${novel.novel_id}'})">
+                                    <strong class="item-title">⚠️ ${escapeHtml(novel.title)}</strong>
+                                    <small class="item-meta">${escapeHtml(novel.description)}</small>
+                                </div>
+                            `).join('')
+                            : '<p class="text-muted">Ошибок не найдено.</p>'
+                        }
+                    </div>
+                </div>
+
+                <div class="dashboard-column">
+                    <h4>Недавние новеллы</h4>
+                    <div class="dashboard-list">
+                        ${dashboardData?.recentNovels?.length > 0 
+                            ? dashboardData.recentNovels.map(novel => `
+                                <div class="dashboard-item" onclick="navigateTo('novel-details', {id: '${novel.novel_id}'})">
+                                    <strong class="item-title">${escapeHtml(novel.title)}</strong>
+                                    <small class="item-meta">Добавлено: ${formatDate(novel.created_at)}</small>
+                                </div>
+                            `).join('')
+                            : '<p class="text-muted">Нет недавних новелл.</p>'
+                        }
+                    </div>
+                </div>
+
+            </div>
+        `;
     }
 
     // Вкладка "Пользователи"
@@ -5076,7 +5130,25 @@ function renderAdminPanel(stats, users, genresAndTags) {
                 </select>
                 <small class="form-help">Выбранная тема будет видна всем пользователям на сайте.</small>
             </div>
-        `;
+
+            <hr class="section-divider">
+            <h3>Глобальные лимиты</h3>
+            <small class="form-help">Лимиты по умолчанию для всех пользователей с ролью 'Creator'. (Индивидуальные лимиты настраиваются во вкладке "Доступы")</small>
+
+            <div class="form-group">
+                <label for="global-limit-personal">Лимит личных новелл</label>
+                <input type="number" id="global-limit-personal" class="form-input" value="${limits.personal}">
+            </div>
+
+            <div class="form-group">
+                <label for="global-limit-community">Лимит общих новелл</label>
+                <input type="number" id="global-limit-community" class="form-input" value="${limits.community}">
+            </div>
+
+            <div class="admin-actions">
+                <button class="btn btn-primary" onclick="handleSaveGlobalSettings()">Сохранить лимиты</button>
+            </div>
+            `;
     }
 
     renderTrashTabContent();
@@ -5223,6 +5295,32 @@ async function handleRoleThemeChange(selectElement) {
             STATE.currentRoleTheme = newTheme;
             // Можно перезагрузить админку для чистоты
             loadAdminData();
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        showToast('Ошибка: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+/**
+ * Сохраняет глобальные лимиты из админ-панели
+ */
+async function handleSaveGlobalSettings() {
+    const personalLimit = document.getElementById('global-limit-personal').value;
+    const communityLimit = document.getElementById('global-limit-community').value;
+
+    showLoading(true, { title: 'Сохранение лимитов...' });
+    try {
+        const response = await apiPostRequest('setGlobalLimits', { 
+            personalLimit: personalLimit, 
+            communityLimit: communityLimit 
+        });
+        
+        if (response.success) {
+            showToast(response.message, 'success');
         } else {
             throw new Error(response.error);
         }
@@ -6025,17 +6123,18 @@ function updateProgress(percent, text = '') {
 }
 
 /**
- * Возвращает красивое название роли в зависимости от ВЫБРАННОЙ ТЕМЫ.
- * @param {string} role - Системная роль (owner, admin, reader).
- * @returns {string} Отображаемое название.
+ * Исправленная версия: Получает красивое название роли.
+ * Теперь она всегда проверяет актуальную тему из STATE.
  */
 function getDisplayRoleName(role) {
-    // Получаем текущую тему из глобального состояния (по умолчанию 'default')
+    // 1. Берем тему из STATE, которую мы получили от сервера в initializeApp
     const currentThemeName = STATE.currentRoleTheme || 'default';
-    const currentTheme = ROLE_THEMES[currentThemeName] || ROLE_THEMES['default'];
     
-    // Возвращаем название из текущей темы
-    return currentTheme[role] || role; // Если роль не найдена, вернем системное имя
+    // 2. Ищем объект темы в справочнике ROLE_THEMES (он у тебя в начале script.js)
+    const theme = ROLE_THEMES[currentThemeName] || ROLE_THEMES['default'];
+    
+    // 3. Возвращаем перевод для конкретной роли
+    return theme[role] || role; 
 }
 
 // ==========================================
@@ -6261,7 +6360,11 @@ function updateUserDisplay() {
         if (userAvatarHeader) {
             if (STATE.currentUser.avatar_url) {
                 // Если есть URL, создаем img
-                userAvatarHeader.innerHTML = `<img src="${escapeHtml(STATE.currentUser.avatar_url)}" alt="Аватар" class="header-avatar-image" onerror="this.onerror=null; this.src=''; this.innerHTML='👤';">`; // Используй свой класс для стилей
+                let avatarUrl = escapeHtml(STATE.currentUser.avatar_url);
+                if (avatarUrl.includes('drive.google.com/thumbnail')) {
+                    avatarUrl += '&t=' + new Date().getTime(); // Добавляем cache-buster
+                }
+                userAvatarHeader.innerHTML = `<img src="\${avatarUrl}" alt="Аватар" class="header-avatar-image" onerror="this.onerror=null; this.src=''; this.innerHTML='👤';">`; // Используй свой класс для стилей
             } else {
                 // Иначе показываем заглушку
                 userAvatarHeader.innerHTML = '(°ロ°) !'; // Твоя заглушка
@@ -7271,8 +7374,12 @@ async function renderProfileSettingsPage() {
     const previewContainer = document.getElementById('profile-avatar-preview');
     const deleteBtn = document.getElementById('delete-avatar-btn');
     if (previewContainer && deleteBtn) {
-        const avatarContent = STATE.currentUser.avatar_url
-            ? `<img src="${escapeHtml(STATE.currentUser.avatar_url)}" alt="Аватар" class="profile-avatar-image" onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<span class=\\'avatar-placeholder-emoji\\'>👤</span>';">`
+        let avatarUrl = STATE.currentUser.avatar_url ? escapeHtml(STATE.currentUser.avatar_url) : null;
+        if (avatarUrl && avatarUrl.includes('drive.google.com/thumbnail')) {
+            avatarUrl += '&t=' + new Date().getTime(); // Добавляем cache-buster
+        }
+        const avatarContent = avatarUrl
+            ? `<img src="\${avatarUrl}" alt="Аватар" class="profile-avatar-image" onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<span class=\\'avatar-placeholder-emoji\\'>👤</span>';">`
             : '<span class="avatar-placeholder-emoji">(_ _*) Z z z</span>';
         previewContainer.innerHTML = avatarContent;
         deleteBtn.style.display = STATE.currentUser.avatar_url ? 'inline-flex' : 'none'; // Показываем/скрываем кнопку удаления
@@ -7812,14 +7919,12 @@ async function handleLogout() {
             .catch(e => console.warn('Фоновый выход не удался:', e));
     }
 
-    showToast('Вы вышли из системы. Перезагрузка...', 'info');
+    showToast('Вы вышли из системы. Переход на главную...', 'info');
 
-    // ✅ КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Перезагружаем страницу через полсекунды.
-    // Это самый надежный способ полностью обновить состояние интерфейса.
+    // 3. ✨ КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Жесткий редирект на чистый URL (Главную) ✨
+    // Это уберет все параметры типа ?page=profile и предотвратит ошибку
     setTimeout(() => {
-        window.location.href = window.location.origin + window.location.pathname; // Чистый переход на главную
-        // На всякий случай, если переход не сработает, перезагрузим
-        setTimeout(() => window.location.reload(), 200);
+        window.location.href = window.location.origin + window.location.pathname;
     }, 500);
 }
 
