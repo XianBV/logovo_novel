@@ -3785,6 +3785,34 @@ h1.chapter-title {
   color: #fff;
   box-shadow: 0 2px 8px rgba(149, 165, 166, 0.3);
 }
+
+.user-status-badge {
+  display: inline-flex;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.user-status-badge.is-active {
+  color: #176b3a;
+  background: rgba(46, 204, 113, 0.16);
+}
+
+.user-status-badge.is-blocked {
+  color: #a93226;
+  background: rgba(231, 76, 60, 0.16);
+}
+
+[data-theme="dark"] .user-status-badge.is-active {
+  color: #7ee2a8;
+}
+
+[data-theme="dark"] .user-status-badge.is-blocked {
+  color: #ff9b90;
+}
+
 .users-filters {
   display: flex;
   gap: 1rem;

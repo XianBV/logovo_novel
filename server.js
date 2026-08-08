@@ -41,6 +41,9 @@ const DIRECT_MUTATION_ACTIONS = new Set([
   'uploadAvatar',
   'deleteAvatar',
   'updateUserRole',
+  'blockUser',
+  'unblockUser',
+  'deleteUser',
   'setRoleTheme',
   'setGlobalLimits',
   'addTag',
@@ -965,13 +968,15 @@ export async function resolveSessionUser(params = {}, options = {}) {
 
   const rows = await supabaseRestRequest('sessions', {
     token: `eq.${params.session_token}`,
-    select: 'expires_at,users(user_id,username,email,role,avatar_url,telegram_id)',
+    select: 'expires_at,users(user_id,username,email,role,avatar_url,telegram_id,is_banned)',
     limit: 1
   }, options);
   const session = rows[0];
   const sessionUser = session?.users;
   const expiresAt = session?.expires_at ? new Date(session.expires_at) : null;
-  if (!sessionUser || !expiresAt || expiresAt <= new Date()) return anonymousUser();
+  if (!sessionUser || sessionUser.is_banned || !expiresAt || expiresAt <= new Date()) {
+    return anonymousUser();
+  }
 
   const features = ['personal_novels', 'community_novels'];
   if (sessionUser.role === 'admin' || sessionUser.role === 'owner') {
@@ -1179,7 +1184,7 @@ async function getAllUsersDirect(user, options = {}) {
   if (accessError) return accessError;
   const db = options.dbRequest || supabaseRestRequest;
   const users = await db('users', {
-    select: 'user_id,telegram_id,username,email,role,created_at,last_active,avatar_url,custom_limit_personal,custom_limit_community',
+    select: 'user_id,telegram_id,username,email,role,created_at,last_active,avatar_url,is_banned,custom_limit_personal,custom_limit_community',
     order: 'created_at.desc',
     limit: 100
   }, options);
@@ -1192,7 +1197,7 @@ async function searchUsersDirect(params, user, options = {}) {
   const text = String(params.query || '').trim().replace(/[,*()]/g, '');
   const db = options.dbRequest || supabaseRestRequest;
   const query = {
-    select: 'user_id,telegram_id,username,email,role,created_at,last_active,avatar_url,custom_limit_personal,custom_limit_community',
+    select: 'user_id,telegram_id,username,email,role,created_at,last_active,avatar_url,is_banned,custom_limit_personal,custom_limit_community',
     order: 'created_at.desc',
     limit: 50
   };
@@ -1445,7 +1450,7 @@ async function getMyCreatedNovelsDirect(user, options = {}) {
   if (authError) return authError;
   const rows = await supabaseRestRequest('novels', {
     creator_id: `eq.${user.user_id}`,
-    select: 'novel_id,title,cover_urls,cover_url,chapter_count,access_type,is_deleted,translation_status',
+    select: 'novel_id,title,cover_urls,chapter_count,access_type,is_deleted,translation_status',
     order: 'updated_at.desc'
   }, options);
   return {
@@ -1455,7 +1460,7 @@ async function getMyCreatedNovelsDirect(user, options = {}) {
       title: novel.title,
       cover_url: Array.isArray(novel.cover_urls) && novel.cover_urls.length
         ? novel.cover_urls[0]
-        : (novel.cover_url || null),
+        : null,
       chapter_count: novel.chapter_count,
       access_type: novel.access_type,
       is_deleted: novel.is_deleted,
@@ -1494,7 +1499,11 @@ function passwordMatches(password, storedHash) {
   const expected = String(storedHash).slice(separator + 1);
   const actual = crypto.createHash('sha256').update(`${salt}${password}`, 'utf8').digest('hex');
   if (expected.length !== actual.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+  let difference = 0;
+  for (let index = 0; index < actual.length; index += 1) {
+    difference |= actual.charCodeAt(index) ^ expected.charCodeAt(index);
+  }
+  return difference === 0;
 }
 
 async function loginWithEmailDirect(data, options = {}) {
@@ -1504,11 +1513,14 @@ async function loginWithEmailDirect(data, options = {}) {
 
   const users = await supabaseRestRequest('users', {
     email: `eq.${email}`,
-    select: 'user_id,username,email,role,avatar_url,telegram_id,password_hash',
+    select: 'user_id,username,email,role,avatar_url,telegram_id,password_hash,is_banned',
     limit: 1
   }, options);
   if (!users.length) return { success: false, error: 'Пользователь с таким email не найден' };
   const user = users[0];
+  if (user.is_banned) {
+    return { success: false, error: 'Учётная запись заблокирована. Обратитесь к владельцу сайта' };
+  }
   if (!user.password_hash) return { success: false, error: 'У пользователя не задан пароль' };
   if (!passwordMatches(password, user.password_hash)) {
     return { success: false, error: 'Неверный пароль' };
@@ -3200,6 +3212,125 @@ export async function updateUserRoleDirect(data, user, options = {}) {
   return { success: true, message: `Роль пользователя обновлена на ${newRole}` };
 }
 
+export async function setUserBlockedDirect(data, user, blocked, options = {}) {
+  const accessError = requireAdministrator(user);
+  if (accessError) return accessError;
+  const db = options.dbRequest || supabaseRestRequest;
+  const userId = Number(data.user_id ?? data.userId);
+  if (!Number.isFinite(userId)) return { success: false, error: 'Пользователь не найден' };
+  if (String(userId) === String(user.user_id)) {
+    return { success: false, error: 'Нельзя заблокировать собственную учётную запись' };
+  }
+
+  const rows = await db('users', {
+    user_id: `eq.${userId}`,
+    select: 'user_id,username,role,is_banned',
+    limit: 1
+  }, options);
+  const target = rows[0];
+  if (!target) return { success: false, error: 'Пользователь не найден' };
+  if (target.role === 'owner' || String(target.user_id) === '0') {
+    return { success: false, error: 'Нельзя заблокировать владельца сайта' };
+  }
+  if (target.role === 'admin' && user.role !== 'owner' && String(user.user_id) !== '0') {
+    return { success: false, error: 'Заблокировать администратора может только владелец' };
+  }
+
+  const updated = await db('users', { user_id: `eq.${userId}` }, {
+    ...options,
+    method: 'PATCH',
+    body: { is_banned: Boolean(blocked) }
+  });
+  if (!updated.length) return { success: false, error: 'Пользователь не найден' };
+
+  if (blocked) {
+    await db('sessions', { user_id: `eq.${userId}` }, {
+      ...options,
+      method: 'DELETE'
+    });
+  }
+  return {
+    success: true,
+    is_banned: Boolean(blocked),
+    message: blocked
+      ? 'Пользователь заблокирован и выведен из аккаунта'
+      : 'Пользователь разблокирован'
+  };
+}
+
+export async function deleteUserDirect(data, user, options = {}) {
+  const accessError = requireAdministrator(user, true);
+  if (accessError) return accessError;
+  const db = options.dbRequest || supabaseRestRequest;
+  const userId = Number(data.user_id ?? data.userId);
+  if (!Number.isFinite(userId)) return { success: false, error: 'Пользователь не найден' };
+  if (String(userId) === String(user.user_id)) {
+    return { success: false, error: 'Нельзя удалить собственную учётную запись' };
+  }
+
+  const rows = await db('users', {
+    user_id: `eq.${userId}`,
+    select: 'user_id,username,role,avatar_url',
+    limit: 1
+  }, options);
+  const target = rows[0];
+  if (!target) return { success: false, error: 'Пользователь не найден' };
+  if (target.role === 'owner' || String(target.user_id) === '0') {
+    return { success: false, error: 'Нельзя удалить владельца сайта' };
+  }
+
+  const ownerId = Number(user.user_id);
+  let avatarFileId = '';
+  let avatarTrashed = false;
+  try {
+    await db('novels', { owner_id: `eq.${userId}` }, {
+      ...options,
+      method: 'PATCH',
+      body: { owner_id: ownerId, updated_at: new Date().toISOString() }
+    });
+    await db('novels', { creator_id: `eq.${userId}` }, {
+      ...options,
+      method: 'PATCH',
+      body: { creator_id: ownerId, updated_at: new Date().toISOString() }
+    });
+
+    await Promise.all([
+      db('sessions', { user_id: `eq.${userId}` }, { ...options, method: 'DELETE' }),
+      db('reading_lists', { user_id: `eq.${userId}` }, { ...options, method: 'DELETE' }),
+      db('reading_progress', { user_id: `eq.${userId}` }, { ...options, method: 'DELETE' }),
+      db('novel_permissions', { user_id: `eq.${userId}` }, { ...options, method: 'DELETE' }),
+      db('comments', { user_id: `eq.${userId}` }, { ...options, method: 'DELETE' }),
+      db('submissions', { created_by: `eq.${userId}` }, { ...options, method: 'DELETE' })
+    ]);
+    await db('submissions', { reviewed_by: `eq.${userId}` }, {
+      ...options,
+      method: 'PATCH',
+      body: { reviewed_by: null }
+    });
+
+    avatarFileId = extractGoogleDriveFileId(target.avatar_url);
+    if (avatarFileId) {
+      await setGoogleDriveTrashedDirect(avatarFileId, true, options);
+      avatarTrashed = true;
+    }
+
+    const deleted = await db('users', { user_id: `eq.${userId}` }, {
+      ...options,
+      method: 'DELETE'
+    });
+    if (!deleted.length) throw new Error('Пользователь не найден');
+    return {
+      success: true,
+      message: 'Пользователь и его личные данные удалены. Новеллы переданы владельцу сайта'
+    };
+  } catch (error) {
+    if (avatarTrashed && avatarFileId) {
+      await setGoogleDriveTrashedDirect(avatarFileId, false, options).catch(() => {});
+    }
+    return { success: false, error: `Не удалось полностью удалить пользователя: ${error.message}` };
+  }
+}
+
 export async function setRoleThemeDirect(data, user, options = {}) {
   const accessError = requireAdministrator(user);
   if (accessError) return accessError;
@@ -3301,6 +3432,9 @@ export async function handleDirectMutation(action, data = {}, options = {}) {
   if (action === 'uploadAvatar') return uploadAvatarDirect(data, user, options);
   if (action === 'deleteAvatar') return deleteAvatarDirect(data, user, options);
   if (action === 'updateUserRole') return updateUserRoleDirect(data, user, options);
+  if (action === 'blockUser') return setUserBlockedDirect(data, user, true, options);
+  if (action === 'unblockUser') return setUserBlockedDirect(data, user, false, options);
+  if (action === 'deleteUser') return deleteUserDirect(data, user, options);
   if (action === 'setRoleTheme') return setRoleThemeDirect(data, user, options);
   if (action === 'setGlobalLimits') return setGlobalLimitsDirect(data, user, options);
   if (action === 'addTag') return addTagDirect(data, user, options);
@@ -3795,6 +3929,9 @@ export function getMutationLockKey(action, data = {}) {
     'deleteAvatar',
     'createAuthorSubmission',
     'updateUserRole',
+    'blockUser',
+    'unblockUser',
+    'deleteUser',
     'setRoleTheme',
     'setGlobalLimits',
     'addTag',

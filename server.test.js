@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import {
   createRequestCoordinator,
   createServer,
@@ -17,6 +18,7 @@ import {
   createAuthorSubmissionDirect,
   deleteAvatarDirect,
   deleteNovelDirect,
+  deleteUserDirect,
   permanentDeleteChapterDirect,
   restoreNovelDirect,
   restoreFromTrashDirect,
@@ -24,7 +26,8 @@ import {
   handleDirectQuery,
   handleDirectMutation,
   parseJsonp,
-  runMutationAction
+  runMutationAction,
+  setUserBlockedDirect
 } from './server.js';
 
 test('parseJsonp извлекает ответ Apps Script', () => {
@@ -814,6 +817,72 @@ test('вход проверяет старый хеш пароля и созда
   assert.equal(result.session_token, savedSession.token);
 });
 
+test('заблокированная учётная запись не может войти', async () => {
+  let sessionsTouched = false;
+  const fetchImpl = async (url, options = {}) => {
+    const table = url.pathname.split('/').at(-1);
+    if (table === 'users') {
+      return new Response(JSON.stringify([{
+        user_id: 9,
+        username: 'Заблокированный',
+        email: 'blocked@example.test',
+        role: 'reader',
+        password_hash: 'salt:not-needed',
+        is_banned: true
+      }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (table === 'sessions') sessionsTouched = true;
+    return new Response('[]', {
+      status: options.method === 'POST' ? 201 : 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  const result = await handleDirectMutation('loginWithEmail', {
+    email: 'blocked@example.test',
+    password: 'secret'
+  }, {
+    fetchImpl,
+    config: {
+      url: 'https://example-ref.supabase.co',
+      key: `sb_secret_${'x'.repeat(40)}`,
+      configured: true,
+      isLegacyKey: false
+    }
+  });
+
+  assert.equal(result.success, false);
+  assert.match(result.error, /заблокирована/i);
+  assert.equal(sessionsTouched, false);
+});
+
+test('сессия заблокированного пользователя считается гостевой', async () => {
+  const future = new Date(Date.now() + 60_000).toISOString();
+  const fetchImpl = async () => new Response(JSON.stringify([{
+    expires_at: future,
+    users: {
+      user_id: 9,
+      username: 'Заблокированный',
+      role: 'reader',
+      is_banned: true
+    }
+  }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  const result = await handleDirectQuery('getInitialData', {
+    scope: 'session',
+    session_token: 'blocked-token'
+  }, {
+    fetchImpl,
+    config: {
+      url: 'https://example-ref.supabase.co',
+      key: `sb_secret_${'x'.repeat(40)}`,
+      configured: true,
+      isLegacyKey: false
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(result.user.user_id, null);
+});
+
 test('регистрация создаёт только роль читателя и не хранит открытый пароль', async () => {
   let insertedUser = null;
   const fetchImpl = async (url, options = {}) => {
@@ -1181,6 +1250,9 @@ test('созданные пользователем новеллы сохран�
   const future = new Date(Date.now() + 60_000).toISOString();
   const fetchImpl = async url => {
     const table = url.pathname.split('/').at(-1);
+    if (table === 'novels') {
+      assert.doesNotMatch(url.searchParams.get('select'), /(^|,)cover_url(,|$)/);
+    }
     const data = table === 'sessions'
       ? [{ expires_at: future, users: { user_id: 9, username: 'Создатель', role: 'creator' } }]
       : [{
@@ -1528,4 +1600,77 @@ test('удаление аватара согласованно очищает ф
     ['drive', 'avatar-file', true],
     ['database', null]
   ]);
+});
+
+test('блокировка пользователя завершает его активные сессии', async () => {
+  const calls = [];
+  const dbRequest = async (table, query, options = {}) => {
+    calls.push({ table, query, method: options.method || 'GET', body: options.body });
+    if (table === 'users' && !options.method) {
+      return [{ user_id: 9, username: 'Читатель', role: 'reader', is_banned: false }];
+    }
+    if (table === 'users' && options.method === 'PATCH') {
+      return [{ user_id: 9, is_banned: true }];
+    }
+    return [];
+  };
+  const result = await setUserBlockedDirect(
+    { user_id: 9 },
+    { user_id: 1, role: 'admin' },
+    true,
+    { dbRequest }
+  );
+
+  assert.equal(result.success, true);
+  assert.equal(result.is_banned, true);
+  assert.ok(calls.some(call => call.table === 'users' && call.method === 'PATCH' && call.body.is_banned === true));
+  assert.ok(calls.some(call => call.table === 'sessions' && call.method === 'DELETE'));
+});
+
+test('полное удаление очищает личные записи и передаёт новеллы владельцу', async () => {
+  const calls = [];
+  const dbRequest = async (table, query, options = {}) => {
+    calls.push({ table, query, method: options.method || 'GET', body: options.body });
+    if (table === 'users' && !options.method) {
+      return [{ user_id: 9, username: 'Создатель', role: 'creator', avatar_url: null }];
+    }
+    if (table === 'users' && options.method === 'DELETE') {
+      return [{ user_id: 9 }];
+    }
+    return [];
+  };
+  const result = await deleteUserDirect(
+    { user_id: 9 },
+    { user_id: 1, role: 'owner' },
+    { dbRequest }
+  );
+
+  assert.equal(result.success, true);
+  assert.ok(calls.some(call => call.table === 'novels' && call.query.owner_id === 'eq.9' && call.body.owner_id === 1));
+  assert.ok(calls.some(call => call.table === 'novels' && call.query.creator_id === 'eq.9' && call.body.creator_id === 1));
+  for (const table of ['sessions', 'reading_lists', 'reading_progress', 'novel_permissions', 'comments']) {
+    assert.ok(calls.some(call => call.table === table && call.method === 'DELETE'));
+  }
+  assert.ok(calls.some(call => call.table === 'users' && call.method === 'DELETE'));
+});
+
+test('администратор не может навсегда удалить пользователя', async () => {
+  let dbTouched = false;
+  const result = await deleteUserDirect(
+    { user_id: 9 },
+    { user_id: 2, role: 'admin' },
+    { dbRequest: async () => { dbTouched = true; return []; } }
+  );
+
+  assert.equal(result.success, false);
+  assert.match(result.error, /только владельцу/i);
+  assert.equal(dbTouched, false);
+});
+
+test('в админ-панели нет раздела полной очистки', async () => {
+  const source = await readFile(new URL('./js/admin.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /clearDatabaseConfirm|clearDriveFolderConfirm|clearAllDataExceptUsers/);
+  assert.doesNotMatch(source, /admin-tab-database/);
+  assert.match(source, /handleToggleUserBlock/);
+  assert.match(source, /Удалить навсегда/);
 });
