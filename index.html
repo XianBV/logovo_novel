@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Логово новелл</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2250%22 fill=%22%23333%22>᥊ìꪖꪀ</text></svg>"> 
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><style>text { fill: %23333; } @media (prefers-color-scheme: dark) { text { fill: %23f0f0f0; } }</style><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2250%22>᥊ìꪖꪀ</text></svg>">
     <!-- <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2250%22 fill=%22%23333%22>χ𐌉ᏗᏁ</text></svg>"> -->
     <meta name="description" content="Система управления библиотекой новелл для Логова Солёной Рыбки">
     <meta name="keywords" content="новеллы, библиотека, переводы">
@@ -173,17 +173,55 @@
             <!-- Search and Filters -->
             <section id="search-section" class="search-section" style="display: none;">
                 <div class="search-container">
-                    <div class="search-box">
-                        <input type="text" id="search-input" placeholder="Поиск по названию или автору..." class="search-input" aria-label="Поиск новелл"/>
-                        <button id="search-btn" class="btn btn-primary" aria-label="Начать поиск">Поиск</button>
-                    </div>
+
+                    <form
+                        id="catalog-search-form"
+                        class="search-box"
+                        role="search"
+                        autocomplete="off"
+                        onsubmit="return false;"
+                    >
+                        <input
+                            type="search"
+                            id="search-input"
+                            name="catalog_query"
+                            class="search-input"
+                            placeholder="Поиск по названию или автору..."
+                            aria-label="Поиск новелл"
+                            autocomplete="off"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            spellcheck="false"
+                            inputmode="search"
+                            readonly
+                            onfocus="this.removeAttribute('readonly')"
+                            data-lpignore="true"
+                            data-1p-ignore="true"
+                            data-bwignore="true"
+                        >
+
+                        <button
+                            type="button"
+                            id="search-btn"
+                            class="btn btn-primary"
+                            aria-label="Начать поиск"
+                        >
+                            Поиск
+                        </button>
+                    </form>
+
                     <div class="action-buttons">
                         <button id="filter-toggle" class="btn btn-secondary">Фильтры</button>
 
                         <div class="sort-controls">
                             <label for="sort-btn" class="visually-hidden">Сортировать по:</label>
-                            <button id="sort-btn" class="btn btn-secondary">
-                                <span class="sort-icon">⇅</span>
+                            <button
+                                id="sort-btn"
+                                class="btn btn-secondary"
+                                type="button"
+                            >
+                                <span class="sort-icon" aria-hidden="true">⇅</span>
+                                <span class="sort-label">Название А-Я</span>
                             </button>
                         </div>
 
@@ -307,7 +345,7 @@
             <section id="novels-container" class="novels-container" style="display: none; position: relative;">
                 <div id="stats-bar" class="stats-bar">
                     <div class="stats-info">
-                        <span id="novels-count">0 новелл</span>
+                        <span id="novels-count" class="skeleton-loader">0 новелл</span>
                         <span id="filter-info" class="filter-info"></span>
                     </div>
                     <div class="view-controls">
@@ -369,11 +407,39 @@
             <!-- ФОРМА ВХОДА/РЕГИСТРАЦИИ -->
             <div id="auth-container">
                 <h2>Вход</h2>
-                <div class="auth-method">
-                    <input type="email" id="auth-email" class="form-input" placeholder="Email" required>
-                    <input type="password" id="auth-password" class="form-input" placeholder="Пароль" required>
-                    <button onclick="handleEmailLogin()" class="btn btn-primary">Войти</button>
-                </div>
+                
+                <form
+                    id="login-form"
+                    class="auth-method"
+                    autocomplete="on"
+                    onsubmit="handleEmailLogin(); return false;"
+                >
+                    <input
+                        type="email"
+                        id="auth-email"
+                        name="username"
+                        class="form-input"
+                        placeholder="Email"
+                        autocomplete="section-login username"
+                        inputmode="email"
+                        required
+                    >
+
+                    <input
+                        type="password"
+                        id="auth-password"
+                        name="current-password"
+                        class="form-input"
+                        placeholder="Пароль"
+                        autocomplete="section-login current-password"
+                        required
+                    >
+
+                    <button type="submit" class="btn btn-primary">
+                        Войти
+                    </button>
+                </form>
+                
                 <div class="auth-divider">или</div>
                 <div class="auth-method">
                     <div class="telegram-widget-container" id="telegram-widget-placeholder">
@@ -384,12 +450,52 @@
 
             <div id="registration-container" style="display: none;">
                 <h2>Регистрация</h2>
-                <div class="auth-method">
-                    <input type="text" id="reg-username" class="form-input" placeholder="Имя пользователя" required>
-                    <input type="email" id="reg-email" class="form-input" placeholder="Email" required>
-                    <input type="password" id="reg-password" class="form-input" placeholder="Пароль (минимум 6 символов)" required>
-                    <button onclick="handleRegistration()" class="btn btn-primary">Зарегистрироваться</button>
-                </div>  
+                
+                <form
+                    id="registration-form"
+                    class="auth-method"
+                    autocomplete="on"
+                    onsubmit="handleRegistration(); return false;"
+                >
+                    <input
+                        type="text"
+                        id="reg-username"
+                        name="registration_nickname"
+                        class="form-input"
+                        placeholder="Имя пользователя"
+                        autocomplete="section-register nickname"
+                        autocapitalize="off"
+                        spellcheck="false"
+                        required
+                    >
+
+                    <input
+                        type="email"
+                        id="reg-email"
+                        name="registration_email"
+                        class="form-input"
+                        placeholder="Email"
+                        autocomplete="section-register email"
+                        inputmode="email"
+                        required
+                    >
+
+                    <input
+                        type="password"
+                        id="reg-password"
+                        name="registration_new_password"
+                        class="form-input"
+                        placeholder="Пароль (минимум 6 символов)"
+                        autocomplete="section-register new-password"
+                        minlength="6"
+                        required
+                    >
+
+                    <button type="submit" class="btn btn-primary" disabled>
+                        Зарегистрироваться
+                    </button>
+                </form>
+
                 <p class="auth-hint">Уже есть аккаунт? <a href="#" onclick="showLogin(); return false;">Войти</a></p>
             </div>
         </div>
@@ -407,62 +513,103 @@
         </div>
     </div>
 
-    <!-- Admin Panel Modal -->
-    <div id="admin-modal" class="modal" role="dialog" aria-labelledby="admin-title" aria-hidden="true">
-        <div class="modal-content admin-panel">
-            <div class="modal-header">
-                <h2 id="admin-title">Админ-панель</h2>
-                <button class="close-btn" onclick="hideModal('admin-modal')" aria-label="Закрыть">×</button>
-            </div>
-            <div class="modal-body">
-                <div id="admin-content" class="admin-content">
-                    <!-- Database Tab -->
-                    <section id="database-tab" class="tab-content active" role="tabpanel">
-                        <h3>Управление БД</h3>
-                        <div class="admin-actions">
-                            <button id="init-db-btn" class="btn btn-primary owner-only">Инициализировать</button>
-                            <button id="cleanup-trash-btn" class="btn btn-warning">Очистить корзину</button>
-                            <button id="export-data-btn" class="btn btn-secondary">Экспорт</button>
-                        </div>
-                        <div id="db-status" class="status-panel"></div>
-                    </section>
+    <div
+        id="author-submission-modal"
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="author-submission-title"
+        aria-hidden="true"
+    >
+        <div class="modal-content author-submission-modal-content">
+            <button
+                type="button"
+                class="modal-close"
+                aria-label="Закрыть"
+                onclick="hideModal('author-submission-modal')"
+            >
+                ×
+            </button>
 
-                    <!-- Genres Tab -->
-                    <section id="genres-tab" class="tab-content" role="tabpanel">
-                        <h3>Управление жанрами</h3>
-                        <form class="add-item-form">
-                            <input type="text" id="new-genre-name" placeholder="Название" class="form-input" required />
-                            <input type="text" id="new-genre-desc" placeholder="Описание" class="form-input">
-                            <button type="submit" id="add-genre-btn" class="btn btn-primary">Добавить</button>
-                        </form>
-                        <div id="genres-management" class="items-list"></div>
-                    </section>
+            <h2 id="author-submission-title">
+                Предложить нового автора
+            </h2>
 
-                    <!-- Tags Tab -->
-                    <section id="tags-tab" class="tab-content" role="tabpanel">
-                        <h3>Управление тегами</h3>
-                        <form class="add-item-form">
-                            <input type="text" id="new-tag-name" placeholder="Название" class="form-input" required />
-                            <input type="text" id="new-tag-desc" placeholder="Описание" class="form-input">
-                            <button type="submit" id="add-tag-btn" class="btn btn-primary">Добавить</button>
-                        </form>
-                        <div id="tags-management" class="items-list"></div>
-                    </section>
+            <p class="author-submission-description">
+                Заявка появится у администрации. Автор будет добавлен
+                в общий список только после проверки.
+            </p>
 
-                    <!-- Trash Tab -->
-                    <section id="trash-tab" class="tab-content" role="tabpanel">
-                        <h3>Корзина</h3>
-                        <div class="trash-actions"><button id="empty-trash-btn" class="btn btn-danger">Очистить корзину</button></div>
-                        <div id="trash-items" class="trash-list"></div>
-                    </section>
+            <form
+                id="author-submission-form"
+                autocomplete="off"
+            >
+                <div class="form-group">
+                    <label for="author-submission-name">
+                        Основное имя *
+                    </label>
 
-                    <!-- Access Tab -->
-                    <section id="access-tab" class="tab-content" role="tabpanel">
-                        <h3>Управление доступами</h3>
-                        <p>В разработке...</p>
-                    </section>
+                    <input
+                        type="text"
+                        id="author-submission-name"
+                        class="form-input"
+                        maxlength="200"
+                        autocomplete="off"
+                        required
+                    >
                 </div>
-            </div>
+
+                <div class="form-group">
+                    <label for="author-submission-aliases">
+                        Альтернативные имена
+                    </label>
+
+                    <textarea
+                        id="author-submission-aliases"
+                        class="form-textarea"
+                        rows="4"
+                        placeholder="Каждое имя с новой строки"
+                        autocomplete="off"
+                    ></textarea>
+
+                    <small class="form-help">
+                        Можно указать имя на языке оригинала,
+                        транскрипцию и другие варианты.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="author-submission-bio">
+                        Краткая информация
+                    </label>
+
+                    <textarea
+                        id="author-submission-bio"
+                        class="form-textarea"
+                        rows="5"
+                        maxlength="3000"
+                        placeholder="Необязательное описание автора"
+                    ></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="hideModal('author-submission-modal')"
+                    >
+                        Отмена
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="author-submission-submit"
+                        class="btn btn-primary"
+                    >
+                        Отправить заявку
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -507,8 +654,31 @@
     <div class="scrollbar-container">
         <div class="custom-scrollbar"></div>
     </div>
-    
-    <!-- Ваш скрипт -->
+    <!-- Публичный адрес серверной функции -->
+    <script src="js/config.js"></script>
+
+    <!-- Глобальное состояние -->
+    <script src="js/core.js"></script>
+
+    <!-- Работа с сервером -->
+    <script src="js/api.js"></script>
+
+    <!-- Интерфейс и темы -->
+    <script src="js/ui.js"></script>
+    <script src="js/theme.js"></script>
+
+    <!-- Страницы и предметные области -->
+    <script src="js/navigation.js"></script>
+    <script src="js/catalog.js"></script>
+    <script src="js/novels.js"></script>
+    <script src="js/chapters.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/authors.js"></script>
+    <script src="js/admin.js"></script>
+
+    <!-- Запуск приложения -->
     <script src="script.js"></script>
+
 </body>
 </html>

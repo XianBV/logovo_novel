@@ -8,11 +8,10 @@
    ========================================== */
 
 :root {
-  /* НЕЦВЕТОВЫЕ ПЕРЕМЕННЫЕ (тени, размеры, скругления) */
   --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
   --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
   --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-  
+
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -22,10 +21,7 @@
    БЛОК 2: ОПРЕДЕЛЕНИЕ ПАЛИТР
    (Здесь задаются цвета для light и dark версий каждой палитры)
    ========================================== */
-
-/* ✨ ПАЛИТРА "КЛАССИЧЕСКАЯ" */
 [data-theme="classic"] {
-  /* --- Цвета для светлого режима --- */
   --palette-bg-light-primary: #FFFFFF;
   --palette-bg-light-secondary: #f8f9fa;
   --palette-bg-light-card: #FFFFFF;
@@ -34,33 +30,29 @@
   --palette-text-light-secondary: #6c757d;
   --palette-text-light-inverse: #FFFFFF;
   --palette-border-light: #dee2e6;
-  
+
   --palette-header-light-start: rgba(248, 249, 250, 0.4);
   --palette-header-light-end: rgb(0, 0, 0);
-  
+
   --palette-btn-light-primary-bg: rgba(229, 229, 229, 0.5);
   --palette-btn-light-primary-text: #212529;
   --palette-btn-light-primary-border: #dadcde;
   --palette-btn-light-primary-bg-hover: #e2e2e2;
   --palette-btn-light-primary-text-hover: #000000;
   --palette-btn-light-primary-border-hover: #868686;
-  
+
   --palette-btn-light-secondary-bg: rgba(0, 0, 0, 0.05);
   --palette-btn-light-secondary-text: #212529;
   --palette-btn-light-secondary-border: #dee2e6;
   --palette-btn-light-secondary-bg-hover: #6c757d;
   --palette-btn-light-secondary-text-hover: #FFFFFF;
   --palette-btn-light-secondary-border-hover: #dee2e6;
-
-    /* --- Цвета для кнопки "Войти" в светлом режиме --- */
-  --palette-btn-light-login-bg: transparent;         /* Почти черный фон */
-  --palette-btn-light-login-text: #FFFFFF;       /* Белый текст */
-  --palette-btn-light-login-border: #212529;     /* Черная рамка */
-  --palette-btn-light-login-bg-hover: #000000;   /* Полностью черный при hover */
-  --palette-btn-light-login-text-hover: #FFFFFF; /* Белый текст при hover */
+  --palette-btn-light-login-bg: transparent;
+  --palette-btn-light-login-text: #FFFFFF;
+  --palette-btn-light-login-border: #212529;
+  --palette-btn-light-login-bg-hover: #000000;
+  --palette-btn-light-login-text-hover: #FFFFFF;
   --palette-btn-light-login-border-hover: #000000;
-  
-  /* --- Цвета для темного режима --- */
   --palette-bg-dark-primary: #2d2d2d;
   --palette-bg-dark-secondary: #383636;
   --palette-bg-dark-card: #2d2d2d;
@@ -69,25 +61,23 @@
   --palette-text-dark-secondary: #e4e9f1;
   --palette-text-dark-inverse: #ffffff;
   --palette-border-dark: #5c5f64;
-  
+
   --palette-header-dark-start: rgba(18, 18, 18, 0.5);
   --palette-header-dark-end: rgba(255, 255, 255, 0.5);
-  
+
   --palette-btn-dark-primary-bg: #444446;
   --palette-btn-dark-primary-text: #ffffff;
   --palette-btn-dark-primary-border: #484950;
   --palette-btn-dark-primary-bg-hover: #212123;
   --palette-btn-dark-primary-text-hover: #FFFFFF;
   --palette-btn-dark-primary-border-hover: #868686;
-  
+
   --palette-btn-dark-secondary-bg: #38383b;
   --palette-btn-dark-secondary-text: #f0f4fa;
   --palette-btn-dark-secondary-border: #334155;
   --palette-btn-dark-secondary-bg-hover: #334155;
   --palette-btn-dark-secondary-text-hover: #EAEAEA;
   --palette-btn-dark-secondary-border-hover: #334155;
-
-    /* --- Для темного режима оставляем как обычную primary --- */
   --palette-btn-dark-login-bg: transparent;
   --palette-btn-dark-login-text: #000000;
   --palette-btn-dark-login-border: #b9bec3;
@@ -96,26 +86,21 @@
   --palette-btn-dark-login-border-hover: #ffffff;
 
   --palette-bg-dark-primary-rgb: 45, 45, 45;
-  
-  /* --- Общие акцентные цвета (одинаковы для обоих режимов) --- */
   --palette-accent-primary: #3B82F6;
   --palette-accent-primary-hover: #1b1e25;
   --palette-accent-danger: #EF4444;
   --palette-accent-warning: #f97316;
   --palette-accent-success: #22c55e;
 
-  --palette-accent-light-highlight: rgba(255, 229, 100, 0.5); /* Желтый маркер для светлой темы */
+  --palette-accent-light-highlight: rgba(255, 229, 100, 0.5);
   --palette-accent-dark-highlight: rgba(255, 229, 100, 0.3);
 
-  --bg-read: rgba(255, 229, 100, 0.2); /* Фон выделения для режима чтения */
-  --bg-unread: transparent; /* Фон для непрочитанных в режиме чтения */
+  --bg-read: rgba(255, 229, 100, 0.2);
+  --bg-unread: transparent;
 
-  --overlay-bg: rgba(0, 0, 0, 0.5); /* Фон оверлея */
+  --overlay-bg: rgba(0, 0, 0, 0.5);
 }
-
-/* ✨ ПАЛИТРА "Солнечная" */
 [data-theme="solar"] {
-  /* --- Цвета для светлого режима --- */
   --palette-bg-light-primary: #c76868;
   --palette-bg-light-secondary: #f35f4e;
   --palette-bg-light-card: #a03e3e;
@@ -124,33 +109,29 @@
   --palette-text-light-secondary: #6c757d;
   --palette-text-light-inverse: #e93c3c;
   --palette-border-light: #dee2e6;
-  
+
   --palette-header-light-start: rgba(248, 249, 250, 0.4);
   --palette-header-light-end: rgb(0, 0, 0);
-  
+
   --palette-btn-light-primary-bg: rgba(229, 229, 229, 0.5);
   --palette-btn-light-primary-text: #212529;
   --palette-btn-light-primary-border: #dadcde;
   --palette-btn-light-primary-bg-hover: #e2e2e2;
   --palette-btn-light-primary-text-hover: #000000;
   --palette-btn-light-primary-border-hover: #868686;
-  
+
   --palette-btn-light-secondary-bg: rgba(0, 0, 0, 0.05);
   --palette-btn-light-secondary-text: #212529;
   --palette-btn-light-secondary-border: #dee2e6;
   --palette-btn-light-secondary-bg-hover: #6c757d;
   --palette-btn-light-secondary-text-hover: #FFFFFF;
   --palette-btn-light-secondary-border-hover: #dee2e6;
-
-    /* --- Цвета для кнопки "Войти" в светлом режиме --- */
-  --palette-btn-light-login-bg: #313233;         /* Почти черный фон */
-  --palette-btn-light-login-text: #FFFFFF;       /* Белый текст */
-  --palette-btn-light-login-border: #212529;     /* Черная рамка */
-  --palette-btn-light-login-bg-hover: #000000;   /* Полностью черный при hover */
-  --palette-btn-light-login-text-hover: #FFFFFF; /* Белый текст при hover */
+  --palette-btn-light-login-bg: #313233;
+  --palette-btn-light-login-text: #FFFFFF;
+  --palette-btn-light-login-border: #212529;
+  --palette-btn-light-login-bg-hover: #000000;
+  --palette-btn-light-login-text-hover: #FFFFFF;
   --palette-btn-light-login-border-hover: #000000;
-  
-  /* --- Цвета для темного режима --- */
   --palette-bg-dark-primary: #2d2d2d;
   --palette-bg-dark-secondary: #383636;
   --palette-bg-dark-card: #2d2d2d;
@@ -159,33 +140,29 @@
   --palette-text-dark-secondary: #e4e9f1;
   --palette-text-dark-inverse: #c51818;
   --palette-border-dark: #5c5f64;
-  
+
   --palette-header-dark-start: rgba(18, 18, 18, 0.5);
   --palette-header-dark-end: rgba(255, 255, 255, 0.5);
-  
+
   --palette-btn-dark-primary-bg: #444446;
   --palette-btn-dark-primary-text: #ffffff;
   --palette-btn-dark-primary-border: #484950;
   --palette-btn-dark-primary-bg-hover: #212123;
   --palette-btn-dark-primary-text-hover: #FFFFFF;
   --palette-btn-dark-primary-border-hover: #868686;
-  
+
   --palette-btn-dark-secondary-bg: #38383b;
   --palette-btn-dark-secondary-text: #f0f4fa;
   --palette-btn-dark-secondary-border: #334155;
   --palette-btn-dark-secondary-bg-hover: #334155;
   --palette-btn-dark-secondary-text-hover: #EAEAEA;
   --palette-btn-dark-secondary-border-hover: #334155;
-
-    /* --- Для темного режима оставляем как обычную primary --- */
   --palette-btn-dark-login-bg: transparent;
   --palette-btn-dark-login-text: #000000;
   --palette-btn-dark-login-border: #b9bec3;
   --palette-btn-dark-login-bg-hover: #ededed;
   --palette-btn-dark-login-text-hover: #000000;
   --palette-btn-dark-login-border-hover: #ffffff;
-  
-  /* --- Общие акцентные цвета (одинаковы для обоих режимов) --- */
   --palette-accent-primary: #3B82F6;
   --palette-accent-primary-hover: #1b1e25;
   --palette-accent-danger: #EF4444;
@@ -195,30 +172,28 @@
    БЛОК 3: ПРИМЕНЕНИЕ РЕЖИМОВ
    (Режимы просто "выбирают" нужные цвета из палитры)
    ========================================== */
-
-/* ✨ СВЕТЛЫЙ РЕЖИМ - берет -light версии из палитры */
 [data-mode="light"] {
   --bg-primary: var(--palette-bg-light-primary);
   --bg-secondary: var(--palette-bg-light-secondary);
   --bg-card: var(--palette-bg-light-card);
   --bg-card-rgb: var(--palette-bg-light-card-rgb);
-  
+
   --text-primary: var(--palette-text-light-primary);
   --text-secondary: var(--palette-text-light-secondary);
   --text-inverse: var(--palette-text-light-inverse);
-  
+
   --border-color: var(--palette-border-light);
-  
+
   --header-gradient-start: var(--palette-header-light-start);
   --header-gradient-end: var(--palette-header-light-end);
-  
+
   --btn-primary-bg: var(--palette-btn-light-primary-bg);
   --btn-primary-text: var(--palette-btn-light-primary-text);
   --btn-primary-border: var(--palette-btn-light-primary-border);
   --btn-primary-bg-hover: var(--palette-btn-light-primary-bg-hover);
   --btn-primary-text-hover: var(--palette-btn-light-primary-text-hover);
   --btn-primary-border-hover: var(--palette-btn-light-primary-border-hover);
-  
+
   --btn-secondary-bg: var(--palette-btn-light-secondary-bg);
   --btn-secondary-text: var(--palette-btn-light-secondary-text);
   --btn-secondary-border: var(--palette-btn-light-secondary-border);
@@ -233,45 +208,40 @@
   --btn-login-bg-hover: var(--palette-btn-light-login-bg-hover);
   --btn-login-text-hover: var(--palette-btn-light-login-text-hover);
   --btn-login-border-hover: var(--palette-btn-light-login-border-hover);
-  
+
   --accent-primary: var(--palette-accent-primary);
   --accent-primary-hover: var(--palette-accent-primary-hover);
   --accent-danger: var(--palette-accent-danger);
   --accent-warning: var(--palette-accent-warning);
-  --accent-success: var(--palette-accent-success);
 
   --accent-success: var(--palette-accent-success);
-  --accent-highlight: var(--palette-accent-light-highlight); /* <-- ДОБАВИТЬ ЭТУ СТРОКУ */
+  --accent-highlight: var(--palette-accent-light-highlight);
 
-  --bg-read: transparent; /* Фон выделения для режима чтения */
-  --bg-unread: rgba(0, 183, 255, 0.2);/* Фон для непрочитанных в режиме чтения */
-
-  --overlay-bg: var(--overlay-bg); /* Фон оверлея */
+  --bg-read: transparent;
+  --bg-unread: rgba(0, 183, 255, 0.2);
 }
-
-/* ✨ ТЕМНЫЙ РЕЖИМ - берет -dark версии из палитры */
 [data-mode="dark"] {
   --bg-primary: var(--palette-bg-dark-primary);
   --bg-secondary: var(--palette-bg-dark-secondary);
   --bg-card: var(--palette-bg-dark-card);
   --bg-card-rgb: var(--palette-bg-dark-card-rgb);
-  
+
   --text-primary: var(--palette-text-dark-primary);
   --text-secondary: var(--palette-text-dark-secondary);
   --text-inverse: var(--palette-text-dark-inverse);
-  
+
   --border-color: var(--palette-border-dark);
-  
+
   --header-gradient-start: var(--palette-header-dark-start);
   --header-gradient-end: var(--palette-header-dark-end);
-  
+
   --btn-primary-bg: var(--palette-btn-dark-primary-bg);
   --btn-primary-text: var(--palette-btn-dark-primary-text);
   --btn-primary-border: var(--palette-btn-dark-primary-border);
   --btn-primary-bg-hover: var(--palette-btn-dark-primary-bg-hover);
   --btn-primary-text-hover: var(--palette-btn-dark-primary-text-hover);
   --btn-primary-border-hover: var(--palette-btn-dark-primary-border-hover);
-  
+
   --btn-secondary-bg: var(--palette-btn-dark-secondary-bg);
   --btn-secondary-text: var(--palette-btn-dark-secondary-text);
   --btn-secondary-border: var(--palette-btn-dark-secondary-border);
@@ -286,22 +256,19 @@
   --btn-login-bg-hover: var(--palette-btn-dark-login-bg-hover);
   --btn-login-text-hover: var(--palette-btn-dark-login-text-hover);
   --btn-login-border-hover: var(--palette-btn-dark-login-border-hover);
-  
+
   --accent-primary: var(--palette-accent-primary);
   --accent-primary-hover: var(--palette-accent-primary-hover);
   --accent-danger: var(--palette-accent-danger);
   --accent-warning: var(--palette-accent-warning);
-  --accent-success: var(--palette-accent-success);
 
   --accent-success: var(--palette-accent-success);
-  --accent-highlight: var(--palette-accent-dark-highlight); /* <-- ДОБАВИТЬ ЭТУ СТРОКУ */
+  --accent-highlight: var(--palette-accent-dark-highlight);
 
-  --bg-read: rgba(255, 229, 100, 0.2); /* Фон выделения для режима чтения */
+  --bg-read: rgba(255, 229, 100, 0.2);
   --bg-unread: transparent; /* Фон для непрочитанных в режиме чтения */
 
-  --accent-danger-rgb: 239, 68, 68
-
-  --overlay-bg: var(--overlay-bg);
+  --accent-danger-rgb: 239, 68, 68;
 }
 
 /* ==========================================
@@ -408,7 +375,7 @@ body {
   right: 0;
   z-index: 1000;
   height: 70px;
-  
+
   /* ✨ ИНТЕГРИРОВАННЫЙ СТИЛЬ */
   background: linear-gradient(135deg,
       var(--header-gradient-start),
@@ -542,7 +509,7 @@ body {
   height: 45px;
   padding: 0;
   font-size: 0.7rem; /* <-- Теперь этот размер будет работать! Можете его менять. */
-  line-height: 40px; 
+  line-height: 40px;
   text-align: center;
   /* Убираем лишние свойства, которые могут мешать */
   display: inline-block;
@@ -813,25 +780,23 @@ html.is-admin .admin-btn,
   transition: all 0.3s ease;
 }
 
-.search-input:focus {
+.search-input:focus,
+.search-input:focus-visible {
   outline: none;
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+  box-shadow: none;
+  border-color: var(--text-secondary);
 }
 
 .search-input::placeholder {
-  color: var(--text-muted);
+  color: var(--text-secondary);
+  opacity: 0.75;
 }
-
-/* Контейнер кнопок действий */
 .action-buttons {
     display: flex;
-    align-items: center; /* Выравниваем кнопки по вертикали */
-    gap: 0.75rem;      /* Отступ между кнопками */
-    flex-wrap: wrap;   /* Разрешаем перенос на мобильных */
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
-
-/* Стили для новой кнопки сортировки */
 #sort-btn {
     display: inline-flex;
     align-items: center;
@@ -844,18 +809,16 @@ html.is-admin .admin-btn,
     font-size: 1.1em;
     line-height: 1;
 }
-
-/* Попап сортировки */
 .sort-popup {
-    position: absolute; /* Позиционируем относительно ближайшего positioned родителя */
-    z-index: 1010; /* Выше основного контента, но ниже хедера */
+    position: absolute;
+    z-index: 1010;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
     padding: 1rem;
     min-width: 250px;
-    animation: fadeIn 0.15s ease-out; /* Быстрое появление */
+    animation: fadeIn 0.15s ease-out;
 }
 
 .sort-popup h4 {
@@ -888,8 +851,6 @@ html.is-admin .admin-btn,
 .sort-option:hover {
     background-color: var(--bg-secondary);
 }
-
-/* Стиль для активной опции */
 .sort-option.active {
     background-color: var(--accent-primary);
     color: var(--text-inverse);
@@ -898,13 +859,9 @@ html.is-admin .admin-btn,
 .sort-option.active:hover {
     background-color: var(--accent-primary-hover);
 }
-
-/* Позиционирование попапа (нужно будет немного доработать в JS) */
 .sort-controls {
-    position: relative; /* Чтобы попап позиционировался относительно этого блока */
+    position: relative;
 }
-
-/* Панель фильтров */
 .filters-panel {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -952,8 +909,6 @@ html.is-admin .admin-btn,
     border-color: var(--btn-primary-border-hover);
     color: var(--btn-primary-text-hover);
 }
-
-/* Моды и теги */
 .filter-mode {
   display: flex;
   gap: 1rem;
@@ -1007,14 +962,10 @@ html.is-admin .admin-btn,
   border-top: 1px solid var(--border-light);
 }
 
-/* Добавь в конец файла или в блок с фильтрами/поиском */
-
 .sort-controls {
   display: flex;
   align-items: center;
 }
-
-/* Скрытие label для зрячих пользователей */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -1026,20 +977,14 @@ html.is-admin .admin-btn,
   white-space: nowrap;
   border: 0;
 }
-
-/* Уменьшаем размер селекта */
 .form-select-sm {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   font-size: 0.875rem;
-  min-width: 200px; /* Чтобы текст влезал */
+  min-width: 200px;
 }
-
-/* Добавь в конец файла или в блок со стилями фильтров */
-
-/* Общие стили для расширенной панели */
 .filters-panel.expanded {
-    max-width: 1000px; /* Ограничим максимальную ширину */
+    max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -1049,25 +994,18 @@ html.is-admin .admin-btn,
     font-size: 1.3rem;
     margin-bottom: 2rem;
 }
-
-/* Сетка для колонок фильтров */
 .filters-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Адаптивные колонки */
-    gap: 1.5rem 2rem; /* Отступы между колонками и строками */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem 2rem;
     margin-bottom: 1.5rem;
 }
-
-/* Широкая колонка для жанров/тегов */
 .filter-column-wide {
-    grid-column: span 2; /* Занимает 2 колонки, если есть место */
+    grid-column: span 2;
 }
 @media (max-width: 767px) {
-     .filter-column-wide { grid-column: span 1; } /* На мобильных - одна колонка */
+     .filter-column-wide { grid-column: span 1; }
 }
-
-
-/* Фильтры-диапазоны */
 .range-filter .range-inputs {
     display: flex;
     align-items: center;
@@ -1077,7 +1015,6 @@ html.is-admin .admin-btn,
     color: var(--text-secondary);
 }
 .range-filter .range-inputs input {
-    /* Можно убрать стрелки у number input */
     -moz-appearance: textfield;
 }
 .range-filter .range-inputs input::-webkit-outer-spin-button,
@@ -1085,15 +1022,12 @@ html.is-admin .admin-btn,
     -webkit-appearance: none;
     margin: 0;
 }
-
-/* Секции жанров/тегов */
 .taxonomy-filter {
-    /* Дополнительные стили, если нужны */
 }
 
 .taxonomy-controls {
     display: flex;
-    flex-direction: column; /* Секции друг под другом */
+    flex-direction: column;
     gap: 1.5rem;
 }
 
@@ -1110,23 +1044,19 @@ html.is-admin .admin-btn,
     margin-bottom: 0.75rem;
     color: var(--text-primary);
 }
-
-/* Контейнер для тегов/жанров с прокруткой */
 .filter-tags.scrollable {
-    max-height: 150px; /* Ограничиваем высоту */
-    overflow-y: auto; /* Добавляем скролл */
+    max-height: 150px;
+    overflow-y: auto;
     padding: 0.5rem;
     border: 1px solid var(--border-color);
     background-color: var(--bg-primary);
     border-radius: var(--radius-sm);
 }
-
-/* Стилизация радио-кнопок */
 .filter-mode label {
     font-size: 0.9em;
     font-weight: normal;
     color: var(--text-secondary);
-    display: inline-flex; /* Чтобы radio и text были в строку */
+    display: inline-flex;
     align-items: center;
     margin-right: 1rem;
     cursor: pointer;
@@ -1135,17 +1065,15 @@ html.is-admin .admin-btn,
     margin-right: 0.3rem;
 }
 
-/* --- Стили для новой карты тегов в фильтрах --- */
-
 #filter-tags-map {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px; /* Расстояние между тегами */
+    gap: 8px;
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     margin-top: 10px;
-    max-height: 200px; /* Ограничиваем высоту, добавляем скролл */
+    max-height: 200px;
     overflow-y: auto;
 }
 
@@ -1157,7 +1085,7 @@ html.is-admin .admin-btn,
     padding: 3px 6px;
     font-size: 0.9em;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid transparent; /* Для плавности при добавлении подсветки */
+    border: 1px solid transparent;
 }
 
 .filter-tag-item:hover {
@@ -1166,7 +1094,7 @@ html.is-admin .admin-btn,
 
 .filter-tag-name {
     margin-right: 5px;
-    cursor: default; /* Чтобы не выглядело как ссылка */
+    cursor: default;
 }
 
 .tag-filter-btn {
@@ -1176,7 +1104,7 @@ html.is-admin .admin-btn,
     width: 18px;
     height: 18px;
     border: 1px solid var(--border-color);
-    border-radius: 50%; /* Круглые кнопки */
+    border-radius: 50%;
     background-color: transparent;
     color: var(--text-secondary);
     font-size: 0.8em;
@@ -1191,16 +1119,12 @@ html.is-admin .admin-btn,
 }
 
 .include-btn {
-    /* Дополнительные стили для кнопки + */
 }
 
 .exclude-btn {
-    /* Дополнительные стили для кнопки - */
 }
-
-/* Подсветка активных кнопок и тега */
 .filter-tag-item.include-active {
-    background-color: #d1e7dd; /* Светло-зеленый */
+    background-color: #d1e7dd;
     border-color: #a3cfbb;
 }
 html[data-mode="dark"] .filter-tag-item.include-active {
@@ -1208,13 +1132,13 @@ html[data-mode="dark"] .filter-tag-item.include-active {
     border-color: #2a5c40;
 }
 .filter-tag-item.include-active .include-btn {
-    background-color: #28a745; /* Зеленый */
+    background-color: #28a745;
     color: white;
     border-color: #28a745;
 }
 
 .filter-tag-item.exclude-active {
-    background-color: #f8d7da; /* Светло-красный */
+    background-color: #f8d7da;
     border-color: #f1aeae;
 }
 html[data-mode="dark"] .filter-tag-item.exclude-active {
@@ -1222,16 +1146,14 @@ html[data-mode="dark"] .filter-tag-item.exclude-active {
     border-color: #7d2d34;
 }
 .filter-tag-item.exclude-active .exclude-btn {
-    background-color: #dc3545; /* Красный */
+    background-color: #dc3545;
     color: white;
     border-color: #dc3545;
 }
-
-/* Стили для списков выбранных тегов */
 .selected-tags-display {
     margin-top: 5px;
     padding: 5px;
-    min-height: 24px; /* Чтобы контейнер не схлопывался */
+    min-height: 24px;
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
@@ -1240,7 +1162,6 @@ html[data-mode="dark"] .filter-tag-item.exclude-active {
 .selected-tags-display .selected-tag {
     font-size: 0.85em;
     padding: 2px 6px;
-    /* Стили как у .selected-tag в форме новеллы, но без кнопки X */
     background-color: var(--bg-tertiary);
     border-radius: var(--radius-sm);
     white-space: nowrap;
@@ -1261,8 +1182,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
     background-color: #4d1b20;
     color: #ea868f;
 }
-
-/* Стили для радио кнопок режимов */
 .filter-mode-options label {
     margin-right: 15px;
     font-size: 0.9em;
@@ -1272,104 +1191,81 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
     margin-right: 5px;
 }
 
-/* --- Стили для списка тегов в админ-панели --- */
-
 #admin-tab-tags .items-list {
     margin-top: 1.5rem;
-    border: 1px solid var(--border-color); /* Добавляем рамку вокруг списка */
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    max-height: 400px; /* Ограничиваем высоту */
-    overflow-y: auto; /* Добавляем скролл */
+    max-height: 400px;
+    overflow-y: auto;
 }
-
-/* Элемент списка (один тег) */
 #admin-tab-tags .item {
-    display: flex; /* Используем flexbox для выравнивания */
-    justify-content: space-between; /* Распределяем контент по краям */
-    align-items: flex-start; /* Выравниваем по верху */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     padding: 10px 15px;
-    border-bottom: 1px solid var(--border-color); /* Разделительная линия */
-    gap: 15px; /* Пространство между контентом и кнопкой */
+    border-bottom: 1px solid var(--border-color);
+    gap: 15px;
 }
-
-/* Убираем линию у последнего элемента */
 #admin-tab-tags .item:last-child {
     border-bottom: none;
 }
-
-/* Контейнер для названия и описания */
 #admin-tab-tags .item .tag-content {
-    flex-grow: 1; /* Занимает все доступное пространство */
+    flex-grow: 1;
 }
-
-
-/* Название тега */
 #admin-tab-tags .item span {
-    font-weight: 600; /* Делаем жирнее */
-    color: var(--text-primary); /* Основной цвет текста */
-    display: block; /* Чтобы описание было под ним */
-    margin-bottom: 3px; /* Небольшой отступ снизу */
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 3px;
 }
-
-/* Описание тега */
 #admin-tab-tags .item .item-description {
     font-size: 0.9em;
-    color: var(--text-secondary); /* Менее яркий цвет */
-    margin: 0; /* Убираем лишние отступы */
-    /* Ограничение высоты описания и добавление многоточия */
-    max-height: 3.6em; /* Примерно 2 строки (1.2em * 3) */
+    color: var(--text-secondary);
+    margin: 0;
+    max-height: 3.6em;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Можно добавить display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; для обрезки по строкам, но это не везде работает */
 }
 
 /* Кнопка "Удалить" */
 #admin-tab-tags .item .btn-danger {
-    flex-shrink: 0; /* Запрещаем кнопке сжиматься */
-    align-self: center; /* Выравниваем кнопку по центру вертикально */
+    flex-shrink: 0;
+    align-self: center;
 }
-
-/* --- Стили для формы добавления тега --- */
 #admin-tab-tags .admin-form {
     display: flex;
-    align-items: flex-start; /* Выравниваем по верху */
+    align-items: flex-start;
     gap: 10px;
     margin-bottom: 1rem;
 }
 
 #admin-tab-tags .admin-form .form-input-container {
-    flex-grow: 1; /* Занимает максимум места */
+    flex-grow: 1;
     display: flex;
-    flex-direction: column; /* Поля друг под другом */
-    gap: 5px; /* Расстояние между полями */
+    flex-direction: column;
+    gap: 5px;
 }
-
-/* Увеличиваем высоту поля описания */
 #admin-tab-tags #new-tag-desc {
-    min-height: 60px; /* Задаем минимальную высоту */
-    resize: vertical; /* Разрешаем менять высоту вручную */
+    min-height: 60px;
+    resize: vertical;
 }
-
-/* Компактная кнопка "+" */
 #admin-tab-tags .admin-form .btn-add {
-    flex-shrink: 0; /* Не сжимается */
-    padding: 8px 12px; /* Подбираем отступы для кнопки */
-    font-size: 1.2em; /* Размер плюса */
-    line-height: 1; /* Убираем лишнюю высоту строки */
-    align-self: flex-start; /* Выравниваем по верху с полями */
-    margin-top: 5px; /* Небольшой отступ сверху, чтобы выровнять с первым полем */
+    flex-shrink: 0;
+    padding: 8px 12px;
+    font-size: 1.2em;
+    line-height: 1;
+    align-self: flex-start;
+    margin-top: 5px;
 }
-
-/* --- Стили для поиска тегов --- */
 #admin-tab-tags .tag-search-container {
     margin-bottom: 1rem;
 }
 
 #admin-tab-tags .item .table-actions {
     display: flex;
-    gap: 5px; /* Расстояние между кнопками */
-    align-items: center; /* Выравнивание по центру */
-    flex-shrink: 0; /* Не сжиматься */
+    gap: 5px;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 /* Адаптивность для сетки фильтров */
@@ -1381,11 +1277,11 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 }
 @media (max-width: 575px) { /* Мобильные */
      .filters-grid {
-        grid-template-columns: 1fr; /* Одна колонка */
+        grid-template-columns: 1fr;
         gap: 1rem;
     }
      .filter-column-wide {
-        grid-column: span 1; /* Всегда одна колонка */
+        grid-column: span 1;
     }
      .taxonomy-controls {
         gap: 1rem;
@@ -1410,9 +1306,8 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   position: absolute;
   top: 100%;
   left: 0;
-  /* Ширина теперь задается через JavaScript */
   z-index: 100;
-  
+
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -1426,11 +1321,8 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  /* --- ИЗМЕНЕНИЕ: Добавляем мягкие разделители --- */
   border-bottom: 1px solid var(--border-color);
 }
-
-/* Убираем линию у последнего элемента */
 .autocomplete-item:last-child {
   border-bottom: none;
 }
@@ -1451,22 +1343,17 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   color: var(--text-secondary);
   margin-top: 0.1rem;
 }
-
-/* --- ИЗМЕНЕНИЕ: Новый стиль подсветки без отступов --- */
 .autocomplete-item strong {
-  color: inherit; /* Наследуем цвет текста */
+  color: inherit;
   font-weight: 700;
-  background-color: var(--accent-highlight); /* Используем переменную из темы */
-  /* padding и border-radius убраны, чтобы не было отступов */
+  background-color: var(--accent-highlight);
   border-radius: 2px;
 }
-
-/* --- Автодополнение для авторов --- */
 .author-autocomplete-list {
   position: absolute;
   top: 100%;
   left: 0;
-  width: 100%; /* Список будет той же ширины, что и поле ввода */
+  width: 100%;
   z-index: 100;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -1476,10 +1363,7 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   max-height: 200px;
   overflow-y: auto;
 }
-
-/* Специфичные для авторов */
 .author-autocomplete {
-    /* Можно добавить специфичные стили если нужно */
 }
 
 .autocomplete-item {
@@ -1497,6 +1381,77 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
     border-bottom: none;
 }
 
+.author-autocomplete-state {
+  cursor: default;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+}
+
+.author-autocomplete-state:hover {
+  background: var(--bg-card);
+}
+
+.author-autocomplete-state.is-loading::before {
+  content: "";
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-right: 0.55rem;
+  vertical-align: -0.1rem;
+
+  border: 2px solid var(--border-color);
+  border-top-color: var(--text-secondary);
+  border-radius: 50%;
+
+  animation: author-search-spin 0.7s linear infinite;
+}
+
+.author-autocomplete-state.is-error {
+  color: var(--accent-danger);
+}
+
+.author-autocomplete-add {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+
+  width: 100%;
+  border: none;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  text-align: left;
+  font: inherit;
+}
+
+.author-autocomplete-add:hover {
+  background: var(--bg-secondary);
+}
+
+.author-autocomplete-add strong {
+  display: block;
+  color: var(--text-primary);
+  background: none;
+}
+
+.author-autocomplete-add small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.author-add-icon {
+  flex: 0 0 auto;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+@keyframes author-search-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ==========================================
    БЛОК 10: СТАТИСТИКА И ПЕРЕКЛЮЧЕНИЕ ВИДОВ
    ========================================== */
@@ -1504,11 +1459,11 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 .stats-bar {
   display: flex;
   justify-content: space-between;
-  align-items: center; /* ✨ ВОТ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ */
+  align-items: center;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 0.5rem 1.5rem; /* Оставляем уменьшенные вертикальные отступы */
+  padding: 0.5rem 1.5rem;
   box-shadow: var(--shadow-sm);
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
@@ -1528,6 +1483,50 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 #novels-count {
   font-weight: 600;
   color: var(--text-primary);
+  transition: filter 0.3s ease, opacity 0.3s ease;
+  display: inline-block;
+  min-width: 80px;
+}
+#novels-count.skeleton-loader {
+    display: inline-block;
+    min-width: 85px;
+    height: 1.2em;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-secondary);
+    color: transparent !important;
+    position: relative;
+    overflow: hidden;
+    vertical-align: text-bottom;
+    pointer-events: none;
+    user-select: none;
+}
+#novels-count.skeleton-loader::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.2) 50%, /* Легкий белый свет для светлой темы */
+        transparent 100%
+    );
+    animation: skeleton-shimmer-elegant 1.5s infinite linear;
+}
+[data-mode="dark"] #novels-count.skeleton-loader::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.04) 50%, /* Почти прозрачный свет для темной темы */
+        transparent 100%
+    );
+}
+@keyframes skeleton-shimmer-elegant {
+    to {
+        left: 100%;
+    }
 }
 
 .filter-info {
@@ -1568,7 +1567,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 }
 
 
-
 /* ==========================================
    БЛОК 11: СЕТКА КАРТОЧЕК НОВЕЛЛ
    ========================================== */
@@ -1600,8 +1598,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 .novels-grid.fade-out {
   animation: fadeOut 0.3s ease forwards;
 }
-
-/* Состояние "Нет результатов" */
 .no-results {
   grid-column: 1 / -1;
   text-align: center;
@@ -1620,11 +1616,9 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 /* ==========================================
    БЛОК 12: КАРТОЧКА НОВЕЛЛЫ
    ========================================== */
-
-/* --- Общие стили для всех карточек --- */
 .novel-card {
     display: flex;
-    position: relative; /* Необходимо для позиционирования бейджей */
+    position: relative;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
@@ -1633,14 +1627,13 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 }
 
 .novel-card:hover {
-  /* Убрали hover-поведение, чтобы карточки не подпрыгивали и не меняли тень */
   transform: none;
   box-shadow: none;
 }
 
 .novel-card .novel-cover {
-    position: relative; /* <-- ДОБАВЛЕНО: Включаем z-index для этого блока */
-    z-index: 1;       /* <-- ДОБАВЛЕНО: Отправляем обложку на первый "слой" */
+    position: relative;
+    z-index: 1;
     flex-shrink: 0;
     overflow: hidden;
     background: var(--bg-secondary);
@@ -1680,95 +1673,83 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
     font-weight: 600;
     color: var(--text-primary);
     line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
-
-/* --- Стили для режима СЕТКИ (GRID VIEW) --- */
 .novels-grid:not(.list-view) .novel-card.grid-view-card {
   flex-direction: column;
-  /* Убираем весь "декор" с карточки-обертки */
   background: transparent;
   border: none;
   box-shadow: none;
-  /* Высоту теперь определяет только обложка и текст */
-  height: auto; 
+  height: auto;
   width: 100%;
 }
 
 .novels-grid:not(.list-view) .novel-card.grid-view-card .novel-cover {
   width: 100%;
   aspect-ratio: 5 / 7;
-  /* Весь "декор" переносим сюда: фон, рамка, тень, скругление */
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  transition: all 0.25s ease; /* Возвращаем анимацию для обложки */
+  transition: all 0.25s ease;
 }
-
-/* При наведении увеличиваем обложку, а не всю невидимую карточку */
 .novels-grid:not(.list-view) .novel-card.grid-view-card:hover .novel-cover {
     transform: translateY(-4px);
 }
 
 .novels-grid:not(.list-view) .novel-card.grid-view-card .novel-info {
-  padding: 0.75rem 0.5rem; /* Сделаем вертикальный отступ чуть больше */
+  padding: 0.75rem 0.5rem;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: auto; /* Высота по содержимому */
+  height: auto;
   min-height: 48px;
 }
-
-/* --- Стили для режима СПИСКА (LIST VIEW) --- */
 #novels-grid.list-view,
 .novels-grid.list-view {
-    grid-template-columns: 1fr; /* Одна колонка на всю ширину */
+    grid-template-columns: 1fr;
 }
 
 .novels-grid.list-view .novel-card.list-view-card {
     flex-direction: row;
-    align-items: stretch; /* <-- ВАЖНО: Растягиваем дочерние элементы по высоте */
+    align-items: stretch;
     width: 100%;
 }
 
 .novels-grid.list-view .novel-card.list-view-card .novel-cover {
     width: 120px;
-    flex-shrink: 0; /* Запрещаем обложке сжиматься */
+    flex-shrink: 0;
     aspect-ratio: 5 / 7;
 }
 
 .novels-grid.list-view .novel-card.list-view-card .novel-info {
     padding: 1rem;
     display: flex;
-    flex-direction: column; /* Выстраиваем контент в колонку */
-    flex-grow: 1; /* Заставляем блок занять все оставшееся место */
+    flex-direction: column;
+    flex-grow: 1;
 }
-
-/* Название (поднимаем, убирая нижний отступ) */
 .novels-grid.list-view .novel-card.list-view-card .novel-title {
     font-size: 1.4rem;
-    margin-bottom: 0.1rem; /* <-- Уменьшили отступ */
+    margin-bottom: 0.1rem;
 }
-
-/* Автор (уменьшаем шрифт) */
 .novels-grid.list-view .novel-card.list-view-card .novel-author {
-    font-size: 0.75rem; /* <-- Уменьшили шрифт */
+    font-size: 0.75rem;
     color: var(--text-secondary);
-    margin: 0.1rem 0 0.5rem; /* Добавили отступ снизу */
+    margin: 0.1rem 0 0.5rem;
 }
-
-/* Мета-данные (опускаем вниз) */
 .novels-grid.list-view .novel-card.list-view-card .novel-meta-line {
-    margin-top: auto; /* <-- ГЛАВНЫЙ ФИКС: прижимает этот блок к низу */
-    padding-top: 0.5rem; /* Добавляет немного воздуха сверху */
+    margin-top: auto;
+    padding-top: 0.5rem;
     font-size: 0.9rem;
     color: var(--text-secondary);
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
 }
-
-/* Бейджи для языка и статуса */
 .novel-badge {
     position: absolute;
     top: 0.5rem;
@@ -1785,8 +1766,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 
 .badge-top-left { left: 0.5rem; }
 .badge-top-right { right: 0.5rem; }
-
-/* Внутренние элементы инфоблока для списка */
 .novel-card .novel-info .novel-meta {
   display: flex;
   gap: 0.75rem;
@@ -1794,8 +1773,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   color: var(--text-secondary);
   font-size: 0.85rem;
 }
-
-/* Язык оригинала — простой текст в левом верхнем углу карточки (без фона) */
 .novel-card .novel-language {
   position: absolute;
   left: 0.6rem;
@@ -1803,38 +1780,30 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   font-size: 0.75rem;
   color: var(--text-secondary);
   pointer-events: none;
-  z-index: 2; /* <-- ДОБАВЛЕНО: Поднимаем плашку на слой выше */
+  z-index: 2;
 }
-
-/* Статус перевода — цветной бейдж в правом верхнем углу */
 .novel-card .novel-status {
   position: absolute;
   right: 0.5rem;
   top: 0.4rem;
-  padding: 0.25rem 0.6rem; /* Немного увеличим отступы по бокам */
-  font-size: 0.8rem;      /* <-- Увеличили шрифт */
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-inverse);
-  border-radius: var(--radius-sm); /* Используем стандартное скругление */
+  border-radius: var(--radius-sm);
   z-index: 2;
-  border: 1px solid rgba(0,0,0,0.05); /* Добавим едва заметную рамку для объёма */
+  border: 1px solid rgba(0,0,0,0.05);
 }
-
-/* Примеры цветовых классов статуса — можно добавлять другие */
 .novel-status.status-ongoing { background: var(--accent-primary); }
 .novel-status.status-hiatus { background: var(--accent-warning); }
 .novel-status.status-completed { background: var(--accent-success); }
 .novel-status.status-unknown { background: var(--text-secondary); }
-
-/* Минимальный вид карточки: только обложка и название; применяется в grid */
 .novels-grid:not(.list-view) .novel-card.grid-view-card .novel-title {
-  background: transparent; /* Убираем фон, если он где-то унаследован */
+  background: transparent;
   display: block;
   margin: 0;
   padding: 0.25rem 0.5rem 0;
 }
-
-/* Стили для удаленной карточки */
 .novel-card.deleted {
     opacity: 0.6;
     filter: grayscale(80%);
@@ -1858,8 +1827,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 /* ==========================================
    БЛОК 13: SKELETON LOADING АНИМАЦИЯ
    ========================================== */
-
-/* ✨ Улучшенная shimmer анимация */
 @keyframes shimmer {
   0% {
     background-position: -1000px 0;
@@ -1868,8 +1835,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
     background-position: 1000px 0;
   }
 }
-
-/* Базовый skeleton класс с переливающимся эффектом */
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -1883,8 +1848,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   animation: shimmer 2s infinite linear;
   border-radius: var(--radius-sm);
 }
-
-/* Для темной темы - более заметный блик */
 [data-mode="dark"] .skeleton {
   background: linear-gradient(
     90deg,
@@ -1896,8 +1859,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   );
   background-size: 1000px 100%;
 }
-
-/* Skeleton карточка */
 .skeleton-card {
   pointer-events: none;
   user-select: none;
@@ -1931,8 +1892,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   aspect-ratio: 5 / 7;
   margin-bottom: 1rem;
 }
-
-/* Дополнительные skeleton элементы */
 .skeleton-tags {
   display: flex;
   gap: 0.5rem;
@@ -1971,8 +1930,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 /* ==========================================
    БЛОК 13.5.1: АНИМАЦИЯ ПЕРЕЛИСТЫВАЮЩЕЙСЯ КНИГИ
    ========================================== */
-
-/* --- 1. Контейнер книги --- */
 .book {
 	--c: var(--text-primary);
 	--s: 9px;
@@ -1984,15 +1941,11 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
     height: 8.5em;
     perspective: 1000px;
 }
-
-/* --- 2. Прячем все ненужные элементы --- */
 .book__pg-shadow,
-.book__pg--2, 
+.book__pg--2,
 .book__pg--4 {
     display: none;
 }
-
-/* --- 3. Базовые стили для всех видимых страниц --- */
 .book__pg, .book__pg--3, .book__pg--5 {
     position: absolute;
     top: 1em;
@@ -2002,47 +1955,33 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
     border: 0.1em solid;
     background: var(--bg-secondary);
 }
-
-/* --- 4. Стили для конкретных страниц --- */
-
-/* ЛЕВАЯ СТАТИЧНАЯ СТРАНИЦА */
 .book__pg {
-    /* ✨ ИСПРАВЛЕНИЕ: Закругляем внешние (левые) углы */
     border-radius: 3px 0 0 3px;
-    transform: rotateY(-180deg); 
+    transform: rotateY(-180deg);
     transform-origin: 100% 50%;
     z-index: 1;
 }
-
-/* ПРАВАЯ СТАТИЧНАЯ СТРАНИЦА */
 .book__pg--5 {
-    /* ✨ ИСПРАВЛЕНИЕ: Закругляем внешние (правые) углы */
     border-radius: 3px 0 0 3px;
-    transform: rotateY(0deg); 
+    transform: rotateY(0deg);
     z-index: 1;
 }
-
-/* ЛИСТАЮЩАЯСЯ СТРАНИЦА */
 .book__pg--3 {
-    /* ✨ ИСПРАВЛЕНИЕ: Углы как у правой страницы */
     border-radius: 3px 0 0 3px;
     transform-origin: 100% 50%;
     animation: var(--t) flip-page infinite ease-in-out;
 }
-
-/* --- 5. Сценарий анимации с плавной сменой слоёв --- */
 @keyframes flip-page {
 	0% {
 		transform: rotateY(-180deg);
-		z-index: 2; /* В начале страница сверху */
+		z-index: 2;
 	}
-	/* ✨ ИСПРАВЛЕНИЕ: Держим z-index высоким до самого конца */
 	99% {
 		z-index: 2;
 	}
 	100% {
 		transform: rotateY(0deg);
-		z-index: 1; /* В конце страница ложится вниз */
+		z-index: 1;
 	}
 }
 
@@ -2054,19 +1993,19 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 .pagination-wrapper {
   margin: 2rem 0;
   display: flex;
-  flex-direction: row; /* ✨ ИСПРАВЛЕНИЕ: Ставим кнопки в ряд */
-  flex-wrap: wrap;       /* ✨ ДОБАВЛЕНО: Разрешаем перенос на новую строку */
-  justify-content: center; /* Центрируем всю группу кнопок */
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem; /* Уменьшим отступ между кнопками */
+  gap: 0.5rem;
 }
 
 .pagination-controls {
   display: flex;
-  flex-wrap: wrap; /* Позволяем переноситься на новую строку на маленьких экранах */
-  justify-content: center; /* Центрируем кнопки */
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem; /* Отступ между кнопками */
+  gap: 0.5rem;
 }
 
 .pagination-btn {
@@ -2101,8 +2040,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   border-color: var(--accent-primary);
   font-weight: 600;
 }
-
-/* Номера страниц */
 .page-numbers {
   display: flex;
   flex-wrap: wrap;
@@ -2142,8 +2079,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   font-weight: bold;
   cursor: default;
 }
-
-/* Информация и селектор */
 .pagination-info,
 .pagination-stats {
   text-align: center;
@@ -2197,8 +2132,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   visibility: visible;
   pointer-events: auto;
 }
-
-/* Контейнер содержимого */
 .modal-content {
   background: var(--bg-card);
   padding: 24px;
@@ -2213,26 +2146,16 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   opacity: 0;
   animation: modalSlideUp 0.3s ease forwards;
 }
-
-/* ✨ СТИЛИ ДЛЯ ФОРМЫ АВТОРИЗАЦИИ */
-/* 1. Задаем окну входа нужную ширину и отступы */
 #auth-modal .modal-content {
-  max-width: 480px; /* Оптимальная ширина для формы */
+  max-width: 480px;
   padding: 3rem 2.5rem;
 }
-
-/* Убираем пустой селектор .auth-form-container — если в будущем понадобится,
-   можно добавить конкретные правила сюда. */
-
-/* 2. Делаем контейнеры форм гибкими (это ключевой фикс!) */
 #auth-container,
 #registration-container {
   display: flex;
   flex-direction: column;
   width: 100%;
 }
-
-/* 3. Центрируем заголовок */
 #auth-modal h2 {
   text-align: center;
   margin-bottom: 2.5rem;
@@ -2240,15 +2163,11 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   font-size: 1.75rem;
   font-weight: 600;
 }
-
-/* 4. Задаем отступы между полями ввода и кнопками */
 .auth-method {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem; /* Отступ между полями */
+  gap: 1.25rem;
 }
-
-/* 5. Стили для разделителя "или" */
 .auth-divider {
   text-align: center;
   color: var(--text-secondary);
@@ -2267,8 +2186,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 }
 .auth-divider::before { left: 0; }
 .auth-divider::after { right: 0; }
-
-/* 6. Стили для ссылки "Нет аккаунта?" */
 .auth-hint {
   text-align: center;
   margin-top: 2rem;
@@ -2294,17 +2211,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   }
 }
 
-/* ✨ КОНЕЦ ИСПРАВЛЕННЫХ СТИЛЕЙ ДЛЯ ФОРМЫ АВТОРИЗАЦИИ ✨ */
-
-
-/* Для админ-панели — шире окно */
-#admin-modal .modal-content {
-  width: 900px;
-  max-width: 90%;
-  height: 85vh;
-  overflow-y: auto;
-  z-index: 1001;
-}
 
 .modal-content.novel-details {
   max-width: 800px;
@@ -2318,20 +2224,14 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 
 .admin-tabs {
     display: flex;
-    border-bottom: 2px solid var(--border-color);
-    margin-bottom: 1.5rem;
 
     flex-wrap: nowrap;
     overflow-x: auto;
-    border-bottom: 2px solid var(--border-color); /* Возвращаем нижнюю границу */
-    margin-bottom: 1.5rem; /* Возвращаем отступ */
-    
-    /* Стилизация скроллбара, как на всём сайте */
-    scrollbar-width: none; /* Для Firefox */
-    -ms-overflow-style: none; /* Для IE/Edge */
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
-
-/* Стили для табов из профиля подойдут и сюда */
 .admin-tabs .tab-btn {
     padding: 0.75rem 1.25rem;
     border: none;
@@ -2362,18 +2262,18 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 }
 
 .admin-tabs::-webkit-scrollbar {
-    height: 3px !important; /* Тонкая полоса */
+    height: 3px !important;
     width: 3px !important;
 }
 .admin-tabs::-webkit-scrollbar-track {
-    background: transparent; /* Невидимый фон */
+    background: transparent;
 }
 .admin-tabs::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.4); /* Полупрозрачный ползунок */
+    background: rgba(0, 0, 0, 0.4);
     border-radius: 1.5px;
 }
 [data-mode="dark"] .admin-tabs::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.4); /* Светлый ползунок для тёмной темы */
+    background: rgba(255, 255, 255, 0.4);
 }
 
 /* Кнопка закрытия */
@@ -2397,8 +2297,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   color: var(--accent-primary);
   background: var(--bg-tertiary);
 }
-
-/* Заголовок и текст */
 .modal-title,
 .alert-title {
   font-weight: 600;
@@ -2473,58 +2371,50 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 
 .modal-loading-overlay {
   position: absolute;
-  inset: 0; /* Растягивает на всю область родителя (top:0, left:0, right:0, bottom:0) */
-  background: rgba(var(--bg-card-rgb), 0.8); /* Полупрозрачный фон в цвет модалки */
+  inset: 0;
+  background: rgba(var(--bg-card-rgb), 0.8);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10; /* Чтобы был поверх содержимого */
-  border-radius: var(--radius-lg); /* Скругляем углы как у модалки */
+  z-index: 10;
+  border-radius: var(--radius-lg);
 }
 
 #admin-content {
     position: relative;
-    min-height: 300px; /* Минимальная высота, чтобы спиннер не сжимался */
+    min-height: 300px;
 }
 
 [data-mode="light"] {
-  /* ... все твои существующие переменные и стили для светлой темы ... */
-
-  /* ✨ FIX: Корректные стили ховера для кнопок в модалках (светлая тема) ✨ */
   .modal-actions .btn-primary:hover,
   .alert-actions .btn-primary:hover {
-    background-color: var(--btn-primary-bg-hover);   /* Используем переменную фона ховера для primary */
-    color: var(--btn-primary-text-hover);      /* Используем переменную текста ховера для primary */
-    border-color: var(--btn-primary-border-hover); /* Добавим и рамку на всякий случай */
+    background-color: var(--btn-primary-bg-hover);
+    color: var(--btn-primary-text-hover);
+    border-color: var(--btn-primary-border-hover);
   }
 
   .modal-actions .btn-secondary:hover,
   .alert-actions .btn-secondary:hover {
-    background-color: var(--btn-secondary-bg-hover); /* Используем переменную фона ховера для secondary */
-    color: var(--btn-secondary-text-hover);     /* Используем переменную текста ховера для secondary */
-    border-color: var(--btn-secondary-border-hover);/* Добавим и рамку */
+    background-color: var(--btn-secondary-bg-hover);
+    color: var(--btn-secondary-text-hover);
+    border-color: var(--btn-secondary-border-hover);
   }
-  /* ✨ КОНЕЦ FIX ✨ */
 }
 
 /* ==========================================
    СТИЛИ ДЛЯ МОДАЛЬНОГО ОКНА "ПОДЕЛИТЬСЯ"
    ========================================== */
-
-/* Контейнер с относительным позиционированием */
 .share-tab-content {
   position: relative;
   display: none;
-  min-height: 300px; /* Минимальная высота для центрирования */
+  min-height: 300px;
   animation: fadeIn 0.3s ease;
 }
 
 .share-tab-content.active {
   display: block !important;
 }
-
-/* ✅ НОВОЕ: Центрируем спинер внутри .share-tab-content */
 .share-tab-content .loading-spinner {
   position: absolute;
   top: 50%;
@@ -2535,8 +2425,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   align-items: center;
   justify-content: center;
 }
-
-/* Стили для самого спинера */
 .loading-spinner .spinner {
   width: 40px;
   height: 40px;
@@ -2558,9 +2446,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
     transform: rotate(360deg);
   }
 }
-
-
-/* Контейнер для ссылки */
 .share-link-container {
   display: flex;
   gap: 0.5rem;
@@ -2578,13 +2463,9 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
-
-/* Список доступов */
 #permissions-list {
   margin-top: 1rem;
 }
-
-/* Большое модальное окно */
 .large-modal {
   max-width: 700px;
   width: 90%;
@@ -2595,7 +2476,7 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   .add-permission-form {
     grid-template-columns: 1fr;
   }
-  
+
   .share-link-container {
     flex-direction: column;
   }
@@ -2616,23 +2497,20 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   max-width: 400px;
 }
 
-/* ✨ НОВЫЕ СТИЛИ ДЛЯ ТОСТОВ В СТИЛЕ GLASSMORPHISM ✨ */
-
 .toast {
-  /* Эффект матового стекла */
-  background: rgba(20, 20, 20, 0.75); /* Полупрозрачный тёмный фон */
+  background: rgba(20, 20, 20, 0.75);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  
-  border: 1px solid rgba(255, 255, 255, 0.1); /* Тонкая светлая рамка для эффекта стекла */
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg); /* Более выраженная тень */
-  
+  box-shadow: var(--shadow-lg);
+
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  
+
   /* Анимации появления/исчезновения (остаются без изменений) */
   transform: translateX(400px);
   opacity: 0;
@@ -2655,8 +2533,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   padding-top: 0;
   padding-bottom: 0;
 }
-
-/* Иконки тостов */
 .toast-icon {
   font-size: 1.2rem;
   flex-shrink: 0;
@@ -2677,8 +2553,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 .toast-info .toast-icon {
   color: var(--accent-primary);
 }
-
-/* Контент тоста */
 .toast-content {
   flex: 1;
   min-width: 0;
@@ -2687,12 +2561,12 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 .toast-title {
   font-weight: 600;
   margin-bottom: 0.25rem;
-  color: #FFFFFF; /* Белый цвет для заголовка */
+  color: #FFFFFF;
   font-size: 0.95rem;
 }
 
 .toast-message {
-  color: #EAEAEA; /* Светло-серый цвет для основного текста */
+  color: #EAEAEA;
   font-size: 0.9rem;
   line-height: 1.4;
   word-wrap: break-word;
@@ -2749,12 +2623,10 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 .btn:active {
   transform: translateY(1px);
 }
-
-/* Варианты кнопок */
 .btn-primary {
   background-color: var(--btn-primary-bg);
   color: var(--btn-primary-text);
-  border: 2px solid var(--btn-primary-border); /* Делаем рамку чуть толще для заметности */
+  border: 2px solid var(--btn-primary-border);
 }
 
 .btn-primary:hover {
@@ -2777,10 +2649,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
 }
-
-/* ✨ Особые стили для кнопок в шапке, чтобы они вели себя как btn-login */
-
-/* --- Общие стили для обеих тем --- */
 .header .btn-secondary {
     background: var(--btn-login-bg);
     color: var(--btn-login-text);
@@ -2791,8 +2659,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
     color: var(--btn-login-text-hover);
     border-color: var(--btn-login-border-hover);
 }
-
-/* Специальная кнопка для входа/авторизации */
 .btn-login {
   background: var(--btn-login-bg);
   color: var(--btn-login-text);
@@ -2884,8 +2750,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
-/* Размеры кнопок */
 .btn-sm {
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
@@ -2897,8 +2761,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   font-size: 1.125rem;
   border-radius: var(--radius-lg);
 }
-
-/* Состояния кнопок */
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -2927,8 +2789,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   animation: spin 1s linear infinite;
   margin-left: 0.5rem;
 }
-
-/* Группа кнопок */
 .btn-group {
   display: inline-flex;
   border-radius: var(--radius-md);
@@ -2979,8 +2839,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 .form-group .required {
   color: var(--accent-danger);
 }
-
-/* Текстовые инпуты */
 .form-input,
 .form-textarea,
 .form-select,
@@ -3008,15 +2866,11 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 .form-textarea::placeholder {
   color: var(--text-muted);
 }
-
-/* Текстовое поле */
 .form-textarea {
   resize: vertical;
   min-height: 100px;
   font-family: inherit;
 }
-
-/* Селект */
 .form-select {
   cursor: pointer;
   appearance: none;
@@ -3026,8 +2880,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   background-size: 1.5em 1.5em;
   padding-right: 2.5rem;
 }
-
-/* Чекбоксы и радио */
 .form-check {
   display: flex;
   align-items: center;
@@ -3056,8 +2908,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   color: var(--text-primary);
   cursor: pointer;
 }
-
-/* Радио кнопки */
 .form-radio .form-check-input {
   border-radius: 50%;
 }
@@ -3066,8 +2916,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
 }
-
-/* Файловый инпут */
 .form-file {
   width: 100%;
 }
@@ -3093,8 +2941,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   border-style: solid;
   background: var(--bg-primary);
 }
-
-/* Валидация */
 .form-input.invalid,
 .form-textarea.invalid,
 .form-select.invalid {
@@ -3123,8 +2969,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
-
-/* Группа инпутов */
 .input-group {
   display: flex;
   border-radius: var(--radius-md);
@@ -3146,8 +2990,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
 /* ==========================================
    БЛОК 19: СПЕЦИФИЧЕСКИЕ КОМПОНЕНТЫ
    ========================================== */
-
-/* Детали новеллы */
 .novel-details-grid {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -3364,8 +3206,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   padding-top: 1.5rem;
   border-top: 1px solid var(--border-light);
 }
-
-/* Таблица администрирования */
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -3404,8 +3244,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   gap: 0.5rem;
   justify-content: flex-end;
 }
-
-/* Загрузка файлов */
 .upload-area {
   border: 2px dashed var(--border-color);
   border-radius: var(--radius-md);
@@ -3442,8 +3280,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   font-size: 0.85rem;
   color: var(--text-muted);
 }
-
-/* Прогресс бар */
 .progress-bar {
   width: 100%;
   height: 6px;
@@ -3459,8 +3295,6 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   border-radius: 3px;
   transition: width 0.3s ease;
 }
-
-/* Рейтинг */
 .rating {
   display: flex;
   gap: 0.25rem;
@@ -3492,42 +3326,32 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
    БЛОК 20: СТРАНИЦЫ И ВИРТУАЛЬНАЯ НАВИГАЦИЯ
    ========================================== */
 
-/* --- Стили страницы чтения главы --- */
-
 .chapter-content-wrapper {
   padding-top: 1rem;
-  margin-top: 1rem; /* Добавляем небольшой отступ сверху для всего контента */
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* ✨ ЗАМЕНЯЕМ 'min-height: 60vh;' ЭТОЙ СТРОКОЙ ✨ */
+  flex-grow: 1;
 }
 
 h1.chapter-title {
-  /* Уменьшаем отступ сверху, увеличиваем снизу */
-  margin-top: 0.5rem; /* Ближе к хедеру */
-  margin-bottom: 2rem; /* Дальше от текста */
-  font-size: 1.8rem; /* Можно немного уменьшить, если был слишком большой */
-  text-align: center; /* Центрируем заголовок */
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  text-align: center;
   line-height: 1.3;
-  font-weight: 700; /* ✨ ДОБАВЛЯЕМ ЭТУ СТРОКУ ✨ */
+  font-weight: 700;
 }
-
-/* Убираем особое форматирование первого параграфа в тексте главы */
 .chapter-text p:first-child {
-  font-weight: normal; /* Обычная жирность */
-  font-size: inherit;   /* Наследуем размер от .chapter-text */
-  margin-top: 0;        /* Убираем доп. отступ сверху, если был */
-  /* Добавь сюда другие свойства, которые нужно сбросить, если первый параграф был стилизован иначе */
+  font-weight: normal;
+  font-size: inherit;
+  margin-top: 0;
 }
 
 .chapter-text {
-  /* Уменьшаем базовый размер шрифта */
-  font-size: 17px; /* Попробуй 17px или 16px */
-  /* Стили для выравнивания и прочего остаются здесь */
-  flex-grow: 1; /* ✨ ДОБАВЛЯЕМ ЭТУ СТРОКУ ✨ */
+  font-size: 17px;
+  flex-grow: 1;
 }
-
-/* Отступ между параграфами (убедись, что он есть) */
 .chapter-text p {
   margin-bottom: 1em;
 }
@@ -3537,16 +3361,13 @@ h1.chapter-title {
 
 .page-content {
   max-width: 1200px;
-  margin: 0 auto 2rem; /* Убираем верхний отступ, оставляем нижний */
+  margin: 0 auto 2rem;
   padding: 0 1rem;
   animation: fadeIn 0.5s ease;
-  /* ✨ ДОБАВЛЯЕМ ЭТИ ТРИ СТРОКИ ✨ */
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
-
-/* Вкладки на странице профиля */
 .tabs {
   display: flex;
   gap: 0.5rem;
@@ -3574,10 +3395,8 @@ h1.chapter-title {
   color: var(--text-primary);
   border-bottom-color: var(--accent-primary);
 }
-
-/* Оформление страниц профиля и создателя */
 .profile-page {
-  max-width: 1000px; /* Ограничиваем ширину для лучшей читаемости */
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -3591,17 +3410,13 @@ h1.chapter-title {
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
 }
-
-/* Выравнивание крошек и кнопки Настройки в профиле */
 .profile-page-header {
     display: flex;
-    justify-content: space-between; /* Элементы по краям */
-    align-items: center;       /* Выровнять по вертикали */
-    margin-bottom: 1.5rem;     /* Отступ снизу */
-    gap: 1rem;                 /* Отступ между крошками и кнопкой */
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
 }
-
-/* --- "Заглушка" для аватара --- */
 .profile-avatar-placeholder {
     width: 90px;
     height: 90px;
@@ -3611,15 +3426,13 @@ h1.chapter-title {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem; /* Размер для смайлика ( ´ ∀ ` ) */
+    font-size: 1rem;
     font-weight: bold;
-    flex-shrink: 0; /* Запрещаем сжиматься на маленьких экранах */
+    flex-shrink: 0;
 }
-
-/* --- Стили для аватара на странице профиля --- */
 .profile-avatar-container {
-    position: relative; /* Для позиционирования кнопок */
-    width: 100px;     /* Размер контейнера */
+    position: relative;
+    width: 100px;
     height: 100px;
     margin-bottom: 1rem;
     flex-shrink: 0;
@@ -3628,30 +3441,29 @@ h1.chapter-title {
 .profile-avatar-display {
     width: 100%;
     height: 100%;
-    width: 90px;     /* Размер контейнера */
+    width: 90px;
     height: 90px;
-    border-radius: 50%; /* Круглый */
+    border-radius: 50%;
     background: var(--bg-primary);
     color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* Обрезаем изображение */
-    border: 2px solid var(--border-color); /* Небольшая рамка */
+    overflow: hidden;
+    border: 2px solid var(--border-color);
     box-shadow: var(--shadow-sm);
 }
 
-.profile-avatar-image { /* Стиль для самого <img> */
-    display: block; /* Убирает лишние отступы */
-    width: 100%;    /* Заполняет контейнер по ширине */
-    height: 100%;   /* Заполняет контейнер по высоте */
-    object-fit: cover; /* ✨ Масштабирует с сохранением пропорций и обрезает лишнее ✨ */
+.profile-avatar-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .avatar-placeholder-emoji {
-    font-size: 1rem; /* Размер смайлика-заглушки */
+    font-size: 1rem;
 }
-
 
 
 /* Кнопки управления аватаром */
@@ -3659,7 +3471,7 @@ h1.chapter-title {
 .delete-avatar-btn {
     position: absolute;
     bottom: 0;
-    width: 28px; /* Маленькие круглые кнопки */
+    width: 28px;
     height: 28px;
     padding: 0;
     border-radius: 50%;
@@ -3671,55 +3483,45 @@ h1.chapter-title {
 }
 
 .change-avatar-btn {
-    right: 15px; /* Справа */
+    right: 15px;
 }
 
 .delete-avatar-btn {
-    right: -5px; /* Правее кнопки редактирования */
+    right: -5px;
 }
 
 .upload-avatar-btn {
-    /* Дополнительные стили, если нужны */
 }
-
-/* --- Стили для аватара в шапке (header) --- */
 .header-avatar-image {
-    width: 100%; /* Заполняем родительскую кнопку */
+    width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 50%; /* Делаем круглым */
+    border-radius: 50%;
 }
-/* Убираем внутренние отступы у кнопки-иконки, если внутри картинка */
 #user-info .user-icon:has(img) {
     padding: 0;
     border: none;
-    /*border: 1px solid var(--border-color); /* Добавляем рамку для img */
 }
-
-/* --- Стили для страницы настроек --- */
 .settings-page h1 {
     text-align: center;
     margin-bottom: 2rem;
 }
 
 .settings-tabs {
-    /* Стили как у .tabs в профиле */
     display: flex;
     gap: 0.5rem;
     border-bottom: 2px solid var(--border-color);
     margin-bottom: 1.5rem;
-    justify-content: center; /* Центрируем вкладки */
+    justify-content: center;
 }
 
 .settings-content-container .tab-content {
-    display: none; /* Скрываем по умолчанию */
+    display: none;
     animation: fadeIn 0.3s ease;
 }
 .settings-content-container .tab-content.active {
-    display: block; /* Показываем активную */
+    display: block;
 }
-
-/* Секция загрузки аватара */
 .avatar-upload-section {
     display: flex;
     align-items: center;
@@ -3734,32 +3536,25 @@ h1.chapter-title {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    align-items: flex-start; /* Выравниваем по левому краю */
+    align-items: flex-start;
 }
-
-/* Стили для .profile-avatar-container, .profile-avatar-display и т.д.
-   УЖЕ ДОЛЖНЫ БЫТЬ ДОБАВЛЕНЫ РАНЕЕ. Убедись, что они есть. */
-
-/* Стили для кнопки настроек на странице профиля */
 .profile-settings-btn {
-    margin-top: 0.5rem; /* Небольшой отступ сверху */
+    margin-top: 0.5rem;
 }
 
 /* Адаптивность для секции аватара */
 @media (max-width: 576px) {
     .avatar-upload-section {
         flex-direction: column;
-        align-items: center; /* Центрируем на мобильных */
+        align-items: center;
         text-align: center;
     }
     .avatar-upload-controls {
         align-items: center;
     }
 }
-
-/* --- Блок с информацией о пользователе --- */
 .profile-info {
-    flex-grow: 1; /* Занимает всё доступное пространство */
+    flex-grow: 1;
 }
 
 .profile-username {
@@ -3779,8 +3574,6 @@ h1.chapter-title {
     color: var(--text-secondary);
     margin: 0.25rem 0;
 }
-
-/* --- "Утончённый" дизайн для кнопки "Выйти" --- */
 .btn-logout-profile {
     background: transparent;
     border: 2px solid var(--accent-danger);
@@ -3795,7 +3588,7 @@ h1.chapter-title {
 
 .btn-logout-profile:hover {
     background: var(--accent-danger);
-    color: var(--text-inverse); /* В большинстве тем это белый */
+    color: var(--text-inverse);
 }
 
 .profile-header h1 {
@@ -3814,15 +3607,11 @@ h1.chapter-title {
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-color);
 }
-
-/* --- Стили для нового двухколоночного раздела "Мои полки" --- */
 .shelves-layout {
     display: grid;
-    grid-template-columns: 180px 1fr; /* Левая колонка - 220px, правая - всё остальное */
+    grid-template-columns: 180px 1fr;
     gap: 2rem;
 }
-
-/* Левая колонка (навигация) */
 .shelves-nav {
     display: flex;
     flex-direction: column;
@@ -3856,7 +3645,7 @@ h1.chapter-title {
 .shelf-nav-btn.active {
     background: var(--bg-secondary);
     color: var(--text-primary);
-    font-weight: 500; /* ✨ Сделали шрифт чуть менее жирным (полужирный) */
+    font-weight: 500;
 }
 
 .shelf-count {
@@ -3869,24 +3658,20 @@ h1.chapter-title {
 
 .shelf-nav-btn.active .shelf-count {
     background: var(--btn-primary-bg);
-    border: 1px solid var(--border-color); /* ✨ Добавили тонкую рамку для контраста */
+    border: 1px solid var(--border-color);
     color: var(--text-primary);
 }
-
-/* Правая колонка (карточки новелл) */
 .shelves-content {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 1.5rem 1rem;
     align-content: start;
 }
-
-/* ✨ Центрируем сообщение "На этой полке пока пусто" ✨ */
 .shelves-content .text-muted {
-    grid-column: 1 / -1; /* Растягиваем элемент на всю ширину сетки */
-    text-align: center;  /* Центрируем текст по горизонтали */
-    padding: 4rem 1rem;  /* Добавляем вертикальные отступы, чтобы сместить надпись к центру */
-    font-size: 1rem;     /* Немного увеличим шрифт для заметности */
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 1rem;
+    font-size: 1rem;
     color: var(--text-secondary);
 }
 
@@ -3921,44 +3706,32 @@ h1.chapter-title {
     margin-top: 0.5rem;
     text-align: center;
 }
-
-/* Стили для новых скелетонов */
 .shelf-novel-item.skeleton-card .shelf-novel-title {
     height: 1rem;
     width: 80%;
     margin: 0.5rem auto 0;
     border-radius: var(--radius-sm);
 }
-
-/* --- Стили для содержимого вкладок профиля --- */
-
-/* 1. Центрируем спиннер загрузки на вкладках */
 .reading-lists-container .loading-spinner {
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Центрируем по вертикали */
-    align-items: center;   /* Центрируем по горизонтали */
-    min-height: 250px;       /* Даем контейнеру высоту, чтобы было где центрироваться */
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
     width: 100%;
 }
-
-/* 2. Центрируем и увеличиваем текст "Вы еще не создали..." и "На этой полке пусто" */
 .reading-lists-container .text-muted {
-    display: block;          /* Делаем блочным элементом для отступов */
-    text-align: center;      /* Центрируем текст */
-    font-size: 1.1rem;       /* Немного увеличиваем шрифт */
-    padding: 4rem 1rem;      /* Добавляем вертикальные отступы для центрирования */
+    display: block;
+    text-align: center;
+    font-size: 1.1rem;
+    padding: 4rem 1rem;
     color: var(--text-secondary);
 }
-
-/* ✨ Увеличиваем спиннер на вкладках профиля ✨ */
 .reading-lists-container .spinner {
-    width: 40px;  /* Задаём новый, больший размер */
+    width: 40px;
     height: 40px;
-    border-width: 4px; /* Делаем линии чуть толще */
+    border-width: 4px;
 }
-
-/* Стили для форм, которые стали страницами */
 .form-page {
   max-width: 800px;
   margin: 2rem auto;
@@ -3975,12 +3748,9 @@ h1.chapter-title {
 }
 
 
-
 /* ==========================================
    БЛОК 21: СИСТЕМА РОЛЕЙ
    ========================================== */
-
-/* Бейджи ролей */
 .role-badge {
   display: inline-flex;
   align-items: center;
@@ -4015,8 +3785,6 @@ h1.chapter-title {
   color: #fff;
   box-shadow: 0 2px 8px rgba(149, 165, 166, 0.3);
 }
-
-/* Таблица пользователей */
 .users-filters {
   display: flex;
   gap: 1rem;
@@ -4099,8 +3867,6 @@ h1.chapter-title {
   background: rgba(255, 255, 255, 0.05);
   border-left-color: var(--accent-primary);
 }
-
-/* Сообщение "Нет доступа" */
 .no-access-message {
   padding: 2rem;
   text-align: center;
@@ -4123,22 +3889,18 @@ h1.chapter-title {
 /* ==========================================
    БЛОК 22: ЭКРАН ЗАГРУЗКИ
    ========================================== */
-
-/* Контейнер для кастомной анимации внутри оверлея */
 #custom-loading-animation {
     position: absolute;
     inset: 0;
-    display: flex; /* Добавлено */
-    justify-content: center; /* Добавлено */
-    align-items: center; /* Добавлено */
-    flex-direction: column; /* Добавлено, чтобы текст был под книгой */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
     z-index: 1;
     pointer-events: none;
 }
-
-/* Опционально: Можно сделать фон оверлея темнее, когда показывается кастомная анимация */
 #loading-overlay.custom-animation-mode {
-  background: rgba(0, 0, 0, 0.3); /* Например, чуть темнее */
+  background: rgba(0, 0, 0, 0.3);
 }
 
 #loading {
@@ -4152,61 +3914,48 @@ h1.chapter-title {
 }
 
 #loading-overlay {
-  position: fixed; /* <-- ВОТ РЕШЕНИЕ! */
+  position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 3000;
-
-  /* ✨ Эффект размытия фона (Glassmorphism) */
-  background: rgba(0, 0, 0, 0.3); /* Затемнение для контраста */
+  background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px); /* Для Safari */
-
-  /* ✨ Плавное появление */
+  -webkit-backdrop-filter: blur(10px);
   animation: fadeIn 0.3s ease;
 }
 
 #chapter-load-overlay {
-    position: fixed; /* Поверх всего */
-    inset: 0; /* Растягиваем на весь экран */
-    background: rgba(0, 0, 0, 0.3); /* Цвет фона как у страницы */
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px); /* Для Safari */
-    z-index: 4500; /* Выше основного хедера, ниже оверлея загрузки */
-    display: none; /* По умолчанию скрыт */
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 4500;
+    display: none;
 }
-
-/* Стили для "коробки" с текстом и спиннером */
 .loading-box {
-  /* ✨ Стеклянный вид для самой карточки */
-  background: rgba(var(--bg-card-rgb), 0.2); /* Полупрозрачный фон из темы */
+  background: rgba(var(--bg-card-rgb), 0.2);
   border: 1px solid rgba(var(--bg-card-rgb), 0.1);
   box-shadow: var(--shadow-lg);
   border-radius: var(--radius-lg);
-  
+
   padding: 2.5rem 3.5rem;
   text-align: center;
-  color: var(--text-primary); 
-  
-  /* ✨ Анимация появления карточки */
+  color: var(--text-primary);
   animation: zoomIn 0.3s ease;
 }
 
 .loading-spinner-large {
   width: 48px;
   height: 48px;
-  border: 5px solid var(--border-color); /* Толщина и цвет фона */
-  border-top-color: var(--accent-primary); /* Акцентный цвет темы */
+  border: 5px solid var(--border-color);
+  border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 1.5rem;
 }
-
-
-
-/* --- ТЕКСТ --- */
 #loading-title {
   font-size: 1.3rem;
   font-weight: 600;
@@ -4217,8 +3966,6 @@ h1.chapter-title {
   color: var(--text-secondary);
   font-size: 1rem;
 }
-
-/* --- ПРОГРЕСС-БАР (если используется) --- */
 .progress-container {
     margin-top: 1.5rem;
     width: 200px;
@@ -4264,8 +4011,6 @@ h1.chapter-title {
 [data-theme="dark"] .novels-loading-overlay {
   background: rgba(0, 0, 0, 0.5);
 }
-
-/* Spinner */
 .spinner {
   border: 2px solid var(--border-color);
   border-top: 2px solid var(--accent-primary);
@@ -4286,27 +4031,23 @@ h1.chapter-title {
   height: 16px;
   border-width: 1px;
 }
-
-/* --- Анимация пузырьков (теперь прямо на оверлее) --- */
 .bubbles-container {
-    position: absolute; /* Позиционируем относительно #loading-overlay */
-    inset: 0; /* Растягиваем на весь оверлей */
-    overflow: hidden; /* Скрываем вылетающие пузырьки */
-    z-index: 1; /* Под текстом/спиннером, если он есть */
-    pointer-events: none; /* Не мешает кликам */
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 1;
+    pointer-events: none;
 }
 
 .bubble {
 position: absolute;
-    bottom: -50px; /* Начинают снизу */
+    bottom: -50px;
     width: 20px;
     height: 20px;
-    /* ✨ ГОЛУБОЙ ЦВЕТ ПО УМОЛЧАНИЮ (для темной темы) */
-    background-color: rgba(173, 216, 230, 0.25); /* Light Blue с 25% прозрачностью */
+    background-color: rgba(173, 216, 230, 0.25);
     border-radius: 50%;
     animation: rise linear infinite;
     opacity: 0;
-    /* ✨ Слегка более яркая голубая рамка */
     border: 1px solid rgba(173, 216, 230, 0.4);
 }
 
@@ -4319,15 +4060,13 @@ position: absolute;
         opacity: 1;
     }
     100% {
-        transform: translateY(-110vh); /* Улетают за верхний край */
+        transform: translateY(-110vh);
         opacity: 0;
     }
 }
 
 [data-mode="light"] .bubble {
-    /* ✨ Используем более темный синий для контраста */
-    background-color: rgba(0, 134, 243, 0.15); /* Steel Blue с 15% прозрачностью */
-    /* ✨ И рамку потемнее */
+    background-color: rgba(0, 134, 243, 0.15);
     border: 1px solid rgba(0, 49, 88, 0.25);
 }
 
@@ -4337,8 +4076,8 @@ position: absolute;
 
 .custom-tooltip {
     position: absolute;
-    visibility: hidden; /* Изначально полностью скрыт и неактивен */
-    opacity: 0; /* Изначально полностью прозрачен */
+    visibility: hidden;
+    opacity: 0;
     background: var(--bg-overlay);
     color: var(--text-primary);
     padding: 0.5rem 0.75rem;
@@ -4351,43 +4090,32 @@ position: absolute;
     z-index: 10000;
     pointer-events: none;
     backdrop-filter: blur(10px);
-    transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out; /* Плавный переход для прозрачности и видимости */
-    transform: translate(5px, 5px); /* Добавляем небольшой отступ, чтобы не появлялся прямо под курсором */
+    transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out;
+    transform: translate(5px, 5px);
 }
-
-/* Стиль для видимого состояния */
 .custom-tooltip.show {
-    visibility: visible; /* Делаем видимым и активным */
-    opacity: 1; /* Делаем непрозрачным */
+    visibility: visible;
+    opacity: 1;
 }
 
-.genre-badge.clickable,
 .tag-badge.clickable {
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
 }
 
-.genre-badge.clickable:hover,
 .tag-badge.clickable:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     filter: brightness(1.1);
 }
 
-.genre-badge.clickable:active,
 .tag-badge.clickable:active {
     transform: translateY(0);
 }
-
-/* Улучшенный tooltip (работает через title attribute) */
-.genre-badge[title]:not([title=""]),
 .tag-badge[title]:not([title=""]) {
     position: relative;
 }
-
-/* Можно добавить иконку для визуального указания кликабельности */
-.genre-badge.clickable::after,
 .tag-badge.clickable::after {
     content: ' 🔍';
     opacity: 0;
@@ -4395,7 +4123,6 @@ position: absolute;
     font-size: 0.8em;
 }
 
-.genre-badge.clickable:hover::after,
 .tag-badge.clickable:hover::after {
     opacity: 0.6;
 }
@@ -4627,8 +4354,6 @@ position: absolute;
     box-shadow: 0 0 20px rgba(13, 110, 253, 0.8);
   }
 }
-
-/* Применение анимаций */
 .fade-in {
   animation: fadeIn 0.3s ease forwards;
 }
@@ -4718,8 +4443,6 @@ position: absolute;
 /* ==========================================
    БЛОК 24: УТИЛИТАРНЫЕ КЛАССЫ
    ========================================== */
-
-/* Текст */
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
@@ -4742,8 +4465,6 @@ position: absolute;
 .font-medium { font-weight: 500; }
 .font-semibold { font-weight: 600; }
 .font-bold { font-weight: 700; }
-
-/* Отступы */
 .m-0 { margin: 0; }
 .m-1 { margin: 0.25rem; }
 .m-2 { margin: 0.5rem; }
@@ -4813,8 +4534,6 @@ position: absolute;
 .pr-3 { padding-right: 1rem; }
 .pr-4 { padding-right: 1.5rem; }
 .pr-5 { padding-right: 3rem; }
-
-/* Flexbox */
 .d-flex { display: flex; }
 .d-inline-flex { display: inline-flex; }
 .d-block { display: block; }
@@ -4840,15 +4559,11 @@ position: absolute;
 .flex-1 { flex: 1; }
 .flex-auto { flex: auto; }
 .flex-none { flex: none; }
-
-/* Позиционирование */
 .position-static { position: static; }
 .position-relative { position: relative; }
 .position-absolute { position: absolute; }
 .position-fixed { position: fixed; }
 .position-sticky { position: sticky; }
-
-/* Видимость */
 .visible { visibility: visible; }
 .invisible { visibility: hidden; }
 
@@ -4864,8 +4579,6 @@ position: absolute;
 .opacity-50 { opacity: 0.5; }
 .opacity-75 { opacity: 0.75; }
 .opacity-100 { opacity: 1; }
-
-/* Ширина и высота */
 .w-25 { width: 25%; }
 .w-50 { width: 50%; }
 .w-75 { width: 75%; }
@@ -4877,8 +4590,6 @@ position: absolute;
 .h-75 { height: 75%; }
 .h-100 { height: 100%; }
 .h-auto { height: auto; }
-
-/* Границы */
 .border { border: 1px solid var(--border-color); }
 .border-0 { border: none; }
 .border-top { border-top: 1px solid var(--border-color); }
@@ -4891,14 +4602,10 @@ position: absolute;
 .rounded-lg { border-radius: var(--radius-lg); }
 .rounded-full { border-radius: 50%; }
 
-/* Тени */
-
 .shadow-sm { box-shadow: var(--shadow-sm); }
 .shadow-md { box-shadow: var(--shadow-md); }
 .shadow-lg { box-shadow: var(--shadow-lg); }
 .shadow-none { box-shadow: none; }
-
-/* Фон */
 .bg-primary { background: var(--bg-primary); }
 .bg-secondary { background: var(--bg-secondary); }
 .bg-tertiary { background: var(--bg-tertiary); }
@@ -4908,8 +4615,6 @@ position: absolute;
 .bg-warning { background: var(--accent-warning); }
 .bg-danger { background: var(--accent-danger); }
 .bg-info { background: var(--accent-primary); }
-
-/* Scroll */
 .overflow-auto { overflow: auto; }
 .overflow-hidden { overflow: hidden; }
 .overflow-visible { overflow: visible; }
@@ -4919,24 +4624,16 @@ position: absolute;
 .overflow-y-auto { overflow-y: auto; }
 .overflow-x-hidden { overflow-x: hidden; }
 .overflow-y-hidden { overflow-y: hidden; }
-
-/* Cursor */
 .cursor-pointer { cursor: pointer; }
 .cursor-default { cursor: default; }
 .cursor-not-allowed { cursor: not-allowed; }
 .cursor-text { cursor: text; }
-
-/* Select */
 .select-none { user-select: none; }
 .select-text { user-select: text; }
 .select-all { user-select: all; }
-
-/* Transitions */
 .transition { transition: all 0.3s ease; }
 .transition-fast { transition: all 0.15s ease; }
 .transition-slow { transition: all 0.5s ease; }
-
-/* Empty state */
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
@@ -4963,29 +4660,23 @@ position: absolute;
 /* ==========================================
    СТИЛИ ДЛЯ ЗАГОЛОВКА СТРАНИЦЫ И КНОПОК
    ========================================== */
-
-/* Контейнер, который выравнивает крошки и кнопки */
 .page-header {
   display: flex;
-  justify-content: space-between; /* Самое важное: расталкивает элементы по краям */
-  align-items: center;            /* Выравнивает их по вертикали */
-  margin-bottom: 1.5rem;          /* Отступ снизу */
-  gap: 1rem;                      /* Пространство между элементами */
-  flex-wrap: wrap;                /* Позволяет переноситься на мобильных */
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
-
-/* Контейнер для самих кнопок */
 .novel-actions-bar {
   display: flex;
-  gap: 0.5rem; /* Расстояние между кнопками */
-  flex-shrink: 0; /* Запрещаем кнопкам сжиматься */
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
-
-/* Новый стиль для кнопок действий */
 .novel-actions-bar .action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem; /* Расстояние между иконкой и текстом */
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
   background-color: transparent;
   border: 1px solid var(--border-color);
@@ -4995,26 +4686,18 @@ position: absolute;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
-/* Эффект при наведении */
 .novel-actions-bar .action-btn:hover {
   background-color: var(--background-color-hover);
   border-color: var(--primary-color-light);
 }
-
-/* Цвет для кнопки "Редактировать" при наведении */
 .novel-actions-bar .action-btn.edit:hover {
   color: var(--success-color);
   border-color: var(--success-color);
 }
-
-/* Цвет для кнопки "Удалить" при наведении */
 .novel-actions-bar .action-btn.delete:hover {
   color: var(--danger-color);
   border-color: var(--danger-color);
 }
-
-/* --- ОБЛОЖКА С FLOAT --- */
 .novel-cover-float {
     float: left;
     width: 250px;
@@ -5060,13 +4743,9 @@ position: absolute;
     color: var(--text-secondary);
     font-size: 0.85rem;
 }
-
-/* --- ОПИСАНИЕ С ОБТЕКАНИЕМ --- */
 .novel-description-float {
     min-height: 300px;
 }
-
-/* Табы */
 .description-tabs {
     display: flex;
     border-bottom: 2px solid var(--border-color);
@@ -5097,8 +4776,6 @@ position: absolute;
     color: var(--text-primary);
     border-bottom-color: var(--accent-primary);
 }
-
-/* Контент вкладок */
 .tab-content {
     display: none;
     line-height: 1.7;
@@ -5108,13 +4785,9 @@ position: absolute;
 .tab-content.active {
     display: block;
 }
-
-/* Стили для текста описания */
 #float-description p {
     margin-bottom: 1rem;
 }
-
-/* Информационная таблица */
 #float-info .info-table,
 .novel-info-desktop .info-table {
     display: grid;
@@ -5140,8 +4813,8 @@ position: absolute;
 }
 
 .info-table .additional-links-display {
-    white-space: pre-wrap; /* Сохраняем переносы строк */
-    word-break: break-word; /* Переносим длинные ссылки */
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 .info-table .additional-links-display a {
     color: var(--link-color);
@@ -5150,8 +4823,6 @@ position: absolute;
 .info-table .additional-links-display a:hover {
     text-decoration: none;
 }
-
-/* --- САЙДБАР ИНФОРМАЦИИ ДЛЯ ДЕСКТОПА --- */
 .novel-info-desktop {
     display: none;
     float: right;
@@ -5168,8 +4839,6 @@ position: absolute;
     margin-bottom: 1rem;
     font-size: 1.3rem;
 }
-
-/* Рейтинг в сайдбаре */
 .rating-container {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
@@ -5208,8 +4877,6 @@ position: absolute;
 .star.empty {
     color: var(--text-tertiary);
 }
-
-/* ЦЕНТРИРОВАННЫЙ ЗАГОЛОВОК И АВТОР */
 .novel-header-center {
     text-align: center;
     margin: 2rem 0;
@@ -5230,9 +4897,9 @@ position: absolute;
 }
 
 .novel-main-title:hover {
-    transform: scale(1.02); /* Немного увеличиваем заголовок */
-    transition: transform 0.2s ease-in-out; /* Плавный переход */
-    cursor: pointer; /* Оставляем курсор-указатель, т.к. элемент кликабельный */
+    transform: scale(1.02);
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
 }
 
 .author-container {
@@ -5274,63 +4941,46 @@ position: absolute;
 
 a.novel-card-link {
     text-decoration: none;
-    color: inherit; /* Наследовать цвет от родителя */
-    display: block; /* Чтобы ссылка занимала место как блок */
+    color: inherit;
+    display: block;
 }
 
 /* ==========================================
    ССЫЛКИ НА АВТОРА И СОЗДАТЕЛЯ (УЛУЧШЕННАЯ ВЕРСИЯ)
    ========================================== */
 
-/* Применяем стили к ссылкам:
-  1. В списке новелл (.author-link-inline)
-  2. В таблице информации на странице новеллы (.info-table .author-name a)
-  3. В центральном заголовке на странице новеллы (.author-container .author-name a)
-*/
-
 a.author-link-inline,
 a.creator-link-inline,
 .info-table .author-name a,
 .author-container .author-name a {
-    text-decoration: none;        /* Убираем подчеркивание в обычном состоянии */
-    color: var(--accent-primary); /* Задаем стандартный СИНИЙ цвет */
+    text-decoration: none;
+    color: var(--accent-primary);
 }
-
-/* Убираем фиолетовый (visited) цвет */
 a.author-link-inline:visited,
 a.creator-link-inline:visited,
 .info-table .author-name a:visited,
 .author-container .author-name a:visited {
-    color: var(--accent-primary); /* Цвет ВСЕГДА СИНИЙ */
+    color: var(--accent-primary);
 }
-
-/* Возвращаем подчеркивание при наведении */
 a.author-link-inline:hover,
 a.creator-link-inline:hover,
 .info-table .author-name a:hover,
 .author-container .author-name a:hover {
     text-decoration: underline;
-    color: var(--accent-primary); /* Убедимся, что цвет остается синим */
+    color: var(--accent-primary);
 }
-
-/* НОВОЕ ПРАВИЛО: 
-  Убираем красный цвет при правом/активном клике (:active).
-  Теперь при клике ссылка будет выглядеть так же, как при наведении.
-*/
 a.author-link-inline:active,
 a.creator-link-inline:active,
 .info-table .author-name a:active,
 .author-container .author-name a:active {
-    color: var(--accent-primary) !important; /* !important для перекрытия общих правил */
+    color: var(--accent-primary) !important;
     text-decoration: underline;
-    background: none !important; /* Убираем любой фон, который мог вызвать красный */
+    background: none !important;
 }
-
-/* ВСПЛЫВАЮЩЕЕ ОКНО АЛЬТЕРНАТИВНЫХ НАЗВАНИЙ */
 .alt-titles-popup {
     display: none;
     position: absolute;
-    bottom: 100%; /* Появляется над элементом */
+    bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
     background: var(--bg-card);
@@ -5341,7 +4991,7 @@ a.creator-link-inline:active,
     z-index: 1000;
     min-width: 300px;
     max-width: 90vw;
-    margin-bottom: 0.5rem; /* Отступ от названия */
+    margin-bottom: 0.5rem;
 }
 
 .alt-titles-popup.show {
@@ -5367,8 +5017,6 @@ a.creator-link-inline:active,
     margin: 0.25rem;
     font-style: normal;
 }
-
-/* Стрелочка для всплывающего окна */
 .alt-titles-popup::after {
     content: '';
     position: absolute;
@@ -5378,25 +5026,13 @@ a.creator-link-inline:active,
     border: 8px solid transparent;
     border-top-color: var(--bg-card);
 }
-
-/* Убираем стандартную синюю обводку у поля ввода альт. названий */
 #alt-title-input:focus {
-  outline: none; /* Убирает стандартную обводку */
-  box-shadow: none; /* Убирает тень, которую некоторые браузеры добавляют */
-  /* Оставляем только изменение цвета рамки, если оно есть в :focus для .form-input */
-  border-color: var(--border-focus); /* Используй переменную цвета рамки при фокусе, если она есть */
+  outline: none;
+  box-shadow: none;
+  border-color: var(--border-focus);
 }
-
-/* Дополнительно: убедимся, что рамка у группы инпутов не мешает */
 .input-group:focus-within {
-   /* Можно добавить стили для всей группы при фокусе, если нужно, */
-   /* но главное - не добавлять конфликтующий box-shadow */
-   /* Например, можно усилить внешнюю рамку группы */
-   /* border-color: var(--border-focus); */
-   /* box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15); /* Мягкая тень для группы */
 }
-
-/* Контейнер для плашек (общий для жанров, тегов, альт. названий) */
 .tags-container {
     display: flex;
     flex-wrap: wrap;
@@ -5404,16 +5040,14 @@ a.creator-link-inline:active,
     padding: 0.5rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    background-color: var(--bg-primary); /* Или var(--bg-secondary) */
-    min-height: 40px; /* Чтобы пустой контейнер был виден */
+    background-color: var(--bg-primary);
+    min-height: 40px;
 }
-
-/* Стили для плашки (общие) */
 .selected-tag {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background-color: var(--bg-secondary); /* Или var(--bg-tertiary) */
+    background-color: var(--bg-secondary);
     color: var(--text-primary);
     padding: 0.3rem 0.6rem;
     border-radius: var(--radius-sm);
@@ -5435,34 +5069,28 @@ a.creator-link-inline:active,
 .remove-tag-btn:hover {
     color: var(--accent-danger);
 }
-
-/* Убираем фон у плашек альт. названий, оставляем рамку */
 .selected-tag.alt-title-tag {
     background-color: transparent;
     border: 1px solid var(--border-color);
-    color: var(--text-secondary); /* Можно сделать текст менее ярким */
+    color: var(--text-secondary);
 }
-
-/* Улучшаем вид кнопки удаления для прозрачных плашек */
 .selected-tag.alt-title-tag .remove-tag-btn {
     color: var(--text-secondary);
 }
 .selected-tag.alt-title-tag .remove-tag-btn:hover {
     color: var(--accent-danger);
-    background-color: rgba(var(--accent-danger-rgb), 0.1); /* Легкий фон при наведении */
+    background-color: rgba(var(--accent-danger-rgb), 0.1);
     border-radius: 50%;
 }
-
-/* ЖАНРЫ И ТЕГИ */
 .novel-taxonomy {
     margin: 1.5rem 0;
 }
 
-.genres-list, .tags-list {
+.tags-list {
     margin-bottom: 1rem;
 }
 
-.genre-badge, .tag-badge {
+.tag-badge {
     display: inline-block;
     padding: 0.3rem 0.7rem;
     background: var(--bg-secondary);
@@ -5470,8 +5098,6 @@ a.creator-link-inline:active,
     margin: 0.2rem;
     font-size: 0.9rem;
 }
-
-/* РАЗДЕЛИТЕЛЬ */
 .section-divider {
     border: none;
     height: 2px;
@@ -5480,27 +5106,21 @@ a.creator-link-inline:active,
 }
 
 /* ГЛАВЫ */
-/* ФИКС ДЛЯ ВЕРТИКАЛЬНЫХ ЛИНИЙ В ТАБЛИЦЕ ГЛАВ */
 .chapters-list-container-v2 {
     margin-top: 1rem;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
 }
-
-/* ОСНОВНЫЕ СТИЛИ ДЛЯ ТАБЛИЦЫ */
 .chapters-list-header,
 .chapter-item-v2 {
     display: grid;
-    /* ОПТИМИЗИРОВАННЫЕ ШИРИНЫ: №(50px), Название(1fr), Слов(80px), Обновлено(130px), Действия(90px) */
     grid-template-columns: 50px minmax(200px, 1fr) 80px 130px 90px;
     align-items: center;
     gap: 0;
     min-height: 3rem;
     width: 100%;
 }
-
-/* ИСПРАВЛЕНИЕ ДЛЯ ЗАГОЛОВКА СЕКЦИИ ГЛАВ */
 .chapters-header-v2 {
     display: flex;
     justify-content: space-between;
@@ -5517,7 +5137,7 @@ a.creator-link-inline:active,
     font-size: 1.1em;
     font-weight: 500;
     color: var(--text-secondary);
-    flex-shrink: 0; /* Запрещаем сжиматься */
+    flex-shrink: 0;
 }
 
 .chapters-controls-v2 {
@@ -5525,48 +5145,42 @@ a.creator-link-inline:active,
     gap: 0.5rem;
     flex-wrap: wrap;
     justify-content: flex-end;
-    flex: 1; /* Занимает доступное пространство */
+    flex: 1;
 }
 
 /* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ */
 @media (max-width: 768px) {
     .chapters-header-v2 {
-        flex-direction: row; /* ВАЖНО: оставляем горизонтальное направление */
+        flex-direction: row;
         align-items: center;
         gap: 0.75rem;
     }
-    
+
     .chapters-controls-v2 {
         justify-content: flex-start;
         width: auto;
     }
 }
-
-/* Для очень маленьких экранов - переносим на новую строку если нужно */
 @media (max-width: 480px) {
     .chapters-header-v2 {
         flex-direction: column;
         align-items: stretch;
         gap: 1rem;
     }
-    
+
     .chapters-controls-v2 {
         justify-content: center;
         width: 100%;
     }
-    
+
     .chapter-count {
         text-align: center;
     }
 }
-
-/* Скрытие последней колонки для не-owner */
 html:not([data-user-role="owner"]) .chapters-list-header,
 html:not([data-user-role="owner"]) .chapter-item-v2 {
     grid-template-columns: 50px minmax(200px, 1fr) 80px 130px;
 }
-
-/* УСИЛЕННЫЕ СТИЛИ ДЛЯ ЗАГОЛОВКА ТАБЛИЦЫ */
 .chapters-list-header {
     background-color: transparent !important;
     color: var(--text-secondary);
@@ -5574,8 +5188,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     font-weight: 600;
     border-bottom: 2px solid var(--border-color);
 }
-
-/* УСИЛЕННЫЕ СТИЛИ ДЛЯ ЯЧЕЕК */
 .chapters-list-header > div,
 .chapter-item-v2 > div {
     white-space: nowrap;
@@ -5586,23 +5198,17 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     align-items: center;
     height: 100%;
     min-height: 3rem;
-    
-    /* ВЕРТИКАЛЬНЫЕ ЛИНИИ */
     border-right: 1px solid var(--border-color) !important;
     border-left: none !important;
     border-top: none !important;
     border-bottom: none !important;
 }
-
-/* Убираем правую границу у последней ячейки */
 .chapters-list-header > div:last-child,
 .chapter-item-v2 > div:last-child {
     border-right: none !important;
 }
-
-/* ВЫРАВНИВАНИЕ ТЕКСТА */
 .chapters-list-header .ch-num,
-.chapter-item-v2 .ch-num { 
+.chapter-item-v2 .ch-num {
     justify-content: center;
     padding-left: 0.25rem;
     padding-right: 0.25rem;
@@ -5613,45 +5219,43 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 .chapters-list-header .ch-actions,
 .chapter-item-v2 .ch-words,
 .chapter-item-v2 .ch-updated,
-.chapter-item-v2 .ch-actions { 
+.chapter-item-v2 .ch-actions {
     justify-content: flex-end;
     padding-right: 0.75rem;
 }
-
-/* СТИЛИ ДЛЯ КОНТЕНТА */
-.chapter-item-v2 .ch-num { 
-    font-weight: 500; 
+.chapter-item-v2 .ch-num {
+    font-weight: 500;
     color: var(--text-secondary);
     font-size: 0.9em;
 }
 
-.chapter-item-v2 .ch-title a { 
-    color: var(--text-primary); 
-    text-decoration: none; 
-    font-weight: 500; 
+.chapter-item-v2 .ch-title a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 0 0.5rem;
 }
 
-.chapter-item-v2 .ch-title a:hover { 
-    color: var(--primary-color); 
-    text-decoration: underline; 
+.chapter-item-v2 .ch-title a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
 }
 
 .chapter-item-v2 .ch-words,
-.chapter-item-v2 .ch-updated { 
-    font-size: 0.85em; 
+.chapter-item-v2 .ch-updated {
+    font-size: 0.85em;
     color: var(--text-secondary);
 }
 
-.chapter-item-v2 .ch-actions { 
+.chapter-item-v2 .ch-actions {
     gap: 0.25rem;
 }
 
-.chapter-item-v2 .ch-actions a { 
-    font-size: 0.8em; 
+.chapter-item-v2 .ch-actions a {
+    font-size: 0.8em;
     white-space: nowrap;
 }
 
@@ -5661,17 +5265,17 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     .chapter-item-v2 {
         grid-template-columns: 45px minmax(150px, 1fr) 70px 110px 80px;
     }
-    
+
     html:not([data-user-role="owner"]) .chapters-list-header,
     html:not([data-user-role="owner"]) .chapter-item-v2 {
         grid-template-columns: 45px minmax(150px, 1fr) 70px 110px;
     }
-    
+
     .chapters-list-header > div,
     .chapter-item-v2 > div {
         padding: 0.6rem 0.4rem;
     }
-    
+
     .chapter-item-v2 .ch-title a {
         font-size: 0.95em;
     }
@@ -5681,159 +5285,145 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 @media (max-width: 768px) {
     .chapters-list-header,
     .chapter-item-v2 {
-        /* ЕЩЁ БОЛЬШЕ МЕСТА ДЛЯ НАЗВАНИЯ: №(40px), Название(minmax(120px, 1fr)), Слов(60px), Обновлено(90px), Действия(70px) */
         grid-template-columns: 40px minmax(120px, 1fr) 60px 90px 70px;
         min-height: 2.5rem;
     }
-    
+
     html:not([data-user-role="owner"]) .chapters-list-header,
     html:not([data-user-role="owner"]) .chapter-item-v2 {
         grid-template-columns: 40px minmax(120px, 1fr) 60px 90px;
     }
-    
+
     .chapters-list-header > div,
     .chapter-item-v2 > div {
         padding: 0.5rem 0.3rem;
         min-height: 2.5rem;
         font-size: 0.85em;
     }
-    
+
     .chapters-list-header .ch-num,
     .chapter-item-v2 .ch-num {
         padding-left: 0.2rem;
         padding-right: 0.2rem;
         font-size: 0.85em;
     }
-    
-    .chapter-item-v2 .ch-title a { 
+
+    .chapter-item-v2 .ch-title a {
         font-size: 0.9em;
         padding: 0 0.3rem;
     }
-    
+
     .chapter-item-v2 .ch-words,
-    .chapter-item-v2 .ch-updated { 
+    .chapter-item-v2 .ch-updated {
         font-size: 0.8em;
     }
-    
-    .chapter-item-v2 .ch-actions a { 
+
+    .chapter-item-v2 .ch-actions a {
         font-size: 0.75em;
         padding: 0.2rem 0.4rem;
     }
-    
-    .chapters-header-v2 { 
-        flex-direction: column; 
-        align-items: flex-start; 
+
+    .chapters-header-v2 {
+        flex-direction: column;
+        align-items: flex-start;
         gap: 1rem;
     }
-    
-    .chapters-controls-v2 { 
-        width: 100%; 
+
+    .chapters-controls-v2 {
+        width: 100%;
         justify-content: flex-start;
         flex-wrap: wrap;
         gap: 0.5rem;
     }
 }
-
-/* ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ */
 @media (max-width: 480px) {
     .chapters-list-header,
     .chapter-item-v2 {
-        /* МИНИМАЛЬНЫЕ ШИРИНЫ: сохраняем приоритет для названия */
         grid-template-columns: 35px minmax(100px, 1fr) 50px 80px 60px;
     }
-    
+
     html:not([data-user-role="owner"]) .chapters-list-header,
     html:not([data-user-role="owner"]) .chapter-item-v2 {
         grid-template-columns: 35px minmax(100px, 1fr) 50px 80px;
     }
-    
+
     .chapters-list-header > div,
     .chapter-item-v2 > div {
         padding: 0.4rem 0.2rem;
         font-size: 0.8em;
     }
-    
-    .chapter-item-v2 .ch-title a { 
+
+    .chapter-item-v2 .ch-title a {
         font-size: 0.85em;
         padding: 0 0.2rem;
     }
-    
-    /* Скрываем полные слова в датах, оставляем только иконку или сокращения */
     .ch-updated {
         font-size: 0.75em;
     }
-    
+
     .ch-words {
         font-size: 0.75em;
     }
 }
-
-/* Стили для томов */
-.volume-section-v2 { 
-    border-top: 1px solid var(--border-color); 
+.volume-section-v2 {
+    border-top: 1px solid var(--border-color);
 }
-#chapters-list-v2 > .volume-section-v2:first-child { 
-    border-top: none; 
+#chapters-list-v2 > .volume-section-v2:first-child {
+    border-top: none;
 }
 
-.volume-header-v2 { 
-    background-color: var(--bg-light); 
-    padding: 0.8rem 1rem; 
-    font-weight: 600; 
-    cursor: pointer; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    transition: background-color 0.2s ease; 
+.volume-header-v2 {
+    background-color: var(--bg-light);
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
     margin-top: 1rem;
 }
 
-.volume-header-v2:hover { 
-    background-color: var(--bg-hover); 
+.volume-header-v2:hover {
+    background-color: var(--bg-hover);
 }
 
-.volume-chapter-count { 
-    font-size: 0.85em; 
-    color: var(--text-secondary); 
-    margin-left: auto; 
-    margin-right: 0.5rem; 
+.volume-chapter-count {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-left: auto;
+    margin-right: 0.5rem;
 }
 
-.volume-toggle-icon { 
-    transition: transform 0.2s ease; 
-    display: inline-block; 
+.volume-toggle-icon {
+    transition: transform 0.2s ease;
+    display: inline-block;
 }
 
-.volume-section-v2.collapsed .volume-toggle-icon { 
-    transform: rotate(-90deg); 
+.volume-section-v2.collapsed .volume-toggle-icon {
+    transform: rotate(-90deg);
 }
 
-.volume-section-v2.collapsed .volume-chapters-v2 { 
-    display: none; 
+.volume-section-v2.collapsed .volume-chapters-v2 {
+    display: none;
 }
-
-/* Сообщение "Нет глав" */
-.no-chapters { 
-    text-align: center; 
-    padding: 2rem; 
-    color: var(--text-secondary); 
+.no-chapters {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
 }
-
-/* Стили для Tooltip V2 */
-.tooltip-v2 { 
-    position: absolute; 
-    display: none; 
-    background-color: rgba(0, 0, 0, 0.8); 
-    color: white; 
-    padding: 5px 10px; 
-    border-radius: 4px; 
-    font-size: 0.85em; 
-    white-space: nowrap; 
-    z-index: 1000; 
-    pointer-events: none; 
+.tooltip-v2 {
+    position: absolute;
+    display: none;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
 }
-
-/* СТИЛИ ДЛЯ ПРОЧИТАННЫХ И НЕПРОЧИТАННЫХ ГЛАВ */
 .chapter-item-v2.unread {
     background-color: var(--bg-unread, rgba(0, 183, 255, 0.05));
 }
@@ -5853,39 +5443,33 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     color: var(--text-tertiary);
     opacity: 0.7;
 }
-
-/* Для светлой темы */
 [data-mode="light"] {
     --bg-unread: rgba(0, 100, 255, 0.03);
     --bg-read: #f8f9fa;
 }
-
-/* Для темной темы */
 [data-mode="dark"] {
     --bg-unread: rgba(100, 150, 255, 0.05);
     --bg-read: #1a1a1a;
 }
-
-/* Убедимся, что ховер работает для всех глав */
 .chapter-item-v2:hover {
-    background-color: var(--bg-hover) !important;
+    box-shadow: inset 3px 0 var(--accent-primary);
 }
 
 .chapter-item-v2.unread:hover {
-    background-color: color-mix(in srgb, var(--bg-unread) 70%, var(--bg-hover) 30%) !important;
+    background-color: var(--bg-unread) !important;
+}
+
+.chapter-item-v2.read:hover {
+    background-color: var(--bg-read) !important;
 }
 
 /* ========================
    Режим редактирования глав
    ======================== */
-
-/* При включении режима, добавляем отступ для кнопок */
 #chapters-list-v2.edit-mode .chapter-item-v2 {
-    padding-right: 80px; /* Место для 2-х кнопок */
+    padding-right: 80px;
     position: relative;
 }
-
-/* Стилизуем кнопки */
 #chapters-list-v2.edit-mode .ch-actions {
     position: absolute;
     right: 10px;
@@ -5893,11 +5477,9 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     transform: translateY(-50%);
     display: flex;
     gap: 5px;
-    background-color: var(--bg-color-light); /* Фон, чтобы перекрыть дату */
+    background-color: var(--bg-color-light);
     padding: 5px;
 }
-
-/* Стили для кнопок-иконок */
 .btn-icon {
     background: transparent;
     border: 1px solid var(--border-color);
@@ -5921,23 +5503,16 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     border-color: var(--color-danger);
     color: var(--color-danger);
 }
-
-/* Прячем колонки "Слов" и "Обновлено" в режиме редактирования */
 #chapters-list-v2.edit-mode .ch-words,
 #chapters-list-v2.edit-mode .ch-updated {
-    opacity: 0; /* ✨ Делаем полностью прозрачными */
-    pointer-events: none; /* ✨ Делаем некликабельными (на всякий случай) */
-    /* Важно: не используем visibility: hidden */
+    opacity: 0;
+    pointer-events: none;
 }
-
-/* Убираем правую границу у колонки "Название" в режиме редактирования */
 #chapters-list-v2.edit-mode .ch-title {
-    border-right: none !important; /* Убираем границу */
+    border-right: none !important;
 }
-
-/* Компенсируем отступ, который мы делали ранее */
 #chapters-list-v2.edit-mode .chapter-item-v2 {
-    padding-right: 90px; /* Немного увеличим, чтобы кнопки точно влезли */
+    padding-right: 90px;
 }
 
 /* КНОПКА "ДОБАВИТЬ НА ПОЛКУ" */
@@ -5954,7 +5529,7 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.5);
     color: white;
-    font-size: 2rem; /* Увеличим размер плюса */
+    font-size: 2rem;
     line-height: 1;
     border: none;
     box-shadow: var(--shadow-lg);
@@ -5963,7 +5538,7 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold; /* Сделаем плюс жирнее */
+    font-weight: bold;
 }
 
 .floating-shelf-button .btn-float:hover {
@@ -5990,25 +5565,21 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 
 .floating-shelf-button.menu-visible .dropdown-menu {
     display: block;
-    /* Можно добавить анимацию появления */
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
     transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
 }
-
-/* Стили для скрытого меню (для анимации) */
 .floating-shelf-button .dropdown-menu {
-    /* ... (твои существующие стили: position, bottom, right, min-width и т.д.) ... */
-    display: block; /* Убери display: none;, если он был */
+    display: block;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(10px); /* Небольшой сдвиг для анимации */
+    transform: translateY(10px);
     transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
-    pointer-events: none; /* Не мешает кликам, пока скрыто */
+    pointer-events: none;
 }
 .floating-shelf-button.menu-visible .dropdown-menu {
-    pointer-events: auto; /* Разрешаем клики, когда видно */
+    pointer-events: auto;
 }
 
 .floating-shelf-button .dropdown-menu a {
@@ -6027,32 +5598,25 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 }
 
 .floating-shelf-button .dropdown-menu a.active-shelf {
-    background-color: var(--bg-secondary); /* Легкий фон для выделения */
-    font-weight: 500; /* Немного жирнее */
-    /* Можно добавить рамку слева для акцента */
+    background-color: var(--bg-secondary);
+    font-weight: 500;
     border-left: 3px solid var(--accent-primary);
-    padding-left: calc(1rem - 3px); /* Компенсируем сдвиг от рамки */
+    padding-left: calc(1rem - 3px);
 }
-
-/* Добавляем галочку перед текстом активной полки */
 .floating-shelf-button .dropdown-menu a.active-shelf span::before {
-    content: '✓ '; /* Галочка и пробел */
-    color: var(--accent-success); /* Зеленый цвет */
+    content: '✓ ';
+    color: var(--accent-success);
     font-weight: bold;
-    margin-right: 0.4em; /* Небольшой отступ */
+    margin-right: 0.4em;
 }
-
-/* Скрываем ссылку "Убрать с полок", если добавлен класс hidden */
 .floating-shelf-button .dropdown-menu a.remove-link.hidden {
     display: none;
 }
-/* Также скрываем разделитель <hr>, если ссылка "Убрать" скрыта */
 .floating-shelf-button .dropdown-menu a.remove-link.hidden + hr,
 .floating-shelf-button .dropdown-menu hr:has(+ a.remove-link.hidden) /* Поддержка :has() для будущих браузеров */
 {
     display: none;
 }
-/* Если :has() не работает, можно использовать JS для скрытия <hr> */
 
 /* ==========================================
    ПОПАП АЛЬТЕРНАТИВНЫХ НАЗВАНИЙ (Bottom Sheet)
@@ -6064,46 +5628,38 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     left: 0;
     width: 100%;
     z-index: 10000;
-    /* Начальное состояние (скрыт внизу) */
     transform: translateY(100%);
     opacity: 0;
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-    /* Добавляем фон-затемнение */
     background-color: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-    height: 100%; /* Занимает весь экран для фона */
-    display: flex; /* Используем flex для позиционирования контента внизу */
-    align-items: flex-end; /* Прижимаем контент к низу */
-    pointer-events: none; /* Не перехватывает клики, пока не видим */
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    pointer-events: none;
 }
 
 .custom-alt-titles-popup.bottom-sheet.show {
     transform: translateY(0);
     opacity: 1;
-    pointer-events: auto; /* Перехватывает клики, когда виден */
+    pointer-events: auto;
 }
-
-/* Контентная часть попапа */
 .bottom-sheet .popup-content {
     background: var(--bg-card);
-    /* Скругление только верхних углов */
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2); /* Тень сверху */
-    max-width: 800px; /* Ограничиваем ширину на десктопах */
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    max-width: 800px;
     width: 100%;
-    margin: 0 auto; /* Центрируем */
-    max-height: 70vh; /* Ограничиваем высоту */
-    overflow: hidden; /* Важно для border-radius */
+    margin: 0 auto;
+    max-height: 70vh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    /* Убираем рамку, т.к. есть тень */
     border: none;
 }
-
-/* Шапка остается почти такой же */
 .bottom-sheet .popup-header {
-    padding: 0.75rem 1.5rem; /* Уменьшим паддинг */
+    padding: 0.75rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-secondary);
     flex-shrink: 0;
@@ -6114,13 +5670,12 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 
 .bottom-sheet .popup-header h3 {
     margin: 0;
-    font-size: 1rem; /* ✨ Уменьшаем шрифт заголовка */
-    color: var(--text-secondary); /* ✨ Делаем цвет менее ярким */
-    font-weight: 500; /* ✨ Убираем жирность */
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .bottom-sheet .popup-close {
-    /* Стили кнопки закрытия остаются прежними */
     background: none; border: none; font-size: 1.8rem; line-height: 1;
     cursor: pointer; color: var(--text-secondary); padding: 0;
     width: 30px; height: 30px; display: flex; align-items: center;
@@ -6129,44 +5684,37 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 .bottom-sheet .popup-close:hover {
     background: var(--bg-tertiary); color: var(--text-primary);
 }
-
-/* Тело попапа с прокруткой */
 .bottom-sheet .popup-body {
     padding: 1.5rem;
     overflow-y: auto;
     flex-grow: 1;
 }
-
-/* Стили для параграфов с названиями */
 .bottom-sheet .popup-body p {
     margin: 0;
-    padding: 0.75rem 0; /* ✨ Увеличиваем вертикальный отступ */
-    font-size: 1.1rem; /* ✨ Увеличиваем шрифт названий */
+    padding: 0.75rem 0;
+    font-size: 1.1rem;
     line-height: 1.5;
     color: var(--text-primary);
-    font-weight: 500; /* ✨ Делаем немного жирнее */
+    font-weight: 500;
 }
-/* Стили для сообщения "нет названий" (остаются как были) */
  .bottom-sheet .popup-body p.text-muted {
     color: var(--text-secondary);
     text-align: center;
     padding: 2rem 0;
-    font-size: 1rem; /* Возвращаем стандартный размер */
-    font-weight: normal; /* Убираем жирность */
+    font-size: 1rem;
+    font-weight: normal;
 }
-
-/* Стили для разделителя */
 .bottom-sheet .popup-body hr {
     border: none;
     border-top: 1px solid var(--border-color);
-    margin: 0; /* ✨ Убираем стандартные отступы у hr */
+    margin: 0;
 }
 
 /* Адаптивность */
 @media (max-width: 767px) {
     .bottom-sheet .popup-content {
-        max-height: 85vh; /* На мобильных разрешаем занимать больше высоты */
-        border-radius: var(--radius-md) var(--radius-md) 0 0; /* Чуть меньше скругление */
+        max-height: 85vh;
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
     }
     .bottom-sheet .popup-header {
         padding: 0.75rem 1rem;
@@ -6189,58 +5737,58 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     .novel-details-page {
         padding: 0 0.5rem;
     }
-    
+
     .novel-cover-float {
         float: none;
         width: 100%;
         max-width: 200px;
         margin: 0 auto 1.5rem;
     }
-    
+
     .novel-description-float {
         min-height: auto;
     }
-    
+
     .description-tabs {
         justify-content: center;
         gap: 0.5rem;
     }
-    
+
     .tab-btn {
         padding: 0.6rem 1.2rem;
         font-size: 0.9rem;
         flex: 0 1 auto;
     }
-    
+
     .novel-main-title {
         font-size: 1.5rem;
     }
-    
+
     .chapters-header {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .chapters-controls {
         justify-content: center;
     }
-    
+
     .floating-shelf-button {
         bottom: 1rem;
         right: 1rem;
     }
-    
+
     .floating-shelf-button .btn-float {
         width: 50px;
         height: 50px;
         font-size: 1.5rem;
     }
-    
+
     .floating-shelf-button .btn-float:hover {
         transform: scale(1.05) rotate(90deg);
     }
 }
-    
+
     .alt-titles-popup {
         min-width: 250px;
     }
@@ -6251,7 +5799,7 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     .novel-cover-float {
         width: 220px;
     }
-    
+
     .description-tabs {
         justify-content: center;
     }
@@ -6263,30 +5811,28 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
         width: 280px;
         margin-right: 2rem;
     }
-    
+
     .novel-info-desktop {
         display: block;
     }
-    
+
     #info-tab-button {
         display: none;
     }
-    
+
     #float-info {
         display: none !important;
     }
-    
+
     .description-tabs {
         justify-content: flex-start;
     }
 }
-
-/* Очень широкие экраны (1200px+) */
 @media (min-width: 1200px) {
     .novel-cover-float {
         width: 300px;
     }
-    
+
     .novel-info-desktop {
         width: 350px;
     }
@@ -6296,11 +5842,11 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     .novel-main-title {
         font-size: 1.6rem;
     }
-    
+
     .author-container {
         font-size: 1rem;
     }
-    
+
     .alt-titles-popup {
         min-width: 250px;
         margin-bottom: 0.5rem;
@@ -6386,15 +5932,11 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
   .logo {
     font-size: 1.3rem;
   }
-
-  /* Сетка карточек */
   #novels-grid,
   .novels-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1.25rem;
   }
-
-  /* Вид списка на планшете */
   #novels-grid.list-view .novel-card,
   .novels-grid.list-view .novel-card {
     height: 180px;
@@ -6404,8 +5946,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
   .novels-grid.list-view .novel-header {
     width: 130px;
   }
-
-  /* Статистика */
   .stats-bar {
     padding: 0.75rem 1.25rem;
   }
@@ -6413,8 +5953,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
   .view-controls {
     align-self: flex-end;
   }
-
-  /* Поиск */
   .search-container {
     flex-direction: column;
     align-items: stretch;
@@ -6429,13 +5967,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     width: 95%;
     padding: 1.5rem;
   }
-
-  #admin-modal .modal-content {
-    width: 95%;
-    height: 90vh;
-  }
-
-  /* Пагинация */
   .pagination-controls {
     gap: 4px;
   }
@@ -6451,12 +5982,10 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     flex-direction: column;
     gap: 0.5rem;
   }
-
-  /* Таблица пользователей */
   .users-table {
     font-size: 0.85rem;
   }
-  
+
   .users-table th,
   .users-table td {
     padding: 0.6rem 0.8rem;
@@ -6485,28 +6014,22 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
   .theme-btn {
     padding: 0.4rem 0.5rem;
   }
-
-  /* Информация о пользователе */
   .user-info-badge {
     padding: 0.4rem 0.6rem;
   }
-  
+
   .user-email {
     display: none;
   }
-  
+
   .user-role-icon {
     font-size: 1.2rem;
   }
-
-  /* Сетка карточек */
   #novels-grid,
   .novels-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 1rem;
   }
-
-  /* Вид списка на мобильных */
   #novels-grid.list-view .novel-card,
   .novels-grid.list-view .novel-card {
     flex-direction: column;
@@ -6518,8 +6041,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     width: 100%;
     height: 200px;
   }
-
-  /* Контент карточки */
   .novel-body {
     padding: 0.75rem;
   }
@@ -6534,12 +6055,9 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 
   .novel-description {
     font-size: 0.8rem;
-  /* Кросс-браузерное ограничение строк: сначала стандартное, затем префикс */
   line-clamp: 2;
   -webkit-line-clamp: 2;
   }
-
-  /* Статистика */
   .stats-bar {
     padding: 0.75rem 1.25rem;
   }
@@ -6553,8 +6071,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     align-self: flex-end;
     justify-content: center;
   }
-
-  /* Фильтры */
   .filters-panel {
     padding: 1rem;
   }
@@ -6582,8 +6098,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
   .modal-actions button {
     width: 100%;
   }
-
-  /* Тосты */
   .toast-container {
     right: 10px;
     left: 10px;
@@ -6593,8 +6107,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
   .toast {
     padding: 0.75rem;
   }
-
-  /* Пагинация */
   .pagination-controls {
     flex-wrap: wrap;
   }
@@ -6617,8 +6129,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     flex-direction: row;
     justify-content: center;
   }
-
-  /* Детали новеллы */
   .novel-details-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -6629,8 +6139,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     grid-template-columns: 1fr;
   }
 }
-
-/* Очень маленькие экраны (до 359px) */
 @media (max-width: 359px) {
   .main {
     padding: 0.75rem 0.5rem;
@@ -6664,15 +6172,9 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     padding: 0.35rem 0.45rem;
   }
 }
-
-/* Поддержка ориентации */
 @media (max-height: 500px) and (orientation: landscape) {
   .modal-content {
     max-height: 70vh;
-  }
-
-  #admin-modal .modal-content {
-    height: 70vh;
   }
 
   .novels-grid.list-view .novel-card {
@@ -6683,8 +6185,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     width: 120px;
   }
 }
-
-/* Поддержка hover на мобильных */
 @media (hover: none) {
   .novel-card:hover {
     transform: none;
@@ -6706,16 +6206,12 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     color: var(--text-inverse);
   }
 }
-
-/* Высокочастотные экраны */
 @media (min-resolution: 192dpi) {
   .novel-cover {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
   }
 }
-
-/* Поддержка reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -6770,9 +6266,9 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
    БЛОК 26: ХЕДЕР ДЛЯ СТРАНИЦЫ ЧТЕНИЯ
    ========================================== */
 
-/* Компенсируем отступ для контента, 
+/* Компенсируем отступ для контента,
    т.к. хедер теперь position: fixed.
-   Мы уже добавили 'padding-top: 80px;' в JS, 
+   Мы уже добавили 'padding-top: 80px;' в JS,
    но этот стиль - хороший запасной вариант.
 */
 /* Remove this rule entirely or comment it out */
@@ -6788,22 +6284,22 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     left: 0;
     right: 0;
     z-index: 1001; /* Выше, чем главный хедер (1000) */
-    
+
     display: grid;
     grid-template-columns: 1fr 2fr 1fr; /* 3 колонки: лево, центр, право */
     align-items: center;
     gap: 1rem;
-    
+
     height: 60px;
     padding: 0 1rem;
-    
+
     /* Стеклянный фон */
     background: rgba(var(--bg-card-rgb), 0.75);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
-    
+
     /* Анимация показа/скрытия */
     transition: transform 0.3s ease-in-out;
 }
@@ -6846,7 +6342,7 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 /* Центральная часть (Кликабельное название) */
 .reader-header-center {
     text-align: center;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 /* Стилизуем <button> как текст */
@@ -6908,7 +6404,7 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
         text-overflow: ellipsis;
         max-width: 200px; /* Ограничим ширину */
     }
-    
+
     .chapter-title-text {
         font-size: 1rem;
     }
@@ -6956,26 +6452,20 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 
 /* Кнопка "Оглавление" */
 .btn-nav-toc {
-    /* Remove background, border */
     background: transparent;
     border: none;
-    /* Set color like prev/next */
     color: var(--accent-primary);
-    /* Keep padding and alignment */
-    padding: 0.75rem 1rem; /* Keep existing padding */
+    padding: 0.75rem 1rem;
     text-decoration: none;
     font-weight: 500;
     transition: background 0.2s ease;
-    justify-self: center; /* Keep centering */
-    font-size: 1rem; /* Ensure consistent font size */
+    justify-self: center;
+    font-size: 1rem;
 }
 .btn-nav-toc:hover {
-    /* Add hover effect like prev/next */
     background: var(--bg-secondary);
-    border: none; /* Ensure no border on hover */
+    border: none;
 }
-
-/* Выравнивание кнопок */
 .btn-nav-prev {
     justify-self: start;
 }
@@ -6996,11 +6486,8 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
         padding: 0.75rem 0.5rem;
     }
     .btn-nav-toc {
-        /* На мобильных можно скрыть текст, оставив иконку */
         font-size: 1rem;
     }
-
-    /* ✨ ДОБАВЛЯЕМ ЭТО ПРАВИЛО ✨ */
     .reader-bottom-nav .nav-text {
         display: none;
     }
@@ -7014,15 +6501,13 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     position: fixed;
     inset: 0;
     z-index: 5000;
-    
+
     background: rgba(var(--bg-primary-rgb, 255, 255, 255), 0.9);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    
+
     display: flex;
     flex-direction: column;
-    
-    /* Скрыто по умолчанию */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -7044,18 +6529,17 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 }
 
 .quick-nav-footer .btn {
-    /* Make it look like the bottom nav buttons */
     background: transparent;
     border: none;
     color: var(--accent-primary);
-    padding: 0.75rem 1rem; /* Adjust padding if needed */
+    padding: 0.75rem 1rem;
     text-decoration: none;
     font-weight: 500;
     transition: background 0.2s ease;
 }
 .quick-nav-footer .btn:hover {
     background: var(--bg-secondary);
-    text-decoration: none; /* Ensure no underline on hover */
+    text-decoration: none;
 }
 
 #quick-nav-search {
@@ -7119,18 +6603,17 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 }
 
 [data-mode="dark"] #quick-nav-overlay {
-    /* Use dark background variables */
     background: rgba(var(--palette-bg-dark-primary-rgb, 45, 45, 45), 0.9);
 }
 
 [data-mode="dark"] .quick-nav-header,
 [data-mode="dark"] .quick-nav-footer {
-    background: var(--palette-bg-dark-secondary); /* Slightly lighter dark */
+    background: var(--palette-bg-dark-secondary);
     border-color: var(--palette-border-dark);
 }
 
 [data-mode="dark"] #quick-nav-search {
-    background: var(--palette-bg-dark-primary); /* Darker input background */
+    background: var(--palette-bg-dark-primary);
     color: var(--palette-text-dark-primary);
     border-color: var(--palette-border-dark);
 }
@@ -7157,14 +6640,12 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     color: var(--palette-text-dark-secondary);
     opacity: 0.7;
 }
-
-/* Use --palette variables directly for consistency */
 [data-mode="dark"] .quick-nav-footer .btn {
-   color: var(--accent-primary); /* Keep accent color */
+   color: var(--accent-primary);
    background: transparent;
 }
 [data-mode="dark"] .quick-nav-footer .btn:hover {
-   background: var(--palette-bg-dark-secondary); /* Use dark secondary bg */
+   background: var(--palette-bg-dark-secondary);
 }
 
 /* ==========================================
@@ -7172,28 +6653,28 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
    ========================================== */
 
 .novel-details-page-skeleton .skeleton {
-    opacity: 0.7; /* Make skeletons slightly transparent */
-    margin-bottom: 1rem; /* Default bottom margin */
+    opacity: 0.7;
+    margin-bottom: 1rem;
 }
 
 .novel-details-page-skeleton .breadcrumbs-skeleton { height: 1.5rem; width: 40%; }
 .novel-details-page-skeleton .page-header-skeleton { display: flex; justify-content: space-between; height: 36px; margin-bottom: 1.5rem;}
 
-.novel-content-wrapper-skeleton { overflow: hidden; /* Clear floats */ margin-bottom: 1.5rem; }
+.novel-content-wrapper-skeleton { overflow: hidden; margin-bottom: 1.5rem; }
 
 .novel-cover-float-skeleton {
     float: left;
-    width: 280px; /* Match cover width */
-    aspect-ratio: 5 / 7; /* Match cover aspect ratio */
+    width: 280px;
+    aspect-ratio: 5 / 7;
     border-radius: var(--radius-lg);
     margin: 0 2rem 1rem 0;
 }
 
 .novel-info-desktop-skeleton {
-    display: none; /* Hide on mobile initially */
+    display: none;
     float: right;
-    width: 320px; /* Match sidebar width */
-    height: 400px; /* Approx height */
+    width: 320px;
+    height: 400px;
     border-radius: var(--radius-lg);
     margin-left: 2rem;
 }
@@ -7205,13 +6686,9 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 .novel-details-page-skeleton .taxonomy-skeleton { height: 4rem; width: 100%; border-radius: var(--radius-md); }
 .novel-details-page-skeleton .chapters-header-skeleton { height: 3rem; width: 100%; margin-top: 1.5rem; }
 .novel-details-page-skeleton .chapters-list-skeleton { margin-top: 1rem; }
-
-/* Desktop adjustments for skeleton */
 @media (min-width: 1024px) {
     .novel-info-desktop-skeleton { display: block; }
 }
-
-/* Mobile adjustments for skeleton */
 @media (max-width: 767px) {
     .novel-cover-float-skeleton { float: none; width: 200px; margin: 0 auto 1.5rem; }
     .novel-description-float-skeleton .tabs-skeleton { width: 100%; }
@@ -7222,149 +6699,123 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
    ========================================== */
 
 .author-page .author-header {
-    display: flex; /* Используем flex для удобного выравнивания */
-    flex-direction: column; /* Элементы идут друг под другом */
-    align-items: center; /* Центрируем всё по горизонтали */
-    text-align: center; /* Центрируем текст внутри элементов */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--border-color);
-    position: relative; /* Для позиционирования кнопки "Назад" */
+    position: relative;
 }
 
 /* Кнопка "Назад" */
 .author-page .author-back-btn {
-    position: absolute; /* Позиционируем абсолютно относительно .author-header */
-    left: 0; /* Прижимаем к левому краю */
-    top: 0; /* Прижимаем к верху */
-    /* Стили из btn-ghost и btn-sm уже применены через JS */
+    position: absolute;
+    left: 0;
+    top: 0;
 }
-
-/* Заголовок с именем автора */
 .author-page .author-header h1 {
-    font-size: 2rem; /* Размер шрифта */
+    font-size: 2rem;
     font-weight: 600;
-    margin-top: 0; /* Убираем верхний отступ, т.к. кнопка спозиционирована */
-    margin-bottom: 0.5rem; /* Небольшой отступ снизу */
+    margin-top: 0;
+    margin-bottom: 0.5rem;
 }
-
-/* Блок с алиасами */
 .author-page .author-aliases {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    max-width: 600px; /* Ограничиваем ширину для читаемости */
+    max-width: 600px;
 }
 .author-page .author-aliases small {
-    display: block; /* Заголовок на своей строке */
+    display: block;
     margin-bottom: 0.25rem;
     font-weight: 500;
 }
 .author-page .author-aliases span {
-    font-style: italic; /* Сами алиасы курсивом */
+    font-style: italic;
 }
-
-/* ✨ СТИЛИ ДЛЯ КОЛИЧЕСТВА НОВЕЛЛ (ТЕПЕРЬ И ДЛЯ СОЗДАТЕЛЯ) ✨ */
 .author-page .author-novel-count,
-.creator-page .author-novel-count { /* <-- Добавили селектор */
+.creator-page .author-novel-count {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
     margin-top: 1rem;
     color: var(--text-secondary);
     font-size: 1.1rem;
-    /* ✨ Центрируем блок под именем */
     justify-content: center;
 }
 
 .author-page .count-value,
-.creator-page .count-value { /* <-- Добавили селектор */
+.creator-page .count-value {
     font-size: 1.1rem;
     font-weight: 500;
     color: var(--text-primary);
 }
 
 .author-page .count-separator,
-.creator-page .count-separator { /* <-- Добавили селектор */
+.creator-page .count-separator {
     font-weight: bold;
 }
 
 .author-page .count-label,
-.creator-page .count-label { /* <-- Добавили селектор */
-    /* Стиль для подписи (Новелла/ы/ел) */
+.creator-page .count-label {
 }
-
-/* Секция произведений */
 .author-page .author-novels h2 {
     margin-bottom: 1.5rem;
-    text-align: center; /* Заголовок тоже по центру */
+    text-align: center;
 }
-
-/* Адаптация для мобильных */
 @media (max-width: 767px) {
     .author-page .author-header h1 {
         font-size: 1.6rem;
     }
     .author-page .author-back-btn {
-        position: static; /* Возвращаем кнопку в поток */
-        margin-bottom: 1rem; /* Добавляем отступ снизу */
-        align-self: flex-start; /* Выравниваем по левому краю */
+        position: static;
+        margin-bottom: 1rem;
+        align-self: flex-start;
     }
     .author-page .author-header {
-         align-items: center; /* Центрируем все еще раз */
+         align-items: center;
     }
 }
 
 /* ==========================================
    БЛОК 31: СТРАНИЦА СОЗДАТЕЛЯ (Дополнения)
    ========================================== */
-
-/* Используем стили хедера профиля, но центрируем */
 .creator-page .profile-header {
-    /* Наследуем стили от .profile-header (уже есть) */
-    flex-direction: column; /* Элементы друг под другом */
-    align-items: center; /* Центрируем всё */
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    position: relative; /* Для кнопки "Назад" */
-    padding-top: 3rem; /* Добавим отступ сверху для кнопки "Назад" */
-    margin-bottom: 2.5rem; /* Отступ до списка новелл */
+    position: relative;
+    padding-top: 3rem;
+    margin-bottom: 2.5rem;
 }
 
 /* Кнопка "Назад" для страницы создателя */
 .creator-page .creator-back-btn {
     position: absolute;
-    left: 1rem; /* Отступ слева */
-    top: 1rem;  /* Отступ сверху */
+    left: 1rem;
+    top: 1rem;
 }
-
-/* Аватарка */
 .creator-page .profile-avatar-placeholder {
-    width: 100px; /* Размер аватарки */
+    width: 100px;
     height: 100px;
-    font-size: 2.5rem; /* Размер буквы внутри */
-    margin-bottom: 1rem; /* Отступ снизу */
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
 }
-
-/* Имя пользователя */
 .creator-page .profile-username {
-    font-size: 1.8rem; /* Размер имени */
+    font-size: 1.8rem;
     margin-bottom: 0.25rem;
 }
-
-/* ID пользователя */
 .creator-page .profile-user-id {
-    font-size: 1rem; /* Размер ID */
+    font-size: 1rem;
 }
-
-/* Секция произведений */
 .creator-page .creator-novels h2 {
     text-align: center;
     margin-bottom: 1.5rem;
 }
-
-/* Адаптация для мобильных */
 @media (max-width: 767px) {
     .creator-page .profile-header {
-        padding-top: 4rem; /* Увеличим отступ для кнопки */
+        padding-top: 4rem;
     }
     .creator-page .creator-back-btn {
         left: 0.5rem;
@@ -7384,36 +6835,30 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 
     #novels-grid,
     .novels-grid {
-      /* ✨ ИЗМЕНЕНИЕ ЗДЕСЬ: Уменьшаем минимальную ширину ✨ */
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Было 160px */
-      gap: 0.75rem; /* Можно немного уменьшить отступ, если нужно */
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.75rem;
     }
 
     .search-input {
-      font-size: 0.85rem; /* Уменьшаем размер шрифта (был 1rem) */
-      padding: 0.5rem 0.5rem; /* Можно немного уменьшить отступы */
+      font-size: 0.85rem;
+      padding: 0.5rem 0.5rem;
     }
 
     .chapter-text {
-      font-size: 14px;  /* Set font size to 14px */
-      line-height: 1.1; /* Set line height to narrow (1.4) */
+      font-size: 14px;
+      line-height: 1.1;
     }
 
     .chapter-text p {
-      margin-bottom: 0.75em; /* Уменьшаем отступ снизу (был 1em) */
-      /* margin-top: 0.75em; */ /* Можно добавить и верхний, если нужно */
+      margin-bottom: 0.75em;
     }
 }
 
 @media (max-width: 767px) {
-
-    /* --- Общие отступы страницы --- */
     .profile-page {
         padding-left: 0.75rem;
         padding-right: 0.75rem;
     }
-
-    /* --- Шапка профиля (над табами) --- */
     .profile-page-header {
         margin-bottom: 1rem;
         flex-wrap: wrap;
@@ -7424,8 +6869,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
         padding: 0.4rem 0.8rem;
         font-size: 0.85rem;
     }
-
-    /* --- Блок с аватаром и информацией --- */
     .profile-header {
         padding: 1rem;
         gap: 1rem;
@@ -7463,8 +6906,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
         word-break: break-word;
     }
     .profile-user-id { font-size: 0.75rem; }
-
-    /* ✨ ИЗМЕНЕНИЕ: Убираем .profile-role из правила ниже */
     .profile-email {
         font-size: 0.8rem;
         margin: 0.1rem 0;
@@ -7473,12 +6914,10 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
         text-overflow: ellipsis;
         max-width: 150px;
     }
-    /* ✨ ИЗМЕНЕНИЕ: Отдельное правило для роли, без усечения */
     .profile-role {
-        font-size: 0.8rem; /* Уменьшаем шрифт */
+        font-size: 0.8rem;
         margin: 0.1rem 0;
-        /* Убираем white-space, overflow, text-overflow, max-width */
-        word-break: break-word; /* Позволяем переноситься, если очень длинное */
+        word-break: break-word;
     }
 
     .btn-logout-profile {
@@ -7488,16 +6927,11 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
         padding: 0.4rem 0.6rem;
         font-size: 0.8rem;
     }
-
-
-    /* --- Табы (Полки / Созданные) --- */
     .tabs { margin-bottom: 1rem; }
     .tab-btn {
         padding: 0.6rem 0.8rem;
         font-size: 0.85rem;
     }
-
-    /* --- Секция "Мои полки" (Shelves) --- */
     .shelves-layout {
         grid-template-columns: 100px 1fr;
         gap: 1rem;
@@ -7515,25 +6949,22 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     .shelf-nav-btn {
         padding: 0.5rem 0.7rem;
         font-size: 0.65em;
-        /* ✨ ИЗМЕНЕНИЕ: Выравниваем текст влево */
-        /* Позволяем тексту кнопки немного сжиматься */
         overflow: hidden;
         display: flex;
         align-items: center;
         width: 100%;
         position: relative;
     }
-    .shelf-nav-btn > span:first-of-type { /* Выбираем первый span (текст полки) */
-        white-space: nowrap;      /* Запрещаем перенос текста */
-        overflow: hidden;         /* Скрываем лишнее */
-        text-overflow: ellipsis;  /* Добавляем троеточие */
-        padding-right: 5px;             /* Позволяем занимать доступное место */
-        min-width: 0;     /* Небольшой отступ справа от текста */
+    .shelf-nav-btn > span:first-of-type {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 5px;
+        min-width: 0;
     }
     .shelf-count {
         font-size: 0.6rem;
         padding: 0.1rem 0.3rem;
-        /* ✨ ИЗМЕНЕНИЕ: Прижимаем счетчик к правому краю */
         position: absolute;
         right: 0.2rem;
         top: 50%;
@@ -7553,8 +6984,6 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
         font-size: 0.85rem;
         padding: 2rem 0.5rem;
     }
-
-    /* --- Секция "Созданные новеллы" --- */
     .profile-page .novels-grid {
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: 0.8rem;
@@ -7632,14 +7061,14 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
     max-width: 100%;
     padding: 0;
     /* Можно сделать шрифт чуть меньше для мобильных */
-    font-size: 16px; 
+    font-size: 16px;
   }
 
   /* --- Хедер чтения --- */
   .reader-header {
     padding: 0 0.5rem; /* Уменьшаем боковые отступы хедера */
   }
-  
+
   .reader-header-center .btn-reader-title {
     padding: 0.5rem; /* Уменьшаем кнопку с названием */
   }
@@ -7667,6 +7096,884 @@ html:not([data-user-role="owner"]) .chapter-item-v2 {
 }
 
 /* ==========================================
-   КОНЕЦ ФАЙЛА СТИЛЕЙ
+   РЕЗУЛЬТАТЫ ПОИСКА АВТОРОВ
    ========================================== */
 
+.author-autocomplete {
+  border: none;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.author-autocomplete .autocomplete-item {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem 1rem;
+
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+
+  background: var(--bg-card);
+  color: var(--text-primary);
+  text-align: left;
+  font: inherit;
+}
+.author-autocomplete .autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.author-autocomplete .autocomplete-item:hover,
+.author-autocomplete .autocomplete-item:focus-visible {
+  background: var(--bg-secondary);
+}
+
+.author-result-content {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.author-result-name {
+  display: block;
+  overflow: hidden;
+
+  color: var(--text-primary);
+  font-size: 0.98rem;
+  font-weight: 600;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.author-result-aliases {
+  display: block;
+  width: 100%;
+  margin-top: 0.18rem;
+  overflow: hidden;
+
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 400;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.author-alias-separator {
+  opacity: 0.55;
+}
+.author-result-name strong,
+.author-result-aliases strong {
+  padding: 0 0.08em;
+  color: inherit;
+  font-weight: 700;
+  background: var(--author-match-background);
+  border-radius: 3px;
+}
+[data-mode="light"] {
+  --author-match-background: rgba(124, 58, 237, 0.14);
+}
+
+[data-mode="dark"] {
+  --author-match-background: rgba(167, 139, 250, 0.24);
+}
+
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.submission-count {
+  min-width: 2rem;
+  padding: 0.25rem 0.65rem;
+
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.submissions-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.submission-card {
+  padding: 1rem;
+
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+
+  background: var(--bg-card);
+}
+
+.submission-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.55rem;
+}
+
+.submission-type,
+.submission-status {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.submission-card h4 {
+  margin-bottom: 0.5rem;
+}
+
+.submission-aliases,
+.submission-body {
+  margin-top: 0.4rem;
+  color: var(--text-secondary);
+}
+
+.submission-meta {
+  margin-top: 0.8rem;
+  padding-top: 0.65rem;
+
+  border-top: 1px solid var(--border-color);
+
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+/* ==========================================
+   ОТДЕЛЬНАЯ СТРАНИЦА АДМИН-ПАНЕЛИ
+   ========================================== */
+
+.admin-page {
+  width: 100%;
+}
+
+.admin-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+
+  background: var(--bg-card);
+}
+
+.admin-page-eyebrow {
+  margin-bottom: 0.2rem;
+
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-page-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.8rem;
+}
+
+.admin-page-description {
+  margin-top: 0.4rem;
+  color: var(--text-secondary);
+}
+
+.admin-page > .admin-content {
+  padding: 0;
+}
+
+.admin-page .modal-loading-overlay {
+  min-height: 18rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+
+  background: var(--bg-card);
+}
+
+@media (max-width: 700px) {
+  .admin-page-header {
+    flex-direction: column;
+  }
+
+  .admin-page-header .btn {
+    width: 100%;
+  }
+}
+
+/* ==========================================
+   РЕДАКТОР ГЛАВЫ
+   ========================================== */
+
+body.chapter-editor-page-open {
+  --chapter-topbar-height: 56px;
+  padding-bottom: 34px;
+}
+
+body.chapter-editor-page-open .main {
+  max-width: none;
+  margin-top: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+body.chapter-editor-page-open .footer {
+  display: none;
+}
+
+.chapter-form-page {
+  width: min(1120px, 100%);
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 1.25rem 5rem;
+  overflow: visible;
+}
+
+.chapter-editor-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--chapter-topbar-height);
+  gap: 1rem;
+  margin: 0 -1.25rem;
+  padding: 0.5rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-primary) 94%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.chapter-editor-topbar .breadcrumbs {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chapter-editor-topbar-actions {
+  display: flex;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.chapter-editor-action-btn {
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chapter-editor-action-btn:hover {
+  border-color: var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.chapter-editor-action-btn-primary {
+  background: var(--accent-primary);
+  color: var(--text-on-accent, #fff);
+}
+
+.chapter-editor-action-btn-primary:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--text-on-accent, #fff);
+  filter: brightness(1.06);
+}
+
+.chapter-draft-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--accent-warning) 48%, var(--border-color));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent-warning) 9%, var(--bg-card));
+  color: var(--text-primary);
+}
+
+.chapter-draft-banner[hidden],
+.chapter-find-panel[hidden],
+.chapter-editor-preview[hidden] {
+  display: none;
+}
+
+.chapter-draft-banner strong,
+.chapter-draft-banner span {
+  display: block;
+}
+
+.chapter-draft-banner span {
+  margin-top: 0.1rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.chapter-draft-banner-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.chapter-editor-meta-card {
+  padding: 1.5rem 0 1.15rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.chapter-editor-meta-grid {
+  align-items: start;
+  margin-bottom: 0;
+}
+
+.chapter-editor-meta-grid-primary {
+  grid-template-columns: minmax(260px, 1fr) minmax(170px, 0.38fr);
+}
+
+.chapter-editor-meta-grid-secondary {
+  grid-template-columns: minmax(260px, 1fr) minmax(230px, 0.52fr);
+}
+
+.chapter-editor-meta-card .form-group {
+  margin-bottom: 0.65rem;
+}
+
+.chapter-editor-meta-card .form-input:focus {
+  border-color: var(--text-primary);
+  box-shadow: none;
+}
+
+.chapter-title-input {
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.chapter-volume-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+
+.chapter-volume-chip {
+  max-width: 100%;
+  padding: 0.22rem 0.58rem;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.74rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chapter-volume-chip:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.chapter-editor-card {
+  position: relative;
+  overflow: visible;
+}
+
+.chapter-editor-toolbar-shell {
+  position: sticky;
+  top: var(--chapter-topbar-height);
+  z-index: 30;
+}
+
+.chapter-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  min-height: 48px;
+  padding: 0.42rem 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-primary) 94%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.chapter-editor-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.18rem;
+}
+
+.editor-tool-select {
+  min-height: 2rem;
+  max-width: 112px;
+  padding: 0.25rem 1.55rem 0.25rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.editor-tool-select-size {
+  width: 84px;
+}
+
+.editor-color-tool {
+  position: relative;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.editor-color-tool:hover {
+  border-color: var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.editor-color-tool input {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 0.18rem;
+  width: 1.45rem;
+  height: 0.22rem;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+.editor-tool-separator {
+  width: 1px;
+  height: 1.4rem;
+  margin-inline: 0.25rem;
+  background: var(--border-color);
+}
+
+.editor-tool-reset {
+  min-width: 1.6rem !important;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.editor-tool-btn {
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.42rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editor-tool-btn:hover,
+.editor-tool-btn[aria-pressed="true"] {
+  border-color: var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--accent-primary);
+}
+
+.chapter-find-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0.5rem;
+  z-index: 35;
+  width: min(470px, calc(100vw - 2rem));
+  padding: 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-primary) 97%, transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.chapter-find-row,
+.chapter-replace-row {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto auto auto auto;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+.chapter-replace-row {
+  grid-template-columns: minmax(120px, 1fr) auto auto;
+  margin: 0.28rem 0 0 1.9rem;
+}
+
+.chapter-replace-row[hidden] {
+  display: none;
+}
+
+.chapter-find-input {
+  min-width: 0;
+  min-height: 1.9rem;
+  padding: 0.2rem 0.4rem;
+  border: 0;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.chapter-find-input:focus {
+  border-bottom-color: var(--accent-primary);
+}
+
+.chapter-find-count {
+  min-width: 3.1rem;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.chapter-find-icon-btn {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.chapter-find-icon-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.chapter-replace-toggle {
+  font-size: 1.2rem;
+}
+
+::highlight(chapter-search) {
+  background: color-mix(in srgb, var(--accent-warning) 48%, transparent);
+}
+
+::highlight(chapter-search-current) {
+  background: color-mix(in srgb, var(--accent-primary) 58%, transparent);
+  color: var(--text-primary);
+}
+
+.chapter-editor-workspace {
+  min-height: 58vh;
+}
+
+.chapter-editor-input-pane {
+  display: block;
+  min-width: 0;
+}
+
+.chapter-editor-card.is-previewing .chapter-editor-input-pane {
+  display: none;
+}
+
+.chapter-editor-surface {
+  width: 100%;
+  min-height: 58vh;
+  margin: 0;
+  padding: clamp(1.25rem, 4vw, 3rem) clamp(0.25rem, 3vw, 2rem);
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.chapter-editor-surface:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.chapter-editor-surface:empty::before {
+  color: var(--text-muted);
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+.chapter-editor-surface p {
+  margin: 0 0 1em;
+}
+
+.chapter-editor-surface blockquote {
+  margin: 1.25rem 0;
+  padding: 0.1rem 0 0.1rem 1rem;
+  border-left: 3px solid var(--accent-primary);
+  color: var(--text-secondary);
+}
+
+.chapter-editor-surface hr {
+  width: 100%;
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.chapter-editor-preview {
+  min-height: 58vh;
+  padding: clamp(1.25rem, 4vw, 3rem) clamp(0.25rem, 3vw, 2rem);
+  background: transparent;
+}
+
+.chapter-editor-preview h2 {
+  margin: 0 0 1.5rem;
+  color: var(--text-primary);
+  font-family: Georgia, 'Times New Roman', serif;
+  text-align: center;
+}
+
+.chapter-editor-preview-volume {
+  margin-bottom: 0.45rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.chapter-editor-preview-text {
+  color: var(--text-primary);
+  line-height: 1.8;
+}
+
+.chapter-editor-preview-text p {
+  margin: 0 0 1em;
+}
+
+.chapter-editor-preview-empty {
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.chapter-quote {
+  margin: 1.25rem 0;
+  padding: 0.1rem 0 0.1rem 1rem;
+  border-left: 3px solid var(--accent-primary);
+  color: var(--text-secondary);
+}
+
+.chapter-quote p:last-child {
+  margin-bottom: 0;
+}
+
+.chapter-divider {
+  width: 100%;
+  margin: 2.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.chapter-editor-statusbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 34px;
+  padding: 0.35rem max(0.75rem, calc((100vw - 1120px) / 2 + 1.25rem));
+  border-top: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  backdrop-filter: blur(12px);
+}
+
+.chapter-editor-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.chapter-editor-stats strong {
+  color: var(--text-primary);
+}
+
+.chapter-draft-status {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.chapter-draft-status[data-state="saved"] { color: var(--accent-success); }
+.chapter-draft-status[data-state="dirty"] { color: var(--accent-warning); }
+.chapter-draft-status[data-state="error"] { color: var(--accent-danger); }
+
+.chapter-editor-card.is-fullscreen {
+  position: fixed;
+  inset: 0 0 34px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+}
+
+.chapter-editor-card.is-fullscreen .chapter-editor-toolbar-shell {
+  top: 0;
+}
+
+.chapter-editor-card.is-fullscreen .chapter-editor-workspace {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.chapter-editor-card.is-fullscreen .chapter-editor-input-pane,
+.chapter-editor-card.is-fullscreen .chapter-editor-surface,
+.chapter-editor-card.is-fullscreen .chapter-editor-preview {
+  min-height: 100%;
+}
+
+body.chapter-editor-fullscreen-open {
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .chapter-editor-meta-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .chapter-editor-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  body.chapter-editor-page-open {
+    --chapter-topbar-height: 52px;
+  }
+
+  .chapter-form-page {
+    padding-inline: 0.75rem;
+  }
+
+  .chapter-editor-topbar {
+    margin-inline: -0.75rem;
+    padding-inline: 0.75rem;
+  }
+
+  .chapter-editor-topbar .breadcrumbs {
+    font-size: 0.75rem;
+  }
+
+  .chapter-editor-action-btn {
+    padding-inline: 0.5rem;
+  }
+
+  .chapter-draft-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .chapter-draft-banner-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .chapter-editor-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chapter-editor-meta-grid .form-group:first-child {
+    grid-column: auto;
+  }
+
+  .chapter-editor-toolbar {
+    gap: 0.3rem;
+    padding-inline: 0;
+  }
+
+  .chapter-editor-toolbar-group {
+    max-width: 100%;
+  }
+
+  .chapter-editor-formatting-group {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.25rem;
+  }
+
+  .editor-tool-select {
+    max-width: 92px;
+  }
+
+  .chapter-find-panel {
+    right: 0;
+    width: calc(100vw - 1.5rem);
+  }
+
+  .chapter-editor-surface,
+  .chapter-editor-preview {
+    padding: 1.35rem 0.15rem 2rem;
+  }
+
+  .chapter-editor-statusbar {
+    gap: 0.5rem;
+    padding-inline: 0.65rem;
+  }
+
+  .chapter-editor-stats span:nth-child(3),
+  .chapter-editor-stats span:nth-child(4) {
+    display: none;
+  }
+
+  .chapter-draft-status {
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ==========================================
+   КОНЕЦ ФАЙЛА СТИЛЕЙ
+   ========================================== */

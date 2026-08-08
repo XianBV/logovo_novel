@@ -1,0 +1,11 @@
+.env
+.env.local
+node_modules/
+*.log
+supabase/.temp/
+supabase/functions/.env
+.vscode/
+Документация/
+*.cmd
+code.gs
+Supabase.gs
