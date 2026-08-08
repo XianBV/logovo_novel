@@ -140,20 +140,30 @@ async function loadAdminData() {
 
 function renderUsersTableRows(users) {
     if (!users || users.length === 0) {
-        return '<tr><td colspan="6" class="text-center">Пользователи не найдены</td></tr>';
+        return '<tr><td colspan="7" class="text-center">Пользователи не найдены</td></tr>';
     }
-    return users.map(user => `
-        <tr>
-            <td>${user.user_id}</td>
-            <td>${escapeHtml(user.username)}</td>
-            <td>${escapeHtml(user.email || '-')}</td>
-            <td><span class="role-badge role-${user.role}">${getDisplayRoleName(user.role)}</span></td>
-            <td>${formatDate(user.created_at)}</td>
-            <td class="table-actions">
-                <button class="btn btn-sm btn-secondary" onclick="editUserRole(${user.user_id}, '${user.role}')">Изменить роль</button>
-                ${user.role !== 'owner' ? `<button class="btn btn-sm btn-danger" onclick="handleDeleteUser(${user.user_id}, '${escapeHtml(user.username)}')">Удалить</button>` : ''}
-            </td>
-        </tr>`).join('');
+    const currentUserId = String(STATE.currentUser?.user_id ?? '');
+    const currentUserIsOwner = STATE.currentUser?.role === 'owner' || currentUserId === '0';
+    return users.map(user => {
+        const isSelf = String(user.user_id) === currentUserId;
+        const isProtectedOwner = user.role === 'owner' || String(user.user_id) === '0';
+        const canBlock = !isSelf && !isProtectedOwner && (currentUserIsOwner || user.role !== 'admin');
+        const canDelete = currentUserIsOwner && !isSelf && !isProtectedOwner;
+        return `
+            <tr>
+                <td>${user.user_id}</td>
+                <td>${escapeHtml(user.username)}</td>
+                <td>${escapeHtml(user.email || '-')}</td>
+                <td><span class="role-badge role-${user.role}">${getDisplayRoleName(user.role)}</span></td>
+                <td><span class="user-status-badge ${user.is_banned ? 'is-blocked' : 'is-active'}">${user.is_banned ? 'Заблокирован' : 'Активен'}</span></td>
+                <td>${formatDate(user.created_at)}</td>
+                <td class="table-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="editUserRole(${user.user_id}, '${user.role}')">Изменить роль</button>
+                    ${canBlock ? `<button class="btn btn-sm ${user.is_banned ? 'btn-secondary' : 'btn-warning'}" onclick="handleToggleUserBlock(${user.user_id}, ${user.is_banned ? 'false' : 'true'})">${user.is_banned ? 'Разблокировать' : 'Заблокировать'}</button>` : ''}
+                    ${canDelete ? `<button class="btn btn-sm btn-danger" onclick="handleDeleteUser(${user.user_id})">Удалить навсегда</button>` : ''}
+                </td>
+            </tr>`;
+    }).join('');
 }
 
 function renderAdminPanel(dashboardData, users, tags, limits, submissions) {
@@ -168,7 +178,6 @@ function renderAdminPanel(dashboardData, users, tags, limits, submissions) {
         access: '🔒 Доступы',
         tags: '🔖 Теги',
         trash: '🗑️ Корзина',
-        database: '🗄️ База данных',
         settings: '⚙️ Настройки'
     };
 
@@ -188,7 +197,6 @@ function renderAdminPanel(dashboardData, users, tags, limits, submissions) {
         <div id="admin-tab-access" class="admin-tab-content" style="display: none;"></div>
         <div id="admin-tab-tags" class="admin-tab-content" style="display: none;"></div>
         <div id="admin-tab-trash" class="admin-tab-content" style="display: none;"></div>
-        <div id="admin-tab-database" class="admin-tab-content" style="display: none;"></div>
         <div id="admin-tab-settings" class="admin-tab-content" style="display: none;"></div>
     `;
     
@@ -361,7 +369,7 @@ function renderAdminPanel(dashboardData, users, tags, limits, submissions) {
             <div class="table-responsive">
                 <table class="users-table">
                     <thead>
-                        <tr><th>ID</th><th>Имя</th><th>Email</th><th>Роль</th><th>Создан</th><th>Действия</th></tr>
+                        <tr><th>ID</th><th>Имя</th><th>Email</th><th>Роль</th><th>Статус</th><th>Создан</th><th>Действия</th></tr>
                     </thead>
                     <tbody>
                         ${renderUsersTableRows(users)}
@@ -440,20 +448,6 @@ function renderAdminPanel(dashboardData, users, tags, limits, submissions) {
             </div>`;
     } else {
         console.error("Элемент #admin-tab-tags не найден!");
-    }
-
-    // Вкладка "База данных"
-    const dbContent = document.getElementById('admin-tab-database');
-    if (dbContent) {
-        dbContent.innerHTML = `
-            <h3>Управление базой данных</h3>
-            <div class="admin-actions">
-                <button class="btn btn-warning" onclick="updateDatabaseStructure()">🔄 Обновить структуру БД</button>
-                <button class="btn btn-secondary" onclick="handleCleanupSessions()">🧹 Очистить старые сессии</button>
-                <button class="btn btn-danger" onclick="clearDatabaseConfirm()">⚠️ Очистить базу данных</button>
-                <button class="btn btn-danger" onclick="clearDriveFolderConfirm()">⚠️ Очистить папку Drive</button>
-                <button class="btn btn-danger" onclick="clearDataConfirm()">⚠️ Очистить ВСЕ ДАННЫЕ</button>
-            </div>`;
     }
 
     const settingsContent = document.getElementById('admin-tab-settings'); // Новое ID
@@ -696,24 +690,53 @@ async function handleSearchUsers() {
     }
 }
 
-// Обработчик для кнопки удаления
-function handleDeleteUser(userId, username) {
+function handleToggleUserBlock(userId, shouldBlock) {
     showConfirmModal(
-        'Подтверждение удаления',
-        `Вы уверены, что хотите НАВСЕГДА удалить пользователя "${username}" (ID: ${userId})? Это действие необратимо.`,
+        shouldBlock ? 'Заблокировать пользователя' : 'Разблокировать пользователя',
+        shouldBlock
+            ? `Пользователь ID ${userId} сразу выйдет из аккаунта и не сможет войти снова, пока вы его не разблокируете.`
+            : `Пользователь ID ${userId} снова сможет войти на сайт.`,
         async () => {
-            showLoading(true, { title: 'Удаление пользователя...' });
+            showLoading(true, { title: shouldBlock ? 'Блокировка...' : 'Разблокировка...' });
             try {
-                const response = await apiPostRequest('deleteUser', { user_id: userId });
+                const response = await apiPostRequest(shouldBlock ? 'blockUser' : 'unblockUser', { user_id: userId });
                 if (response.success) {
                     showToast(response.message, 'success');
-                    loadAdminData(); // Обновляем всю админку
+                    await loadAdminData();
                 } else { throw new Error(response.error); }
             } catch (error) {
-                showToast('Ошибка удаления: ' + error.message, 'error');
+                showToast('Ошибка: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
+        }
+    );
+}
+
+// Полное удаление доступно только владельцу и специально требует два подтверждения.
+function handleDeleteUser(userId) {
+    showConfirmModal(
+        'Безвозвратное удаление пользователя',
+        `Пользователь ID ${userId} и все его личные данные будут удалены. Его новеллы сохранятся и перейдут владельцу сайта. Продолжить?`,
+        () => {
+            showConfirmModal(
+                'Последнее подтверждение',
+                'Отменить это действие после удаления будет невозможно. Обычно безопаснее использовать блокировку.',
+                async () => {
+                    showLoading(true, { title: 'Полное удаление пользователя...' });
+                    try {
+                        const response = await apiPostRequest('deleteUser', { user_id: userId });
+                        if (response.success) {
+                            showToast(response.message, 'success');
+                            await loadAdminData();
+                        } else { throw new Error(response.error); }
+                    } catch (error) {
+                        showToast('Ошибка удаления: ' + error.message, 'error');
+                    } finally {
+                        showLoading(false);
+                    }
+                }
+            );
         }
     );
 }
@@ -820,140 +843,6 @@ function handleDeleteTag(id, name) {
                 showToast('Ошибка: ' + error.message, 'error');
             } finally {
                 showLoading(false); // Прячем спиннер
-            }
-        }
-    );
-}
-
-function updateDatabaseStructure() {
-    showConfirmModal(
-        'Обновление структуры БД',
-        'Вы уверены, что хотите обновить структуру базы данных? Это безопасная операция.',
-        async () => {
-            showLoading(true, { title: 'Обновление БД' });
-            try {
-                // ✨ ИЗМЕНЕНИЕ ЗДЕСЬ: используем apiRequest вместо apiPostRequest
-                const response = await apiRequest('updateDatabaseStructure', {});
-                
-                if (response.success) {
-                    // Используем сообщение от сервера, оно теперь умное!
-                    showToast(response.message, 'success');
-                } else {
-                    throw new Error(response.error || 'Ошибка');
-                }
-            } catch (error) {
-                showToast('Ошибка: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-    );
-}
-
-function clearDatabaseConfirm() {
-    // Первое подтверждение
-    showConfirmModal(
-        'Очистка базы данных',
-        'ВНИМАНИЕ! Это действие удалит ВСЕ новеллы, главы и теги. Вы уверены?',
-        () => {
-            // Если нажали "Да", показываем второе, более страшное окно
-            showConfirmModal(
-                'Окончательное подтверждение',
-                'Вы АБСОЛЮТНО уверены? Данные будет невозможно восстановить. Это действие необратимо.',
-                async () => {
-                    // Если и здесь нажали "Да", выполняем опасное действие
-                    showLoading(true, { title: 'Очистка БД' });
-                    
-                    try {
-                        const response = await apiPostRequest('clearDatabase', {});
-                        
-                        if (response.success) {
-                            showToast('База данных очищена', 'success');
-                            clearCache();
-                            setTimeout(() => location.reload(), 2000);
-                        } else {
-                            throw new Error(response.error || 'Ошибка');
-                        }
-                    } catch (error) {
-                        showToast('Ошибка: ' + error.message, 'error');
-                    } finally {
-                        showLoading(false);
-                    }
-                }
-            );
-        }
-    );
-}
-
-function clearDriveFolderConfirm() {
-    // Первое подтверждение
-    showConfirmModal(
-        'Очистка папки Drive',
-        'ВНИМАНИЕ! Это действие удалит ВСЕ файлы новелл из папки на Google Drive. Продолжить?',
-        () => {
-            // Второе подтверждение
-            showConfirmModal(
-                'Окончательное подтверждение',
-                'Вы ТОЧНО уверены? Эта операция затронет все созданные новеллы.',
-                async () => {
-                    // Основная логика
-                    showLoading(true, { title: 'Очистка Drive' });
-                    
-                    try {
-                        const response = await apiPostRequest('clearDriveFolder', {});
-                        
-                        if (response.success) {
-                            showToast('Папка Drive очищена', 'success');
-                        } else {
-                            throw new Error(response.error || 'Ошибка');
-                        }
-                    } catch (error) {
-                        showToast('Ошибка: ' + error.message, 'error');
-                    } finally {
-                        showLoading(false);
-                    }
-                }
-            );
-        }
-    );
-}
-
-function handleCleanupSessions() {
-    showConfirmModal(
-        'Очистка старых сессий',
-        'Вы уверены, что хотите удалить все истёкшие сессии пользователей? Это заставит неактивных пользователей заново войти в систему.',
-        async () => {
-            showLoading(true, { title: 'Очистка сессий...' });
-            try {
-                const response = await apiRequest('cleanupSessions'); // Используем apiRequest
-                if (response.success) {
-                    showToast(`Удалено истёкших сессий: ${response.deletedCount}`, 'success');
-                } else { throw new Error(response.error); }
-            } catch (error) {
-                showToast('Ошибка: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-    );
-}
-
-function clearDataConfirm() {
-    showConfirmModal(
-        'ПОЛНАЯ ОЧИСТКА ДАННЫХ',
-        'ВНИМАНИЕ! Это действие удалит ВСЕ новеллы, главы, авторов и теги. Таблицы пользователей и сессий останутся. Это действие НЕОБРАТИМО. Вы абсолютно уверены?',
-        async () => {
-            showLoading(true, { title: 'Очистка данных...' });
-            try {
-                const response = await apiPostRequest('clearAllDataExceptUsers', {});
-                if (response.success) {
-                    showToast(response.message, 'success');
-                    setTimeout(() => location.reload(), 2000);
-                } else { throw new Error(response.error); }
-            } catch (error) {
-                showToast('Ошибка: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
             }
         }
     );
