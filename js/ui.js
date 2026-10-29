@@ -30,35 +30,14 @@ function showModal(modalId, options = {}) {
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
 
-        // ✨ НАЧАЛО ИСПРАВЛЕНИЯ: Динамическая загрузка виджета ✨
-        if (modalId === 'auth-modal' && options.loadTelegram !== false && !isTelegramWidgetLoaded) {
-            const placeholder = document.getElementById('telegram-widget-placeholder');
-            
-            // Проверяем, что плейсхолдер существует
-            if (placeholder) { 
-                console.log('Загрузка виджета Telegram...');
-                isTelegramWidgetLoaded = true; // Ставим флаг, чтобы не грузить дважды
-
-                const script = document.createElement('script');
-                script.async = true; // async здесь уже безопасен
-                script.src = 'https://telegram.org/js/telegram-widget.js?22';
-                
-                // Все data-атрибуты из твоего HTML
-                script.dataset.telegramLogin = 'logovo_saltfish_bot';
-                script.dataset.size = 'large';
-                script.dataset.onauth = 'onTelegramAuth(user)';
-                script.dataset.requestAccess = 'write';
-
-                // Добавляем скрипт ВНУТРЬ плейсхолдера
-                // Теперь document.write() сработает только внутри этого div
-                placeholder.appendChild(script);
-            }
+        if (modalId === 'auth-modal' && options.loadTelegram !== false && typeof prepareTelegramLogin === 'function') {
+            prepareTelegramLogin();
         }
-        // ✨ КОНЕЦ ИСПРАВЛЕНИЯ ✨
     }
 }
 
 function hideModal(modalId) {
+    if (modalId === 'auth-modal' && typeof cancelTelegramLogin === 'function') cancelTelegramLogin();
     const modal = document.getElementById(modalId);
     if (modal) {
         if (document.activeElement) document.activeElement.blur(); // <-- ДОБАВЛЕНО: Снимаем фокус

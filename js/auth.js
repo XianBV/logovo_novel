@@ -219,14 +219,12 @@ async function handleLogout() {
  * Вызывается автоматически виджетом Telegram после успешной авторизации.
  * Разместите эту функцию в глобальной области видимости (не внутри других функций).
  */
-window.onTelegramAuth = async function(user) {
-    console.log('Данные от виджета Telegram:', user);
+window.onTelegramAuth = async function(credentials) {
     showLoading(true, { title: 'Вход через Telegram...' });
 
     try {
-        // Отправляем ВСЕ данные от Telegram (включая 'hash') на сервер
-        // для проверки подлинности в функции 'authenticateTelegram'.
-        const response = await apiRequest('authenticateTelegram', user);
+        // Сервер проверяет подписанный ID token и одноразовое подтверждение браузера.
+        const response = await apiPostRequest('authenticateTelegram', credentials);
 
         if (response && response.success && response.user) {
             // Эта та же логика, что и в handleEmailLogin
@@ -246,14 +244,16 @@ window.onTelegramAuth = async function(user) {
             setTimeout(() => {
                 window.location.reload();
             }, 500);
+            return true;
 
         } else {
-            // Сервер отклонил вход (например, неверный hash)
+            // Сервер отклонил подпись или подтверждение входа.
             throw new Error(response.error || 'Не удалось войти. Сервер отклонил данные.');
         }
     } catch (error) {
-        console.error('Ошибка входа через Telegram (onTelegramAuth):', error);
+        console.error('Не удалось завершить вход через Telegram');
         showToast('Ошибка: ' + error.message, 'error');
         showLoading(false); // Прячем загрузку при ошибке
+        return false;
     }
 }

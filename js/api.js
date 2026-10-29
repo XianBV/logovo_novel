@@ -162,7 +162,7 @@ async function apiPostRequest(action, data = {}) {
             throw new Error(result.error || `Ошибка сервера: HTTP ${response.status}`);
         }
         
-        console.log(`✅ POST успешен: ${action}`, result);
+        console.log(`✅ POST успешен: ${action}`);
         return result;
         
     } catch (error) {
