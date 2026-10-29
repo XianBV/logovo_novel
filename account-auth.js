@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { Buffer } from 'node:buffer';
 
 export const PASSWORD_MIN_LENGTH = 8;
 export const ACCOUNT_EMAIL_ACTIONS = new Set(['requestPasswordReset', 'resendEmailConfirmation', 'confirmEmail', 'confirmEmailCode', 'resetPassword']);
