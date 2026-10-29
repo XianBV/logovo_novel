@@ -39,6 +39,9 @@ function showLogin() {
     if (emailInput) {
         emailInput.focus();
     }
+    if (typeof prepareTelegramLogin === 'function' && document.getElementById('auth-modal')?.classList.contains('show')) {
+        prepareTelegramLogin();
+    }
 }
 
 /**

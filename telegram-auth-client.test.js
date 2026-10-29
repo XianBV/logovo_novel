@@ -150,3 +150,20 @@ test('неподключённый Telegram оставляет доступны�
     assert.equal(h.button.disabled, false);
     assert.match(h.status.textContent, /войти по почте/);
 });
+
+test('возвращение из почтовой формы готовит Telegram, сохраняя текущий аккаунт', async () => {
+    const h = popupHarness();
+    h.elements['auth-container'].style.display = 'none';
+    h.elements['registration-container'] = { style: { display: 'none' } };
+    const storedUser = { user_id: 1, username: 'Existing reader' };
+    h.context.STATE = { currentUser: storedUser };
+    vm.runInContext(source, h.context);
+    h.context.showLogin();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(h.elements['auth-container'].style.display, 'flex');
+    assert.equal(h.requests.length, 1);
+    assert.equal(h.requests[0].action, 'beginTelegramLogin');
+    assert.equal(h.button.disabled, false);
+    assert.equal(h.popups.length, 0);
+    assert.equal(h.context.STATE.currentUser, storedUser);
+});
