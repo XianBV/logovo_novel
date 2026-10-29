@@ -139,6 +139,7 @@ async function initializeApp() {
     // --- ЭТАП 1: МГНОВЕННАЯ ОТРИСОВКА ---
     applyTheme(currentThemePalette, currentThemeMode);
     setupEventListeners();
+    if (typeof captureAccountEmailLink === 'function') captureAccountEmailLink();
     updateSortButtonText();
     const loadingEl = document.getElementById('loading');
     if (loadingEl) loadingEl.style.display = 'none';

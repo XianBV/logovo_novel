@@ -4,6 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
+import { ACCOUNT_EMAIL_ACTIONS, accountPasswordMatches, dummyPasswordCheck, getAccountEmailConfig, getAccountMailAvailability, handleAccountEmailAction, hashAccountPassword, isModernPasswordHash, passwordValidationError, requestAccountEmail } from './account-auth.js';
 
 const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_SCRIPT_URL = '';
@@ -13,6 +14,8 @@ const PRIVATE_FILES = new Set([
   'package.json',
   'server.js',
   'server.test.js',
+  'account-auth.js',
+  'account-auth.test.js',
   'code.gs',
   'Supabase.gs'
 ]);
@@ -26,6 +29,11 @@ const CLIENT_CONFIG = Object.freeze({
 const DIRECT_MUTATION_ACTIONS = new Set([
   'loginWithEmail',
   'registerWithEmail',
+  'requestPasswordReset',
+  'resendEmailConfirmation',
+  'confirmEmail',
+  'confirmEmailCode',
+  'resetPassword',
   'logout',
   'createNovel',
   'updateNovel',
@@ -1487,58 +1495,42 @@ function publicSessionUser(user) {
   };
 }
 
-function passwordHash(password, salt = crypto.randomUUID()) {
-  const digest = crypto.createHash('sha256').update(`${salt}${password}`, 'utf8').digest('hex');
-  return `${salt}:${digest}`;
-}
-
-function passwordMatches(password, storedHash) {
-  if (!storedHash || !String(storedHash).includes(':')) return false;
-  const separator = String(storedHash).indexOf(':');
-  const salt = String(storedHash).slice(0, separator);
-  const expected = String(storedHash).slice(separator + 1);
-  const actual = crypto.createHash('sha256').update(`${salt}${password}`, 'utf8').digest('hex');
-  if (expected.length !== actual.length) return false;
-  let difference = 0;
-  for (let index = 0; index < actual.length; index += 1) {
-    difference |= actual.charCodeAt(index) ^ expected.charCodeAt(index);
-  }
-  return difference === 0;
-}
-
 async function loginWithEmailDirect(data, options = {}) {
   const email = String(data.email || '').trim().toLowerCase();
   const password = String(data.password || '');
-  if (!email || !password) return { success: false, error: 'Заполните email и пароль' };
-
-  const users = await supabaseRestRequest('users', {
-    email: `eq.${email}`,
-    select: 'user_id,username,email,role,avatar_url,telegram_id,password_hash,is_banned',
-    limit: 1
-  }, options);
-  if (!users.length) return { success: false, error: 'Пользователь с таким email не найден' };
+  const invalid = { success: false, error: 'Неверный email или пароль' };
+  if (!email || !password || email.length > 254 || password.length > 1024) return invalid;
+  const db = options.dbRequest || supabaseRestRequest;
+  const mailConfig = options.accountEmailConfig || getAccountEmailConfig(options.env || process.env);
+  if (mailConfig.enabled) {
+    const allowed = await db('rpc/auth_take_login_attempt', {}, { ...options, method: 'POST', body: { p_key_hash: crypto.createHash('sha256').update(email).digest('hex') } });
+    if (allowed !== true) return { success: false, error: 'Слишком много попыток входа. Подождите минуту.' };
+  }
+  // select * совместим со старой схемой; наружу возвращается только publicSessionUser.
+  const users = await db('users', { email: `eq.${email}`, select: '*', limit: 1 }, options);
   const user = users[0];
-  if (user.is_banned) {
-    return { success: false, error: 'Учётная запись заблокирована. Обратитесь к владельцу сайта' };
+  const matches = await accountPasswordMatches(password, user?.password_hash);
+  if (!user || !matches || user.is_banned) {
+    if (!isModernPasswordHash(user?.password_hash)) await dummyPasswordCheck(password);
+    return invalid;
   }
-  if (!user.password_hash) return { success: false, error: 'У пользователя не задан пароль' };
-  if (!passwordMatches(password, user.password_hash)) {
-    return { success: false, error: 'Неверный пароль' };
+  if (user.email_verification_required && !user.email_verified_at) {
+    return { success: false, code: 'EMAIL_CONFIRMATION_REQUIRED', error: 'Подтвердите почту по ссылке в письме.' };
   }
-
+  if (!isModernPasswordHash(user.password_hash)) {
+    const upgraded = await hashAccountPassword(password);
+    const updated = await db('users', { user_id: `eq.${user.user_id}`, password_hash: `eq.${user.password_hash}` }, { ...options, method: 'PATCH', body: { password_hash: upgraded } });
+    if (!Array.isArray(updated) || !updated.length) return invalid;
+    user.password_hash = upgraded;
+  }
   const token = crypto.randomUUID();
-  const now = new Date();
-  await supabaseRestRequest('sessions', {}, {
-    ...options,
-    method: 'POST',
-    body: {
-      token,
-      user_id: user.user_id,
-      created_at: now.toISOString(),
-      last_used: now.toISOString(),
-      expires_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  });
+  if (user.email_verification_required !== undefined) {
+    const created = await db('rpc/auth_create_email_session', {}, { ...options, method: 'POST', body: { p_user_id: user.user_id, p_password_hash: user.password_hash, p_token: token } });
+    if (created !== true) return invalid;
+  } else {
+    const now = new Date();
+    await db('sessions', {}, { ...options, method: 'POST', body: { token, user_id: user.user_id, created_at: now.toISOString(), last_used: now.toISOString(), expires_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString() } });
+  }
   return { success: true, user: publicSessionUser(user), session_token: token };
 }
 
@@ -1546,33 +1538,32 @@ async function registerWithEmailDirect(data, options = {}) {
   const username = String(data.username || '').trim();
   const email = String(data.email || '').trim().toLowerCase();
   const password = String(data.password || '');
-  if (username.length < 2) return { success: false, error: 'Имя пользователя слишком короткое' };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { success: false, error: 'Некорректный email' };
+  if (username.length < 2 || username.length > 100) return { success: false, error: 'Имя пользователя должно содержать от 2 до 100 символов' };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return { success: false, error: 'Некорректный email' };
+  const passwordError = passwordValidationError(password);
+  if (passwordError) return { success: false, error: passwordError };
+  const db = options.dbRequest || supabaseRestRequest;
+  const mailConfig = options.accountEmailConfig || getAccountEmailConfig(options.env || process.env);
+  if (mailConfig.enabled && !mailConfig.configured) return { success: false, error: 'Регистрация с подтверждением почты ещё не настроена' };
+  if (mailConfig.enabled) {
+    const availability = await getAccountMailAvailability({ ...options, accountEmailConfig: mailConfig });
+    if (!availability.success) return availability;
   }
-  if (password.length < 6) return { success: false, error: 'Пароль должен быть минимум 6 символов' };
-
-  const existing = await supabaseRestRequest('users', {
-    email: `eq.${email}`,
-    select: 'user_id',
-    limit: 1
-  }, options);
-  if (existing.length) return { success: false, error: 'Пользователь с таким email уже существует' };
-
-  const timestamp = new Date().toISOString();
-  await supabaseRestRequest('users', {}, {
-    ...options,
-    method: 'POST',
-    body: {
-      username,
-      email,
-      role: 'reader',
-      password_hash: passwordHash(password),
-      created_at: timestamp,
-      last_active: timestamp,
-      avatar_url: null
-    }
-  });
+  const existing = await db('users', { email: `eq.${email}`, select: 'user_id', limit: 1 }, options);
+  if (!existing.length) {
+    const timestamp = new Date().toISOString();
+    await db('users', {}, { ...options, method: 'POST', body: {
+      username, email, role: 'reader', password_hash: await hashAccountPassword(password),
+      created_at: timestamp, last_active: timestamp, avatar_url: null,
+      ...(mailConfig.enabled ? { email_verification_required: true, email_verified_at: null } : {})
+    } });
+  } else if (!mailConfig.enabled) {
+    return { success: false, error: 'Не удалось зарегистрировать аккаунт с указанными данными' };
+  }
+  if (mailConfig.enabled) {
+    const result = await requestAccountEmail('email_confirm', email, { ...options, dbRequest: db, accountEmailConfig: mailConfig });
+    return { ...result, verification_required: true };
+  }
   return { success: true, message: 'Регистрация прошла успешно' };
 }
 
@@ -3415,6 +3406,7 @@ export async function deleteTagDirect(data, user, options = {}) {
 export async function handleDirectMutation(action, data = {}, options = {}) {
   if (action === 'loginWithEmail') return loginWithEmailDirect(data, options);
   if (action === 'registerWithEmail') return registerWithEmailDirect(data, options);
+  if (ACCOUNT_EMAIL_ACTIONS.has(action)) return handleAccountEmailAction(action, data, { ...options, dbRequest: options.dbRequest || supabaseRestRequest });
   if (action === 'logout') return logoutDirect(data, options);
 
   const user = await resolveSessionUser(data, options);

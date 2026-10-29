@@ -46,7 +46,7 @@
     })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20260808b">
+    <link rel="stylesheet" href="style.css?v=20261028e">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -439,7 +439,7 @@
                         Войти
                     </button>
                 </form>
-                
+                <p class="auth-hint"><a href="#" onclick="showAccountHelp('forgot'); return false;">Забыли пароль?</a></p>
                 <div class="auth-divider">или</div>
                 <div class="auth-method">
                     <div class="telegram-widget-container" id="telegram-widget-placeholder">
@@ -485,9 +485,12 @@
                         id="reg-password"
                         name="registration_new_password"
                         class="form-input"
-                        placeholder="Пароль (минимум 6 символов)"
+                        placeholder="Пароль от 8 символов"
                         autocomplete="section-register new-password"
-                        minlength="6"
+                        minlength="8"
+                        maxlength="128"
+                        pattern="[!-~]{8,128}"
+                        title="Латинские буквы, цифры и стандартные знаки, без пробелов. Регистр важен."
                         required
                     >
 
@@ -498,6 +501,7 @@
 
                 <p class="auth-hint">Уже есть аккаунт? <a href="#" onclick="showLogin(); return false;">Войти</a></p>
             </div>
+            <div id="account-help-container" style="display: none;"></div>
         </div>
     </div>
     
@@ -664,7 +668,7 @@
     <script src="js/api.js?v=20260808b"></script>
 
     <!-- Интерфейс и темы -->
-    <script src="js/ui.js?v=20260808b"></script>
+    <script src="js/ui.js?v=20261028b"></script>
     <script src="js/theme.js?v=20260808b"></script>
 
     <!-- Страницы и предметные области -->
@@ -673,12 +677,13 @@
     <script src="js/novels.js?v=20260808b"></script>
     <script src="js/chapters.js?v=20260808b"></script>
     <script src="js/profile.js?v=20260808b"></script>
-    <script src="js/auth.js?v=20260808b"></script>
+    <script src="js/auth.js?v=20261028e"></script>
+    <script src="js/account-email.js?v=20261028e"></script>
     <script src="js/authors.js?v=20260808b"></script>
     <script src="js/admin.js?v=20260808b"></script>
 
     <!-- Запуск приложения -->
-    <script src="script.js?v=20260808b"></script>
+    <script src="script.js?v=20261028b"></script>
 
 </body>
 </html>

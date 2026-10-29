@@ -2151,7 +2151,8 @@ html[data-mode="dark"] .selected-tags-display .selected-tag.exclude {
   padding: 3rem 2.5rem;
 }
 #auth-container,
-#registration-container {
+#registration-container,
+#account-help-container {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -8005,3 +8006,6 @@ body.chapter-editor-fullscreen-open {
 /* ==========================================
    КОНЕЦ ФАЙЛА СТИЛЕЙ
    ========================================== */
+
+#account-confirm-code { text-align: center; letter-spacing: 0.3em; font-variant-numeric: tabular-nums; }
+#account-resend-code { font-variant-numeric: tabular-nums; }

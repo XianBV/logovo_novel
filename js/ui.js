@@ -23,7 +23,7 @@ function formatDateShort(dateString) {
     }
 }
 
-function showModal(modalId) {
+function showModal(modalId, options = {}) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.add('show', 'visible');
@@ -31,7 +31,7 @@ function showModal(modalId) {
         document.body.style.overflow = 'hidden';
 
         // ✨ НАЧАЛО ИСПРАВЛЕНИЯ: Динамическая загрузка виджета ✨
-        if (modalId === 'auth-modal' && !isTelegramWidgetLoaded) {
+        if (modalId === 'auth-modal' && options.loadTelegram !== false && !isTelegramWidgetLoaded) {
             const placeholder = document.getElementById('telegram-widget-placeholder');
             
             // Проверяем, что плейсхолдер существует

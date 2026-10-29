@@ -851,7 +851,7 @@ test('заблокированная учётная запись не может
   });
 
   assert.equal(result.success, false);
-  assert.match(result.error, /заблокирована/i);
+  assert.match(result.error, /неверный email или пароль/i);
   assert.equal(sessionsTouched, false);
 });
 
@@ -914,7 +914,7 @@ test('регистрация создаёт только роль читател
   assert.equal(result.success, true);
   assert.equal(insertedUser.role, 'reader');
   assert.notEqual(insertedUser.password_hash, 'secret-password');
-  assert.match(insertedUser.password_hash, /^[^:]+:[a-f0-9]{64}$/);
+  assert.match(insertedUser.password_hash, /^pbkdf2-sha256\$600000\$[a-f0-9]{32}\$[a-f0-9]{64}$/);
 });
 
 test('добавление на полку выполняется одним безопасным upsert', async () => {

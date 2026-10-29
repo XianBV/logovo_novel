@@ -25,6 +25,7 @@ function setAuthFormDisabled(formId, disabled) {
  * Показать форму входа
  */
 function showLogin() {
+    if (typeof hideAccountHelp === 'function') hideAccountHelp();
     const loginContainer = document.getElementById('auth-container');
     const registrationContainer = document.getElementById('registration-container');
 
@@ -44,6 +45,7 @@ function showLogin() {
  * Показать форму регистрации
  */
 function showRegistration() {
+    if (typeof hideAccountHelp === 'function') hideAccountHelp();
     const loginContainer = document.getElementById('auth-container');
     const registrationContainer = document.getElementById('registration-container');
 
@@ -102,6 +104,8 @@ async function handleEmailLogin() {
                 window.location.reload();
             }, 500);
 
+        } else if (response?.code === 'EMAIL_CONFIRMATION_REQUIRED') {
+            showAccountHelp('resend', email);
         } else {
             // Обрабатываем ошибку, которую вернул сервер (например, "Неверный пароль")
             showToast('Ошибка: ' + (response.error || 'Неверный email или пароль'), 'error');
@@ -129,8 +133,12 @@ async function handleRegistration() {
         return;
     }
     
-    if (password.length < 6) {
-        showToast('Пароль должен быть минимум 6 символов', 'warning');
+    if (password.length < 8 || password.length > 128) {
+        showToast('Пароль должен содержать от 8 до 128 символов', 'warning');
+        return;
+    }
+    if (!/^[\x21-\x7E]+$/.test(password)) {
+        showToast('Используйте латинские буквы, цифры и стандартные знаки без пробелов', 'warning');
         return;
     }
     
@@ -144,6 +152,12 @@ async function handleRegistration() {
         });
         
         if (response.success) {
+            if (response.verification_required) {
+                document.getElementById('reg-password').value = '';
+                if (response.retry_after) rememberAccountEmailCooldown(email, 'resend', response.retry_after);
+                showAccountHelp(response.confirmation_id ? 'verify' : 'resend', email, response.message, response.confirmation_id);
+                return;
+            }
             showToast('Регистрация успешна! Войдите в систему.', 'success');
             
             document.getElementById('reg-password').value = '';
