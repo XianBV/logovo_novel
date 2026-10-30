@@ -40,6 +40,7 @@ function showLogin() {
         emailInput.focus();
     }
     if (typeof prepareTelegramLogin === 'function' && document.getElementById('auth-modal')?.classList.contains('show')) {
+        if (typeof cancelTelegramLogin === 'function') cancelTelegramLogin();
         prepareTelegramLogin();
     }
 }
@@ -61,6 +62,10 @@ function showRegistration() {
     const usernameInput = document.getElementById('reg-username');
     if (usernameInput) {
         usernameInput.focus();
+    }
+    if (typeof prepareTelegramLogin === 'function' && document.getElementById('auth-modal')?.classList.contains('show')) {
+        if (typeof cancelTelegramLogin === 'function') cancelTelegramLogin();
+        prepareTelegramLogin();
     }
 }
 

@@ -111,6 +111,8 @@ function restoreSortPreference() {
 
 async function initializeApp() {
     if (STATE.isInitialized) return;
+    const telegramReturn = typeof captureTelegramReturn === 'function' ? captureTelegramReturn() : null;
+    if (telegramReturn && await telegramReturn) return;
 
     restoreSortPreference();
 

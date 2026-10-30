@@ -46,9 +46,14 @@ test('Telegram JWT не принимает подменённую подпись
 function dbHarness() {
     const challenges = new Map(), calls = [];
     const user = { user_id: 12, telegram_id: '99887766', role: 'reader', username: 'Telegram reader' };
-    const dbRequest = async (table, _query, request) => {
+    const dbRequest = async (table, query, request = {}) => {
         calls.push({ table, body: request.body });
         const p = request.body;
+        if (table === 'telegram_login_challenges') {
+            const c = challenges.get(query.challenge_id.slice(3));
+            return c ? [{ proof_hash: c.p_proof_hash, consumed_at: c.consumed ? new Date(now).toISOString() : null, expires_at: c.expires_at || new Date(now + 600000).toISOString() }] : [];
+        }
+        if (table === 'rpc/auth_take_login_attempt') return true;
         if (table === 'rpc/auth_begin_telegram_login') { challenges.set(p.p_challenge_id, p); return true; }
         if (table === 'rpc/auth_finish_telegram_login') {
             const c = challenges.get(p.p_challenge_id);
@@ -70,6 +75,91 @@ test('подготовка Telegram сохраняет только хеши б�
     assert.equal(h.challenges.get(result.challenge_id).p_nonce_hash, telegramProofHash(result.nonce));
     assert.equal(h.challenges.get(result.challenge_id).p_proof_hash, telegramProofHash(result.proof));
     assert.ok(!JSON.stringify(h.calls).includes(result.proof));
+});
+
+const redirectConfig = getTelegramLoginConfig({ TELEGRAM_LOGIN_ENABLED: 'true', TELEGRAM_CLIENT_ID: config.clientId,
+    TELEGRAM_LOGIN_MODE: 'redirect', TELEGRAM_CLIENT_SECRET: 'synthetic-client-secret-not-for-production' });
+const redirectUri = 'http://127.0.0.1:3000/';
+async function redirectHarness() {
+    const h = dbHarness();
+    h.options.telegramLoginConfig = redirectConfig;
+    const begin = await handleTelegramAuthAction('beginTelegramLogin', { redirect_uri: redirectUri }, h.options);
+    const exchanges = [];
+    h.options.telegramTokenFetchImpl = async (url, request) => {
+        exchanges.push({ url, request });
+        return new Response(JSON.stringify({ id_token: sign({ ...claims, nonce: begin.nonce }), access_token: 'discard-this-access-token' }), { status: 200 });
+    };
+    return { ...h, begin, exchanges, data: { challenge_id: begin.challenge_id, proof: begin.proof, redirect_uri: redirectUri, code: 'synthetic-authorization-code' } };
+}
+
+test('переход в Telegram использует code, PKCE S256 и только заранее разрешённый адрес', async () => {
+    const h = await redirectHarness();
+    assert.equal(h.begin.success, true);
+    assert.equal(h.begin.mode, 'redirect');
+    const url = new URL(h.begin.authorization_url);
+    assert.equal(url.origin, 'https://oauth.telegram.org');
+    assert.equal(url.pathname, '/auth');
+    assert.equal(url.searchParams.get('response_type'), 'code');
+    assert.equal(url.searchParams.get('state'), h.begin.challenge_id);
+    assert.equal(url.searchParams.get('nonce'), h.begin.nonce);
+    assert.equal(url.searchParams.get('scope'), 'openid profile');
+    assert.equal(url.searchParams.get('code_challenge_method'), 'S256');
+    assert.equal(url.searchParams.get('code_challenge'), crypto.createHash('sha256').update(h.begin.proof).digest('base64url'));
+    assert.ok(!JSON.stringify(h.begin).includes(redirectConfig.clientSecret));
+    assert.ok(!h.begin.authorization_url.includes(h.begin.proof));
+    const count = h.challenges.size;
+    assert.equal((await handleTelegramAuthAction('beginTelegramLogin', { redirect_uri: 'https://attacker.invalid/' }, h.options)).success, false);
+    assert.equal(h.challenges.size, count);
+});
+
+test('код обменивается только сервером; повторный ответ не создаёт второй сеанс', async () => {
+    const h = await redirectHarness();
+    const result = await handleTelegramAuthAction('authenticateTelegram', h.data, h.options);
+    assert.equal(result.success, true);
+    assert.equal(result.user.role, 'reader');
+    assert.equal(result.user.email, undefined);
+    assert.equal(result.id_token, undefined);
+    assert.equal(result.access_token, undefined);
+    assert.equal(h.exchanges.length, 1);
+    const exchange = h.exchanges[0];
+    assert.equal(exchange.url, 'https://oauth.telegram.org/token');
+    assert.equal(exchange.request.redirect, 'error');
+    assert.equal(exchange.request.headers.Authorization, 'Basic ' + Buffer.from(config.clientId + ':' + redirectConfig.clientSecret).toString('base64'));
+    const body = new URLSearchParams(exchange.request.body);
+    assert.equal(body.get('code_verifier'), h.begin.proof);
+    assert.equal(body.get('redirect_uri'), redirectUri);
+    assert.equal((await handleTelegramAuthAction('authenticateTelegram', h.data, h.options)).success, false);
+    assert.equal(h.exchanges.length, 1);
+});
+
+test('чужое подтверждение, изменённый redirect URI и истёкший запрос не используют Client Secret', async () => {
+    const h = await redirectHarness();
+    for (const changed of [{ proof: 'a'.repeat(64) }, { redirect_uri: 'https://xianbv.github.io/logovo_novel/' }, { redirect_uri: 'https://attacker.invalid/' }]) {
+        assert.equal((await handleTelegramAuthAction('authenticateTelegram', { ...h.data, ...changed }, h.options)).success, false);
+    }
+    h.challenges.get(h.begin.challenge_id).expires_at = new Date(now - 1000).toISOString();
+    assert.equal((await handleTelegramAuthAction('authenticateTelegram', h.data, h.options)).success, false);
+    assert.equal(h.exchanges.length, 0);
+});
+
+test('неверная подпись или отказ обмена не создают аккаунт и не раскрывают секрет', async () => {
+    for (const failure of ['provider', 'signature', 'nonce']) {
+        const h = await redirectHarness();
+        h.options.telegramTokenFetchImpl = async () => new Response(JSON.stringify(failure === 'provider' ? { error_description: redirectConfig.clientSecret }
+            : { id_token: failure === 'signature' ? 'broken.token.signature' : sign({ ...claims, nonce: 'b'.repeat(64) }) }), { status: failure === 'provider' ? 400 : 200 });
+        const result = await handleTelegramAuthAction('authenticateTelegram', h.data, h.options);
+        assert.equal(result.success, false);
+        assert.ok(!JSON.stringify(result).includes(redirectConfig.clientSecret));
+        assert.equal(h.challenges.get(h.begin.challenge_id).consumed, undefined);
+    }
+});
+
+test('redirect-вход без секрета отключён и не обращается к базе', async () => {
+    const result = await handleTelegramAuthAction('beginTelegramLogin', { redirect_uri: redirectUri }, {
+        env: { TELEGRAM_LOGIN_ENABLED: 'true', TELEGRAM_CLIENT_ID: config.clientId, TELEGRAM_LOGIN_MODE: 'redirect' },
+        dbRequest() { throw new Error('Unexpected database call'); }
+    });
+    assert.equal(result.code, 'TELEGRAM_NOT_CONFIGURED');
 });
 
 test('Telegram входит без почты, повторное использование и чужой браузер отклоняются', async () => {

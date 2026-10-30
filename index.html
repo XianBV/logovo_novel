@@ -46,7 +46,7 @@
     })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261028e">
+    <link rel="stylesheet" href="style.css?v=20261030a">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -441,7 +441,7 @@
                 </form>
                 <p class="auth-hint"><a href="#" onclick="showAccountHelp('forgot'); return false;">Забыли пароль?</a></p>
                 <div class="auth-divider">или</div>
-                <div class="auth-method">
+                <div class="auth-method" id="telegram-login-slot">
                     <div class="telegram-widget-container" id="telegram-widget-placeholder">
                         </div>
                 </div>
@@ -499,6 +499,8 @@
                     </button>
                 </form>
 
+                <div class="auth-divider">или</div>
+                <div class="auth-method" id="telegram-register-slot"></div>
                 <p class="auth-hint">Уже есть аккаунт? <a href="#" onclick="showLogin(); return false;">Войти</a></p>
             </div>
             <div id="account-help-container" style="display: none;"></div>
@@ -677,14 +679,14 @@
     <script src="js/novels.js?v=20260808b"></script>
     <script src="js/chapters.js?v=20260808b"></script>
     <script src="js/profile.js?v=20260808b"></script>
-    <script src="js/auth.js?v=20261029b"></script>
+    <script src="js/auth.js?v=20261030b"></script>
     <script src="js/account-email.js?v=20261028e"></script>
-    <script src="js/telegram-login.js?v=20261029a"></script>
+    <script src="js/telegram-login.js?v=20261030c"></script>
     <script src="js/authors.js?v=20260808b"></script>
     <script src="js/admin.js?v=20260808b"></script>
 
     <!-- Запуск приложения -->
-    <script src="script.js?v=20261028b"></script>
+    <script src="script.js?v=20261030c"></script>
 
 </body>
 </html>
