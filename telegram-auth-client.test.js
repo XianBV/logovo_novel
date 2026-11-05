@@ -334,3 +334,34 @@ test('Telegram доступен в регистрации без заполне�
     assert.equal(h.listeners.size, 0);
     assert.equal(h.button.disabled, false);
 });
+
+
+test('подключение Telegram из настроек использует отдельное назначение и возвращает в настройки', async () => {
+    const start = redirectClient({ url: redirectCallback + '?page=profile-settings&tab=account' });
+    start.context.STATE = { currentUser: { user_id: 22 } };
+    start.elements['account-telegram-link'] = { disabled: false };
+    await start.context.beginAccountTelegramLink();
+    assert.equal(start.requests[0].action, 'beginTelegramLink');
+    assert.equal(start.navigations.length, 1);
+    const pending = JSON.parse(start.storage.get(pendingKey));
+    assert.equal(pending.purpose, 'link'); assert.equal(pending.id_token, undefined);
+    const h = redirectClient({ storage: start.storage, url: redirectCallback + '?code=synthetic-link-code&state=' + redirectChallenge });
+    let links = 0;
+    h.context.completeAccountTelegramLink = async data => {
+        links++; assert.equal(data.code, 'synthetic-link-code');
+        assert.equal(h.context.window.location.href, redirectCallback + '?page=profile-settings&tab=account');
+        return true;
+    };
+    assert.equal(await h.context.captureTelegramReturn(), true);
+    assert.equal(links, 1); assert.equal(h.completed.length, 0); assert.equal(h.storage.has(pendingKey), false);
+});
+
+test('отмена подключения Telegram возвращает в настройки без открытия формы входа', async () => {
+    const storage = new Map([[pendingKey, JSON.stringify({ purpose: 'link', challenge_id: redirectChallenge, proof: redirectResponse.proof,
+        until: 695000, redirect_uri: redirectCallback, return_url: redirectCallback + '?page=profile-settings&tab=account' })]]);
+    const h = redirectClient({ storage, url: redirectCallback + '?error=access_denied&state=' + redirectChallenge });
+    h.context.completeAccountTelegramLink = () => { throw Error('Cancelled response must not link'); };
+    assert.equal(await h.context.captureTelegramReturn(), false);
+    assert.equal(h.context.window.location.href, redirectCallback + '?page=profile-settings&tab=account');
+    assert.equal(h.requests.length, 0); assert.equal(h.completed.length, 0); assert.equal(storage.has(pendingKey), false);
+});

@@ -1,8 +1,9 @@
 import crypto from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { readFileSync } from 'node:fs';
+import { accountLinkingEnabled, accountLinkSession, linkSessionHash, linkFailure } from './account-links.js';
 
-export const TELEGRAM_AUTH_ACTIONS = new Set(['beginTelegramLogin', 'authenticateTelegram']);
+export const TELEGRAM_AUTH_ACTIONS = new Set(['beginTelegramLogin', 'authenticateTelegram', 'beginTelegramLink', 'linkTelegram']);
 const ISSUER = 'https://oauth.telegram.org';
 const JWKS_URL = `${ISSUER}/.well-known/jwks.json`;
 const INVALID = { success: false, error: 'Не удалось подтвердить вход через Telegram. Нажмите кнопку входа ещё раз.' };
@@ -45,9 +46,10 @@ async function exchangeTelegramCode(data, config, options) {
   const db = options.dbRequest;
   const rows = await db('telegram_login_challenges', {
     challenge_id: `eq.${data.challenge_id}`, client_id: `eq.${config.clientId}`,
-    select: 'proof_hash,expires_at,consumed_at', limit: 1
+    select: options.telegramLinkUser ? 'proof_hash,expires_at,consumed_at,target_user_id,target_session_hash' : 'proof_hash,expires_at,consumed_at', limit: 1
   }, options);
   const row = rows[0];
+  if (options.telegramLinkUser && (!row || String(row.target_user_id) !== String(options.telegramLinkUser.user_id) || row.target_session_hash !== linkSessionHash(data.session_token))) throw new Error('Invalid account binding');
   if (!row || row.consumed_at || !Number.isFinite(Date.parse(row.expires_at)) || Date.parse(row.expires_at) <= (options.telegramNow ?? Date.now()) ||
       typeof row.proof_hash !== 'string' || row.proof_hash.length !== proofHash.length || !crypto.timingSafeEqual(Buffer.from(row.proof_hash), Buffer.from(proofHash))) throw new Error('Invalid redirect binding');
   const allowed = await db('rpc/auth_take_login_attempt', {}, { ...options, method: 'POST', body: { p_key_hash: telegramProofHash(`telegram-code:${data.challenge_id}`) } });
@@ -112,12 +114,23 @@ export async function handleTelegramAuthAction(action, data, options = {}) {
   const config = options.telegramLoginConfig || getTelegramLoginConfig(options.env || process.env);
   if (!config.configured) return { success: false, code: 'TELEGRAM_NOT_CONFIGURED', error: 'Вход через Telegram ещё настраивается. Пока можно войти по почте.' };
   const db = options.dbRequest;
-  if (action === 'beginTelegramLogin') {
+  const linking = action === 'beginTelegramLink' || action === 'linkTelegram';
+  let linkUser = null;
+  if (linking) {
+    if (!accountLinkingEnabled(options)) return { success: false, code: 'LINKING_NOT_CONFIGURED', error: 'Подключение Telegram ещё настраивается.' };
+    try { linkUser = await accountLinkSession(data, options); } catch { return { ...INVALID }; }
+    if (!linkUser) return linkFailure({ code: 'REAUTH_REQUIRED' });
+    if (linkUser.telegram_id) return { success: false, error: 'Telegram уже подключён к этому аккаунту.' };
+    if (config.mode !== 'redirect') return { success: false, error: 'Подключение Telegram требует входа в той же вкладке.' };
+    options = { ...options, telegramLinkUser: linkUser };
+  }
+  if (action === 'beginTelegramLogin' || action === 'beginTelegramLink') {
     const redirect = config.mode === 'redirect';
     if (redirect && !redirectUriAllowed(data.redirect_uri, config)) return { ...INVALID };
     const challengeId = crypto.randomUUID(), nonce = crypto.randomBytes(32).toString('hex'), proof = crypto.randomBytes(32).toString('hex');
     try {
-      const issued = await db('rpc/auth_begin_telegram_login', {}, { ...options, method: 'POST', body: {
+      const issued = await db(linking ? 'rpc/auth_begin_telegram_link' : 'rpc/auth_begin_telegram_login', {}, { ...options, method: 'POST', body: {
+        ...(linking ? { p_user_id: linkUser.user_id, p_session_token: data.session_token, p_session_hash: linkSessionHash(data.session_token) } : {}),
         p_challenge_id: challengeId, p_client_id: config.clientId, p_nonce_hash: telegramProofHash(nonce), p_proof_hash: redirect ? redirectProofHash(proof, data.redirect_uri) : telegramProofHash(proof)
       } });
       if (issued !== true) return { ...INVALID };
@@ -132,17 +145,20 @@ export async function handleTelegramAuthAction(action, data, options = {}) {
       return result;
     } catch { return { success: false, error: 'Не удалось подготовить вход через Telegram. Попробуйте позже.' }; }
   }
-  if (action !== 'authenticateTelegram') return { ...INVALID };
+  if (action !== 'authenticateTelegram' && action !== 'linkTelegram') return { ...INVALID };
   if (!/^[a-f0-9-]{36}$/i.test(data.challenge_id || '') || !/^[a-f0-9]{64}$/.test(data.proof || '')) return { ...INVALID };
   try {
     const exchanged = data.code !== undefined ? await exchangeTelegramCode(data, config, options) : { token: data.id_token, proofHash: telegramProofHash(data.proof) };
     const identity = await verifyTelegramIdToken(exchanged.token, config, options);
     const sessionToken = crypto.randomUUID();
-    const result = await db('rpc/auth_finish_telegram_login', {}, { ...options, method: 'POST', body: {
+    const result = await db(linking ? 'rpc/auth_finish_telegram_link' : 'rpc/auth_finish_telegram_login', {}, { ...options, method: 'POST', body: {
       p_challenge_id: data.challenge_id, p_client_id: config.clientId, p_proof_hash: exchanged.proofHash,
-      p_nonce_hash: telegramProofHash(identity.nonce), p_telegram_id: identity.telegramId, p_username: identity.username, p_session_token: sessionToken
+      p_nonce_hash: telegramProofHash(identity.nonce), p_telegram_id: identity.telegramId,
+      ...(linking ? { p_user_id: linkUser.user_id, p_session_token: data.session_token, p_session_hash: linkSessionHash(data.session_token) }
+        : { p_username: identity.username, p_session_token: sessionToken })
     } });
-    if (!result || result.success !== true || !result.user) return { ...INVALID };
+    if (!result || result.success !== true || !result.user) return linking ? linkFailure(result) : { ...INVALID };
+    if (linking) return { success: true, user: options.publicSessionUser(result.user), message: 'Telegram подключён к вашему аккаунту.' };
     return { success: true, user: options.publicSessionUser(result.user), session_token: sessionToken };
   } catch { return { ...INVALID }; }
 }

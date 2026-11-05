@@ -143,6 +143,7 @@ async function renderProfilePage() {
 }
 
 async function renderProfileSettingsPage() {
+    const accountTabInitiallyOpen = new URLSearchParams(window.location.search).get('tab') === 'account';
     const container = document.getElementById('page-content-container');
     if (!container || !STATE.currentUser) {
         navigateTo('home'); // Перенаправляем, если нет пользователя
@@ -158,12 +159,12 @@ async function renderProfileSettingsPage() {
             <h1>Настройки профиля</h1>
 
             <div class="tabs settings-tabs">
-                <button class="tab-btn active" onclick="switchSettingsTab(this, 'edit-profile')">✏️ Редактирование</button>
-                <button class="tab-btn" onclick="switchSettingsTab(this, 'account')">⚙️ Аккаунт</button>
+                <button class="tab-btn ${accountTabInitiallyOpen ? '' : 'active'}" onclick="switchSettingsTab(this, 'edit-profile')">✏️ Редактирование</button>
+                <button class="tab-btn ${accountTabInitiallyOpen ? 'active' : ''}" onclick="switchSettingsTab(this, 'account')">⚙️ Аккаунт</button>
                 </div>
 
             <div class="settings-content-container">
-                <div id="settings-tab-edit-profile" class="tab-content active">
+                <div id="settings-tab-edit-profile" class="tab-content ${accountTabInitiallyOpen ? '' : 'active'}">
                     <h3>Изменение аватара</h3>
                     <div class="avatar-upload-section">
                         <div class="profile-avatar-container">
@@ -190,11 +191,12 @@ async function renderProfileSettingsPage() {
                      <p class="text-muted">Редактирование имени пользователя и описания профиля пока не доступно.</p>
                 </div>
 
-                <div id="settings-tab-account" class="tab-content">
+                <div id="settings-tab-account" class="tab-content ${accountTabInitiallyOpen ? 'active' : ''}">
                      <h3>Настройки аккаунта</h3>
-                     <p class="text-muted">Здесь могут быть настройки уведомлений, смена пароля (если используется) и т.д.</p>
-                     <p>Ваш Email: ${escapeHtml(STATE.currentUser.email || 'Не указан')}</p>
+                     <p class="text-muted">Подключайте способы входа к своему аккаунту.</p>
+                     <p>Ваш Email: <span id="profile-account-email-value">${escapeHtml(STATE.currentUser.email || 'Не указан')}</span></p>
                      <p>Ваш ID: ${STATE.currentUser.user_id}</p>
+                     ${renderAccountConnectionsMarkup()}
                      <button class="btn btn-danger" onclick="handleLogout()">Выйти из аккаунта</button>
                      </div>
             </div>
@@ -218,6 +220,7 @@ async function renderProfileSettingsPage() {
 
     // Запускаем настройку загрузки аватара
     setupAvatarUpload();
+    loadAccountConnections();
 }
 
 function switchSettingsTab(button, tabName) {

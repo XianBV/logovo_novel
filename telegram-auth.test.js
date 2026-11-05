@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { getTelegramLoginConfig, telegramProofHash, verifyTelegramIdToken, handleTelegramAuthAction } from './telegram-auth.js';
 import { handleDirectMutation } from './server.js';
+import { linkSessionHash } from './account-links.js';
 
 const config = getTelegramLoginConfig({ TELEGRAM_LOGIN_ENABLED: 'true', TELEGRAM_CLIENT_ID: '123456789' });
 const now = 1793250000000;
@@ -197,4 +198,59 @@ test('серверный маршрут Telegram не требует старо�
     assert.equal(result.user.auth_type, 'telegram');
     assert.equal(result.user.email, null);
     assert.deepEqual(result.user.features, ['personal_novels', 'community_novels']);
+});
+
+
+async function linkHarness() {
+    const h = dbHarness(), original = h.options.dbRequest, session = crypto.randomUUID();
+    const target = { user_id: 22, email: 'owner@example.test', role: 'owner', username: 'Existing owner', telegram_id: null };
+    Object.assign(h.options, { env: { ACCOUNT_LINKING_ENABLED: 'true' }, linkNow: now, telegramLoginConfig: redirectConfig });
+    h.options.dbRequest = async (table, query, request = {}) => {
+        if (table === 'sessions') return [{ created_at: new Date(now - 1000).toISOString(), expires_at: new Date(now + 3600000).toISOString(), users: target }];
+        if (table === 'rpc/auth_begin_telegram_link') { h.challenges.set(request.body.p_challenge_id, request.body); return true; }
+        if (table === 'telegram_login_challenges') {
+            const result = await original(table, query, request), row = h.challenges.get(query.challenge_id.slice(3));
+            return result.map(r => ({ ...r, target_user_id: row.p_user_id, target_session_hash: row.p_session_hash }));
+        }
+        if (table === 'rpc/auth_finish_telegram_link') {
+            const p = request.body, c = h.challenges.get(p.p_challenge_id);
+            if (!c || c.consumed || c.p_proof_hash !== p.p_proof_hash || c.p_nonce_hash !== p.p_nonce_hash || c.p_session_hash !== p.p_session_hash) return null;
+            assert.equal(p.p_user_id, 22); assert.equal(p.p_session_token, session);
+            assert.equal(p.p_username, undefined); c.consumed = true;
+            return { success: true, user: { ...target, telegram_id: p.p_telegram_id } };
+        }
+        return original(table, query, request);
+    };
+    const begin = await handleTelegramAuthAction('beginTelegramLink', { session_token: session, user_id: 999, redirect_uri: redirectUri }, h.options);
+    const exchanges = [];
+    h.options.telegramTokenFetchImpl = async (url, request) => {
+        exchanges.push({ url, request });
+        return new Response(JSON.stringify({ id_token: sign({ ...claims, nonce: begin.nonce }) }), { status: 200 });
+    };
+    return { ...h, begin, exchanges, session, data: { session_token: session, challenge_id: begin.challenge_id, proof: begin.proof, redirect_uri: redirectUri, code: 'synthetic-link-code' } };
+}
+
+test('Telegram привязывается к проверенному аккаунту без смены роли, имени и сеанса', async () => {
+    const h = await linkHarness(); assert.equal(h.begin.success, true);
+    const saved = h.challenges.get(h.begin.challenge_id);
+    assert.equal(saved.p_user_id, 22); assert.equal(saved.p_session_hash, linkSessionHash(h.session));
+    const result = await handleDirectMutation('linkTelegram', h.data, h.options);
+    assert.equal(result.success, true); assert.equal(result.user.user_id, 22);
+    assert.equal(result.user.role, 'owner'); assert.equal(result.user.username, 'Existing owner');
+    assert.equal(result.session_token, undefined); assert.equal(h.exchanges.length, 1);
+    assert.equal((await handleTelegramAuthAction('linkTelegram', h.data, h.options)).success, false);
+    assert.equal(h.exchanges.length, 1);
+});
+
+test('смена браузерного сеанса отклоняет привязку до обмена кода Telegram', async () => {
+    const h = await linkHarness();
+    const r = await handleTelegramAuthAction('linkTelegram', { ...h.data, session_token: crypto.randomUUID() }, h.options);
+    assert.equal(r.success, false); assert.equal(h.exchanges.length, 0);
+});
+
+test('подключение Telegram выключено по умолчанию и не влияет на обычный вход', async () => {
+    const h = dbHarness();
+    const r = await handleTelegramAuthAction('beginTelegramLink', { session_token: crypto.randomUUID() }, h.options);
+    assert.equal(r.code, 'LINKING_NOT_CONFIGURED'); assert.equal(h.calls.length, 0);
+    assert.equal((await handleTelegramAuthAction('beginTelegramLogin', {}, h.options)).success, true);
 });

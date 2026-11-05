@@ -34,17 +34,23 @@ function captureTelegramReturn() {
             if (!pending || state !== pending.challenge_id || !/^[a-f0-9-]{36}$/i.test(state || '') ||
                 !/^[a-f0-9]{64}$/.test(pending.proof || '') || !Number.isFinite(pending.until) || pending.until <= Date.now() ||
                 pending.redirect_uri !== telegramLoginRedirectUri()) throw new Error('invalid_state');
-            if (providerError !== null) throw new Error('provider_cancelled');
-            if (!code || code.length > 4096) throw new Error('invalid_code');
+            if (pending.purpose !== undefined && pending.purpose !== 'link') throw new Error('invalid_state');
             const returnUrl = new URL(pending.return_url);
             if (returnUrl.origin !== url.origin || telegramLoginRedirectUri(returnUrl.href) !== pending.redirect_uri) throw new Error('invalid_state');
             window.history.replaceState(window.history.state, '', returnUrl.href);
+            if (providerError !== null) throw new Error('provider_cancelled');
+            if (!code || code.length > 4096) throw new Error('invalid_code');
+            if (pending.purpose === 'link') return await completeAccountTelegramLink({ code, challenge_id: state, proof: pending.proof, redirect_uri: pending.redirect_uri });
             if (typeof showLogin === 'function') showLogin();
             if (typeof showModal === 'function') showModal('auth-modal', { loadTelegram: false });
             const ok = await window.onTelegramAuth({ code, challenge_id: state, proof: pending.proof, redirect_uri: pending.redirect_uri });
             if (!ok) await prepareTelegramLogin();
             return ok;
         } catch (error) {
+            if (pending?.purpose === 'link') {
+                showToast(error.message === 'provider_cancelled' ? 'Подключение отменено в Telegram.' : 'Подтверждение подключения истекло или относится к другой вкладке. Вернитесь в настройки аккаунта и повторите попытку.', 'error');
+                return false;
+            }
             if (typeof showLogin === 'function') showLogin();
             if (typeof showModal === 'function') showModal('auth-modal', { loadTelegram: false });
             if (typeof showToast === 'function') showToast(error.message === 'provider_cancelled' ? 'Вход отменён в Telegram. Можно попробовать снова.' : 'Подтверждение входа истекло или относится к другой вкладке. Начните вход заново.', 'error');
@@ -156,17 +162,7 @@ function startTelegramLogin() {
     button.disabled = true;
     if (challenge.mode === 'redirect') {
         try {
-            const authUrl = new URL(challenge.authorization_url);
-            if (authUrl.origin !== 'https://oauth.telegram.org' || authUrl.pathname !== '/auth' ||
-                authUrl.searchParams.get('response_type') !== 'code' || authUrl.searchParams.get('state') !== challenge.challenge_id ||
-                authUrl.searchParams.get('client_id') !== String(challenge.client_id) ||
-                authUrl.searchParams.get('redirect_uri') !== challenge.redirect_uri || challenge.redirect_uri !== telegramLoginRedirectUri()) throw new Error('Invalid authorization URL');
-            const pending = JSON.stringify({ challenge_id: challenge.challenge_id, proof: challenge.proof, redirect_uri: challenge.redirect_uri,
-                until: challenge.until, return_url: window.location.href });
-            sessionStorage.setItem(TELEGRAM_REDIRECT_PENDING_KEY, pending);
-            if (sessionStorage.getItem(TELEGRAM_REDIRECT_PENDING_KEY) !== pending) throw new Error('Storage unavailable');
-            status.textContent = 'Переходим в Telegram…';
-            window.location.assign(authUrl.href);
+            redirectTelegramChallenge(challenge);
         } catch {
             try { sessionStorage.removeItem(TELEGRAM_REDIRECT_PENDING_KEY); } catch {}
             button.disabled = false;
@@ -241,4 +237,36 @@ function startTelegramLogin() {
         const opening = window.Telegram.Login.auth({ client_id: Number(challenge.client_id), scope: ['profile'], lang: 'ru', nonce: challenge.nonce }, receive);
         opening?.catch?.(() => { if (!completed) retry('Не удалось открыть Telegram. Попробуйте снова.'); });
     } catch { retry('Не удалось открыть Telegram. Проверьте разрешение на всплывающие окна и попробуйте снова.'); }
+}
+
+
+function redirectTelegramChallenge(challenge, purpose) {
+    const authUrl = new URL(challenge.authorization_url);
+    if (authUrl.origin !== 'https://oauth.telegram.org' || authUrl.pathname !== '/auth' ||
+        authUrl.searchParams.get('response_type') !== 'code' || authUrl.searchParams.get('state') !== challenge.challenge_id ||
+        authUrl.searchParams.get('client_id') !== String(challenge.client_id) ||
+        authUrl.searchParams.get('redirect_uri') !== challenge.redirect_uri || challenge.redirect_uri !== telegramLoginRedirectUri()) throw new Error('Invalid authorization URL');
+    const pending = JSON.stringify({ challenge_id: challenge.challenge_id, proof: challenge.proof, redirect_uri: challenge.redirect_uri,
+        until: challenge.until, return_url: window.location.href, ...(purpose ? { purpose } : {}) });
+    sessionStorage.setItem(TELEGRAM_REDIRECT_PENDING_KEY, pending);
+    if (sessionStorage.getItem(TELEGRAM_REDIRECT_PENDING_KEY) !== pending) throw new Error('Storage unavailable');
+    window.location.assign(authUrl.href);
+}
+
+async function beginAccountTelegramLink() {
+    const button = document.getElementById('account-telegram-link');
+    if (!button || button.disabled || !STATE.currentUser) return;
+    const userId = STATE.currentUser.user_id;
+    button.disabled = true;
+    try {
+        const requestedAt = Date.now();
+        const response = await apiPostRequest('beginTelegramLink', { redirect_uri: telegramLoginRedirectUri() });
+        if (STATE.currentUser?.user_id !== userId || document.getElementById('account-telegram-link') !== button) return;
+        if (!response.success) { showToast(response.error, 'error'); return; }
+        if (response.mode !== 'redirect') throw new Error('Unsupported mode');
+        redirectTelegramChallenge({ ...response, until: requestedAt + Math.min(600, Number(response.expires_in) || 600) * 1000 - 5000 }, 'link');
+    } catch {
+        try { sessionStorage.removeItem(TELEGRAM_REDIRECT_PENDING_KEY); } catch {}
+        showToast('Не удалось начать подключение Telegram. Попробуйте ещё раз.', 'error');
+    } finally { if (document.getElementById('account-telegram-link') === button) button.disabled = false; }
 }

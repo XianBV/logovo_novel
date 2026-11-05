@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import { TELEGRAM_AUTH_ACTIONS, handleTelegramAuthAction } from './telegram-auth.js';
+import { ACCOUNT_LINK_ACTIONS, handleAccountLinkAction } from './account-links.js';
 import { ACCOUNT_EMAIL_ACTIONS, accountPasswordMatches, dummyPasswordCheck, getAccountEmailConfig, getAccountMailAvailability, handleAccountEmailAction, hashAccountPassword, isModernPasswordHash, passwordValidationError, requestAccountEmail } from './account-auth.js';
 
 const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -16,6 +17,8 @@ const PRIVATE_FILES = new Set([
   'server.js',
   'server.test.js',
   'account-auth.js',
+  'account-links.js',
+  'account-links.test.js',
   'account-auth.test.js',
   'telegram-auth.js',
   'telegram-auth.test.js',
@@ -31,6 +34,11 @@ const CLIENT_CONFIG = Object.freeze({
 });
 const DIRECT_MUTATION_ACTIONS = new Set([
   'beginTelegramLogin',
+  'beginTelegramLink',
+  'linkTelegram',
+  'getAccountConnections',
+  'beginEmailLink',
+  'confirmEmailLink',
   'authenticateTelegram',
   'loginWithEmail',
   'registerWithEmail',
@@ -3409,6 +3417,7 @@ export async function deleteTagDirect(data, user, options = {}) {
 }
 
 export async function handleDirectMutation(action, data = {}, options = {}) {
+  if (ACCOUNT_LINK_ACTIONS.has(action)) return handleAccountLinkAction(action, data, { ...options, dbRequest: options.dbRequest || supabaseRestRequest, publicSessionUser });
   if (TELEGRAM_AUTH_ACTIONS.has(action)) return handleTelegramAuthAction(action, data, { ...options, dbRequest: options.dbRequest || supabaseRestRequest, publicSessionUser });
   if (action === 'loginWithEmail') return loginWithEmailDirect(data, options);
   if (action === 'registerWithEmail') return registerWithEmailDirect(data, options);

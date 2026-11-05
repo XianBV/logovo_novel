@@ -8026,3 +8026,13 @@ body.chapter-editor-fullscreen-open {
 
 #account-confirm-code { text-align: center; letter-spacing: 0.3em; font-variant-numeric: tabular-nums; }
 #account-resend-code { font-variant-numeric: tabular-nums; }
+
+.account-connections { margin: 1.5rem 0; display: grid; gap: 1rem; }
+.account-connections > h3, .account-connections > p { margin: 0; }
+.account-connection-card { padding: 1.25rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-card); }
+.account-connection-card h4 { margin: 0 0 0.75rem; }
+.account-connection-card form { display: grid; gap: 0.65rem; max-width: 32rem; margin-top: 1rem; }
+.account-connection-card form[hidden] { display: none; }
+.account-connection-card input { min-width: 0; width: 100%; }
+.account-connection-card small { color: var(--text-secondary); line-height: 1.5; }
+#account-link-status { white-space: pre-line; overflow-wrap: anywhere; }
