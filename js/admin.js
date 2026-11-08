@@ -81,6 +81,8 @@ async function loadAdminData() {
             tagsResponse,
             limitPersonalResponse,
             limitCommunityResponse,
+            roleThemeResponse,
+            novelDetailsLayoutResponse,
             submissionsResponse
         ] = await Promise.all([
             apiRequest('getDashboardData'),
@@ -88,6 +90,8 @@ async function loadAdminData() {
             apiRequest('getTags'),
             apiRequest('getSetting', { key: 'global_limit_personal' }),
             apiRequest('getSetting', { key: 'global_limit_community' }),
+            apiRequest('getSetting', { key: 'roleTheme' }),
+            apiRequest('getSetting', { key: 'novelDetailsLayout' }),
             apiRequest('getSubmissions', { status: 'pending' }, true)
         ]);
 
@@ -112,6 +116,15 @@ async function loadAdminData() {
                 : 50
         };
 
+        const novelDetailsLayout = novelDetailsLayoutResponse?.success && novelDetailsLayoutResponse.value === 'fixed'
+            ? 'fixed'
+            : 'adaptive';
+        STATE.currentRoleTheme = roleThemeResponse?.success && roleThemeResponse.value
+            ? roleThemeResponse.value
+            : 'default';
+        STATE.novelDetailsLayout = novelDetailsLayout;
+        document.documentElement.dataset.novelDetailsLayout = novelDetailsLayout;
+
         // Логируем ошибки, если были
         if (!dashboardResponse?.success) console.error("Ошибка загрузки статистики:", dashboardResponse?.error);
         if (!usersResponse?.success) console.error("Ошибка загрузки пользователей:", usersResponse?.error);
@@ -130,7 +143,7 @@ async function loadAdminData() {
             );
         }
 
-        renderAdminPanel(dashboardData, usersData, tagsData, limitsData, submissionsData);
+        renderAdminPanel(dashboardData, usersData, tagsData, limitsData, novelDetailsLayout, submissionsData);
 
     } catch (error) { // Эта ошибка ловит проблемы с самим apiRequest (например, сеть)
         console.error("Критическая ошибка загрузки данных админки:", error);
@@ -166,7 +179,7 @@ function renderUsersTableRows(users) {
     }).join('');
 }
 
-function renderAdminPanel(dashboardData, users, tags, limits, submissions) {
+function renderAdminPanel(dashboardData, users, tags, limits, novelDetailsLayout, submissions) {
     const content = getAdminContentRoot();
     if (!content) return;
 
@@ -469,6 +482,15 @@ function renderAdminPanel(dashboardData, users, tags, limits, submissions) {
                 <small class="form-help">Выбранная тема будет видна всем пользователям на сайте.</small>
             </div>
 
+            <div class="form-group">
+                <label for="novel-details-layout-select">Макет страницы новеллы</label>
+                <select id="novel-details-layout-select" class="form-select" onchange="handleNovelDetailsLayoutChange(this)">
+                    <option value="adaptive" ${novelDetailsLayout === 'adaptive' ? 'selected' : ''}>Классика (адаптивный)</option>
+                    <option value="fixed" ${novelDetailsLayout === 'fixed' ? 'selected' : ''}>Панорама (фиксированный)</option>
+                </select>
+                <small class="form-help">Общая настройка для всего сайта. Адаптивный макет перестраивает верхние блоки раньше; фиксированный дольше сохраняет обложку, описание и информацию в три колонки. На узких телефонах оба режима остаются удобными.</small>
+            </div>
+
             <hr class="section-divider">
             <h3>Глобальные лимиты</h3>
             <small class="form-help">Лимиты по умолчанию для всех пользователей с ролью 'Creator'. (Индивидуальные лимиты настраиваются во вкладке "Доступы")</small>
@@ -711,6 +733,27 @@ function handleToggleUserBlock(userId, shouldBlock) {
             }
         }
     );
+}
+
+async function handleNovelDetailsLayoutChange(selectElement) {
+    const previousLayout = STATE.novelDetailsLayout || 'adaptive';
+    const newLayout = selectElement.value === 'fixed' ? 'fixed' : 'adaptive';
+    showLoading(true, { title: 'Смена макета страницы новеллы...' });
+    try {
+        const response = await apiPostRequest('setNovelDetailsLayout', { layout: newLayout });
+        if (!response.success) throw new Error(response.error);
+
+        STATE.novelDetailsLayout = newLayout;
+        document.documentElement.dataset.novelDetailsLayout = newLayout;
+        showToast('Макет страницы новеллы изменён для всего сайта', 'success');
+    } catch (error) {
+        STATE.novelDetailsLayout = previousLayout;
+        document.documentElement.dataset.novelDetailsLayout = previousLayout;
+        selectElement.value = previousLayout;
+        showToast('Ошибка: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
 }
 
 // Полное удаление доступно только владельцу и специально требует два подтверждения.

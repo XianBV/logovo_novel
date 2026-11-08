@@ -1,0 +1,279 @@
+/* Все каталоги используют одну геометрию. layout.js задаёт только шаблон колонок. */
+.novels-grid {
+    display: grid;
+    grid-template-columns: var(--novel-grid-template, repeat(2, minmax(0, 1fr)));
+    gap: 1.5rem 1.25rem;
+    align-content: start;
+    align-items: start;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    margin-bottom: 2rem;
+    container-type: inline-size;
+}
+
+.novels-grid:empty { display: none; }
+.novels-grid.fade-in { animation: fadeInGrid .4s ease forwards; }
+.novels-grid.fade-out { animation: fadeOut .3s ease forwards; }
+
+/* Карточки новелл, обложки и отметки состояния. */
+.novel-card {
+    display: flex;
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.novel-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.novel-card .novel-cover {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.novel-card .novel-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.novel-card:hover .novel-cover img {
+    transform: scale(1.02);
+}
+
+.novel-card .novel-cover .no-cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 3rem;
+    color: var(--text-secondary);
+}
+
+.novel-card .novel-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 1rem;
+}
+
+.novel-card .novel-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.novel-card :is(.novel-status, .novel-language) {
+  --status-accent: var(--text-secondary);
+  position: absolute;
+  padding: 0.125rem 0.375rem;
+  max-width: calc(100% - 1rem);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--status-accent) 12%, var(--bg-card));
+  border-radius: 3px;
+  z-index: 2;
+  border: 1px solid color-mix(in srgb, var(--status-accent) 22%, var(--bg-card));
+}
+
+.grid-view-card .novel-status { top: 4px; right: -4px; }
+.novel-card .novel-language {
+  bottom: 4px;
+  left: 4px;
+  font-weight: 600;
+  letter-spacing: .03em;
+}
+
+.novel-status.status-ongoing { --status-accent: var(--accent-primary); }
+.novel-status.status-hiatus { --status-accent: var(--accent-warning); }
+.novel-status.status-completed { --status-accent: var(--accent-success); }
+
+.novel-card.deleted {
+    opacity: 0.6;
+    filter: grayscale(80%);
+}
+
+.novel-card.deleted:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+}
+
+.restore-icon {
+    font-size: 1.5rem;
+}
+
+@media (hover: none) {.novel-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {.novel-card {
+    transition: none !important;
+  }
+}
+
+.novel-card-link, .novel-row-link { color: inherit; text-decoration: none; }
+.novel-card-link { display: block; }
+.novel-card { min-width: 0; }
+.novel-card .novel-info { min-width: 0; box-sizing: border-box; }
+.novel-card-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: grid;
+    place-content: center;
+    gap: .35rem;
+    padding: .5rem;
+    border-radius: inherit;
+    background: color-mix(in srgb, var(--bg-card) 86%, transparent);
+    text-align: center;
+    pointer-events: none;
+}
+.novel-card.deleted .novel-card-overlay { opacity: 0; transition: opacity .2s ease; }
+.novel-card.deleted:is(:hover, :focus-within) .novel-card-overlay,
+.novel-card-link:focus-visible .novel-card.deleted .novel-card-overlay { opacity: 1; }
+
+/* Сетка: обложки занимают свои колонки, заголовки имеют одинаковую высоту. */
+.novels-grid:not(.list-view) > :is(.novel-card-link, .novel-card) {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+}
+.novels-grid:not(.list-view) :is(.grid-view-card, .shelf-novel-item) {
+    flex-direction: column;
+    width: 100%;
+    background: transparent;
+    border: 0;
+}
+.novels-grid:not(.list-view) .novel-cover {
+    width: 100%;
+    aspect-ratio: 5 / 7;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: transform .25s ease;
+}
+.novels-grid:not(.list-view) .novel-card:hover .novel-cover { transform: translateY(-2px); }
+.novels-grid:not(.list-view) .novel-info {
+    padding: .7rem .125rem .25rem;
+    align-items: stretch;
+    justify-content: center;
+    min-height: 48px;
+}
+.novels-grid:not(.list-view) .novel-title {
+    margin: 0;
+    padding: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    text-overflow: ellipsis;
+    text-align: start;
+    font-size: .9375rem;
+    font-weight: 500;
+    line-height: 1.4;
+    min-height: 2.8em;
+    max-height: 2.8em;
+}
+
+/* Список: одинаковая левая колонка обложек и разделители только между строками. */
+.novels-grid.list-view { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.novels-grid.list-view > .novel-card {
+    --list-cover-width: 112px;
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--list-cover-width) minmax(0, 1fr);
+    align-items: start;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+    padding: .75rem 0;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 65%, transparent);
+    border-radius: 0;
+    background: transparent;
+}
+.novels-grid.list-view > .novel-card:first-child { padding-top: 0; }
+.novels-grid.list-view > .novel-card:last-child { border-bottom: 0; padding-bottom: 0; }
+.novels-grid.list-view > .novel-card:hover {
+    background: color-mix(in srgb, var(--bg-secondary) 35%, transparent);
+}
+.novels-grid.list-view .novel-cover {
+    width: 100%;
+    aspect-ratio: 5 / 7;
+    border-radius: var(--radius-md);
+}
+.novels-grid.list-view .novel-info { gap: .3rem; padding: 0; }
+.novels-grid.list-view .novel-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    margin: 0;
+    min-height: 0;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    font-size: 1rem;
+    line-height: 1.4;
+    text-align: start;
+}
+.novels-grid.list-view :is(.novel-author, .novel-meta-line) {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: .8rem;
+    overflow-wrap: anywhere;
+}
+.novel-meta-line { display: flex; flex-wrap: wrap; gap: .25rem .65rem; }
+.novel-row-link { position: absolute; inset: 0; z-index: 3; }
+.novel-row-link:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+.list-view-card .author-link-inline { position: relative; z-index: 5; }
+.novels-grid.list-view .novel-cover img { transform: none; }
+.list-view-card .novel-language { display: none; }
+.list-view-card .novel-status { position: static; }
+.list-view-card .novel-cover { grid-column: 1; grid-row: 1; }
+.list-view-card .novel-info { grid-column: 2; grid-row: 1; }
+@media (max-width: 600px) {
+    .novels-grid.list-view > .novel-card { --list-cover-width: 96px; }
+    .novels-grid.list-view .novel-title { font-size: .9rem; }
+}
+@container (max-width: 240px) {
+    .novels-grid.list-view > .novel-card { --list-cover-width: 78px; }
+}
+
+/* Заглушка загрузки повторяет пропорции обложки. */
+.novels-grid .novel-card .skeleton-cover { height: 100%; }
+
+@media (max-width: 600px) {
+    .novels-grid { gap: 1.25rem .875rem; }
+    .novels-grid:not(.list-view) .novel-title { font-size: .875rem; }
+}
+.novel-card-link:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 5px; border-radius: var(--radius-md); }
+@media (prefers-reduced-motion: reduce) {
+    .novel-card .novel-cover, .novel-card .novel-cover img { transition: none !important; transform: none !important; }
+}

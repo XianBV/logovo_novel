@@ -250,6 +250,7 @@ test('смена браузерного сеанса отклоняет прив
 
 test('подключение Telegram выключено по умолчанию и не влияет на обычный вход', async () => {
     const h = dbHarness();
+    h.options.env = {}; // Изолируем флаг функции от настроек локального .env.
     const r = await handleTelegramAuthAction('beginTelegramLink', { session_token: crypto.randomUUID() }, h.options);
     assert.equal(r.code, 'LINKING_NOT_CONFIGURED'); assert.equal(h.calls.length, 0);
     assert.equal((await handleTelegramAuthAction('beginTelegramLogin', {}, h.options)).success, true);

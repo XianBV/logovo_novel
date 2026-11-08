@@ -6,6 +6,10 @@
 let currentThemePalette = localStorage.getItem('novel-library-theme') || 'classic';
 let currentThemeMode = localStorage.getItem('novel-library-mode') || 'light';
 
+function renderThemeIcon(name) {
+    return `<svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-${name}"></use></svg>`;
+}
+
 function toggleThemeMode() {
     const newMode = currentThemeMode === 'light' ? 'dark' : 'light';
     applyTheme(currentThemePalette, newMode);
@@ -24,13 +28,15 @@ function applyTheme(palette, mode) {
     // Обновляем иконку на кнопке
     const icon = document.querySelector('.theme-icon');
     if (icon) {
-        icon.textContent = mode === 'dark' ? '☀️' : '🌙';
+        icon.innerHTML = renderThemeIcon(mode === 'dark' ? 'sun' : 'moon');
     }
 
     // ✨ НОВОЕ: Обновляем кнопку в панели настроек чтения (если она открыта) ✨
     const readerThemeBtn = document.getElementById('reader-theme-toggle-btn');
     if (readerThemeBtn) {
-        readerThemeBtn.textContent = mode === 'dark' ? 'Тема: Светлая ☀️' : 'Тема: Тёмная 🌙';
+        readerThemeBtn.innerHTML = mode === 'dark'
+            ? `Тема: Светлая ${renderThemeIcon('sun')}`
+            : `Тема: Тёмная ${renderThemeIcon('moon')}`;
     }
     // ✨ КОНЕЦ ✨
 

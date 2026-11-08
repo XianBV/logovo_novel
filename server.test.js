@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
+// Тестовый процесс не включает доставку по настройкам настоящего .env.
+process.env.AUTH_EMAIL_ENABLED = 'false';
 import {
   createRequestCoordinator,
   createServer,
@@ -13,7 +15,12 @@ import {
   getGoogleConfig,
   getMutationLockKey,
   getSupabaseConfig,
+  supabaseRestRequest,
   grantPermissionDirect,
+  createChapterNotificationsDirect,
+  getNotificationShelfSettingsDirect,
+  updateNotificationShelfSettingDirect,
+  markNotificationReadDirect,
   createNovelDirect,
   createAuthorSubmissionDirect,
   deleteAvatarDirect,
@@ -27,8 +34,39 @@ import {
   handleDirectMutation,
   parseJsonp,
   runMutationAction,
+  setNovelDetailsLayoutDirect,
   setUserBlockedDirect
 } from './server.js';
+
+test('чтение Supabase повторяет сетевой сбой один раз, сохранение не повторяется', async () => {
+  const config = { configured: true, url: 'https://test.supabase.co', key: 'synthetic-key' };
+  let reads = 0;
+  const rows = await supabaseRestRequest('settings', {}, { config, fetchImpl: async () => {
+    if (++reads === 1) throw new TypeError('fetch failed');
+    return { ok: true, text: async () => '[{"value":"default"}]' };
+  } });
+  assert.equal(reads, 2);
+  assert.equal(rows[0].value, 'default');
+  let writes = 0;
+  await assert.rejects(supabaseRestRequest('settings', {}, { config, method: 'POST', body: {}, fetchImpl: async () => {
+    writes++; throw new TypeError('fetch failed');
+  } }), /fetch failed/);
+  assert.equal(writes, 1);
+});
+
+test('зависшее чтение Supabase ограничено двумя попытками, HTTP ошибки не повторяются', async () => {
+  const config = { configured: true, url: 'https://test.supabase.co', key: 'synthetic-key' };
+  let attempts = 0;
+  await assert.rejects(supabaseRestRequest('settings', {}, { config, supabaseReadTimeoutMs: 5,
+    fetchImpl: (_, { signal }) => { attempts++; return new Promise((_, reject) => signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true })); }
+  }), /временно недоступна/);
+  assert.equal(attempts, 2);
+  let denied = 0;
+  await assert.rejects(supabaseRestRequest('settings', {}, { config, fetchImpl: async () => {
+    denied++; return { ok: false, status: 403, text: async () => 'Denied' };
+  } }), /HTTP 403/);
+  assert.equal(denied, 1);
+});
 
 test('parseJsonp извлекает ответ Apps Script', () => {
   assert.deepEqual(
@@ -472,7 +510,8 @@ test('глава без тома не получает скрытое имя т�
     updateNovelStats: async () => {},
     updateNovelVolumeStructure: async () => {},
     syncContents: async () => ({ success: true, chapter_count: 1 }),
-    syncNavigation: async () => ({ success: true, errors: [] })
+    syncNavigation: async () => ({ success: true, errors: [] }),
+    createChapterNotifications: async () => ({ created: 0 })
   });
 
   assert.equal(result.success, true);
@@ -553,6 +592,85 @@ test('прямое удаление главы скрывает её и обно
   assert.equal(result.success, true);
   assert.equal(deletedPatch.is_deleted, true);
   assert.deepEqual(navigationIds, [52, 54]);
+});
+
+test('групповое удаление глав обновляет новеллу один раз', async () => {
+  const future = new Date(Date.now() + 60_000).toISOString();
+  let deletedPatch = null;
+  let statsUpdates = 0;
+  let contentsUpdates = 0;
+  let navigationIds = null;
+  const trashedDocuments = [];
+  const fetchImpl = async (url, options = {}) => {
+    const parsedUrl = url instanceof URL ? url : new URL(url);
+    const table = parsedUrl.pathname.split('/').at(-1);
+    if (table === 'sessions') {
+      return new Response(JSON.stringify([{
+        expires_at: future,
+        users: { user_id: 3, username: 'Создатель', role: 'creator' }
+      }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (table === 'novels') {
+      return new Response(JSON.stringify([{
+        novel_id: 10,
+        title: 'Тест 2',
+        creator_id: 3,
+        is_deleted: false
+      }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (table === 'chapters' && options.method === 'PATCH') {
+      deletedPatch = JSON.parse(options.body);
+      return new Response(JSON.stringify([{ chapter_id: 53 }, { chapter_id: 54 }]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    if (table === 'chapters' && parsedUrl.searchParams.get('chapter_id')?.startsWith('in.')) {
+      return new Response(JSON.stringify([
+        { chapter_id: 53, novel_id: 10, volume_order: 1, chapter_number: 2, file_id: 'doc-53' },
+        { chapter_id: 54, novel_id: 10, volume_order: 1, chapter_number: 3, file_id: 'doc-54' }
+      ]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (table === 'chapters') {
+      return new Response(JSON.stringify([
+        { chapter_id: 52, novel_id: 10, volume_order: 1, chapter_number: 1, file_id: 'doc-52' },
+        { chapter_id: 53, novel_id: 10, volume_order: 1, chapter_number: 2, file_id: 'doc-53' },
+        { chapter_id: 54, novel_id: 10, volume_order: 1, chapter_number: 3, file_id: 'doc-54' },
+        { chapter_id: 55, novel_id: 10, volume_order: 1, chapter_number: 4, file_id: 'doc-55' }
+      ]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    throw new Error(`Неожиданный запрос ${parsedUrl}`);
+  };
+
+  const result = await handleDirectMutation('deleteChaptersBulk', {
+    session_token: 'creator-token',
+    novel_id: 10,
+    chapter_ids: [53, 54]
+  }, {
+    fetchImpl,
+    config: {
+      url: 'https://example-ref.supabase.co',
+      key: `sb_secret_${'x'.repeat(40)}`,
+      configured: true,
+      isLegacyKey: false
+    },
+    updateNovelStats: async () => { statsUpdates += 1; },
+    updateNovelVolumeStructure: async () => {},
+    trashChapterDocument: async fileId => { trashedDocuments.push(fileId); },
+    syncContents: async () => { contentsUpdates += 1; return { success: true }; },
+    syncNavigation: async (_novelId, ids) => {
+      navigationIds = ids;
+      return { success: true, errors: [] };
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(result.deleted_count, 2);
+  assert.equal(deletedPatch.is_deleted, true);
+  assert.equal(statsUpdates, 1);
+  assert.equal(contentsUpdates, 1);
+  assert.deepEqual(trashedDocuments.sort(), ['doc-53', 'doc-54']);
+  assert.deepEqual(navigationIds, [52, 55]);
 });
 
 test('содержание не показывает заголовок для главы без тома', () => {
@@ -643,6 +761,8 @@ test('страница чтения получает текст и навига�
   assert.equal(result.chapter.content_rich.blocks[0].runs[0].italic, true);
   assert.equal(result.chapter.prevChapterNumber, 1);
   assert.equal(result.chapter.nextChapterNumber, 3);
+  assert.equal(result.chapter.novel_slug, 'novel-slug');
+  assert.equal(result.chapter.novel_access_type, 'public');
 });
 
 test('обновление главы записывает документ, имя файла и Supabase напрямую', async () => {
@@ -851,7 +971,7 @@ test('заблокированная учётная запись не может
   });
 
   assert.equal(result.success, false);
-  assert.match(result.error, /неверный email или пароль/i);
+  assert.equal(result.error, 'Неверный email или пароль');
   assert.equal(sessionsTouched, false);
 });
 
@@ -955,6 +1075,140 @@ test('добавление на полку выполняется одним б�
   assert.match(shelfRequest.options.headers.Prefer, /merge-duplicates/);
 });
 
+test('уведомления о новой главе создаются только для включённых полок', async () => {
+  let inserted = null;
+  const dbRequest = async (table, query, options = {}) => {
+    if (table === 'reading_lists') {
+      return [
+        { user_id: 2, list_type: 'reading' },
+        { user_id: 3, list_type: 'want_to_read' },
+        { user_id: 4, list_type: 'favorite' }
+      ];
+    }
+    if (table === 'notification_preferences') {
+      assert.equal(query.user_id, 'in.(2,3,4)');
+      return [{ user_id: 3, want_to_read_enabled: true }];
+    }
+    if (table === 'notifications' && options.method === 'POST') {
+      inserted = options.body;
+      return options.body;
+    }
+    return [];
+  };
+
+  const result = await createChapterNotificationsDirect({
+    chapter_id: 27,
+    chapter_number: 2,
+    chapter_title: 'Возвращение',
+    publish_at: null
+  }, {
+    novel_id: 8,
+    title: 'Тестовая новелла'
+  }, { dbRequest });
+
+  assert.equal(result.created, 3);
+  assert.deepEqual(inserted.map(row => row.user_id), [2, 3, 4]);
+  assert.ok(inserted.every(row => row.type === 'new_chapter'));
+  assert.match(inserted[0].message, /Глава 2/);
+});
+
+test('личная подписка учитывает доступ к новелле и не дублирует уведомление с полки', async () => {
+  const publishAt = new Date(Date.now() + 60_000).toISOString();
+  let notifications;
+  const result = await createChapterNotificationsDirect({ chapter_id: 3, chapter_number: 1, publish_at: publishAt }, {
+    novel_id: 8, title: 'Закрытая новелла', creator_id: 2, access_type: 'private'
+  }, {
+    dbRequest: async (table, query, options) => {
+      if (table === 'reading_lists') return [{ user_id: 2, list_type: 'reading' }];
+      if (table === 'novel_chapter_subscriptions') return [{ user_id: 2 }, { user_id: 3 }, { user_id: 4 }];
+      if (table === 'novel_permissions') return [{ user_id: 3 }];
+      if (table === 'notification_preferences') return [];
+      assert.equal(table, 'notifications');
+      assert.equal(query.on_conflict, 'user_id,type,chapter_id');
+      notifications = options.body;
+      return [];
+    }
+  });
+  assert.equal(result.created, 2);
+  assert.deepEqual(notifications.map(row => [row.user_id, row.chapter_subscription_only, row.available_at]), [
+    [2, false, publishAt], [3, true, publishAt]
+  ]);
+});
+
+test('подписка на главы использует владельца сессии и доступную новеллу', async () => {
+  const future = new Date(Date.now() + 60_000).toISOString();
+  const writes = [];
+  const options = {
+    fetchImpl: async (url, request) => {
+      const resource = url.pathname.split('/').at(-1);
+      if (resource === 'sessions') return Response.json([{ expires_at: future, users: { user_id: 9, role: 'reader' } }]);
+      if (resource === 'novels') return Response.json([{ novel_id: 8, access_type: 'public' }]);
+      assert.equal(resource, 'set_novel_chapter_subscription');
+      assert.equal(request.method, 'POST');
+      writes.push(JSON.parse(request.body));
+      return Response.json(null);
+    },
+    config: { url: 'https://example-ref.supabase.co', key: 'test-key', configured: true }
+  };
+  const guest = await handleDirectMutation('setNovelChapterSubscription', { novel: 8, subscribed: true }, options);
+  assert.equal(guest.success, false);
+  for (const subscribed of [true, false]) {
+    const response = await handleDirectMutation('setNovelChapterSubscription', {
+      session_token: 'reader-token', user_id: 42, novel: 8, subscribed
+    }, options);
+    assert.deepEqual(response, { success: true, subscribed });
+  }
+  assert.deepEqual(writes, [
+    { p_user_id: 9, p_novel_id: 8, p_subscribed: true },
+    { p_user_id: 9, p_novel_id: 8, p_subscribed: false }
+  ]);
+});
+
+test('настройки уведомлений дополняют безопасные значения по умолчанию', async () => {
+  const result = await getNotificationShelfSettingsDirect({ user_id: 9 }, {
+    dbRequest: async table => {
+      assert.equal(table, 'notification_preferences');
+      return [{ reading_enabled: false }];
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(result.settings.reading, false);
+  assert.equal(result.settings.favorite, true);
+  assert.equal(result.settings.want_to_read, false);
+});
+
+test('изменение настройки уведомлений сохраняется только для владельца сессии', async () => {
+  let saved = null;
+  const result = await updateNotificationShelfSettingDirect({
+    list_type: 'completed',
+    enabled: true
+  }, { user_id: 9 }, {
+    dbRequest: async (_table, _query, options) => {
+      saved = options.body;
+      return [options.body];
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(saved.user_id, 9);
+  assert.equal(saved.completed_enabled, true);
+});
+
+test('прочтение уведомления ограничено текущим пользователем', async () => {
+  let filters = null;
+  const result = await markNotificationReadDirect({ notification_id: 44 }, { user_id: 9 }, {
+    dbRequest: async (_table, query) => {
+      filters = query;
+      return [];
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(filters.notification_id, 'eq.44');
+  assert.equal(filters.user_id, 'eq.9');
+});
+
 test('отметка прочитанной главы обновляет прогресс напрямую', async () => {
   const future = new Date(Date.now() + 60_000).toISOString();
   let savedProgress = null;
@@ -996,6 +1250,114 @@ test('отметка прочитанной главы обновляет про
   assert.equal(result.progress, 50);
   assert.deepEqual(savedProgress.read_chapters, [27]);
   assert.equal(savedProgress.last_chapter_number, 2);
+});
+
+test('ручная отметка в оглавлении не меняет последнюю открытую главу', async () => {
+  const future = new Date(Date.now() + 60_000).toISOString();
+  let savedProgress = null;
+  const fetchImpl = async (url, options = {}) => {
+    const table = url.pathname.split('/').at(-1);
+    let data = [];
+    if (table === 'sessions') {
+      data = [{ expires_at: future, users: { user_id: 9, username: 'Читатель', role: 'reader' } }];
+    } else if (table === 'chapters' && url.searchParams.has('chapter_id')) {
+      data = [{ chapter_id: 27, novel_id: 8, chapter_number: 2 }];
+    } else if (table === 'chapters') {
+      data = [
+        { chapter_id: 26, chapter_number: 1, publish_at: null },
+        { chapter_id: 27, chapter_number: 2, publish_at: null }
+      ];
+    } else if (table === 'reading_progress' && options.method === 'POST') {
+      savedProgress = JSON.parse(options.body);
+      data = [savedProgress];
+    } else if (table === 'reading_progress') {
+      data = [{
+        last_chapter_id: 26,
+        last_chapter_number: 1,
+        last_paragraph_index: 14,
+        read_chapters: [26],
+        progress_percent: 50
+      }];
+    }
+    return new Response(JSON.stringify(data), {
+      status: options.method === 'POST' ? 201 : 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+
+  const result = await handleDirectMutation('markChapterRead', {
+    session_token: 'reader-token',
+    chapter_id: 27,
+    novel_id: 8,
+    preserve_last_chapter: true
+  }, {
+    fetchImpl,
+    config: {
+      url: 'https://example-ref.supabase.co',
+      key: `sb_secret_${'x'.repeat(40)}`,
+      configured: true,
+      isLegacyKey: false
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.deepEqual(savedProgress.read_chapters, [26, 27]);
+  assert.equal(savedProgress.last_chapter_id, 26);
+  assert.equal(savedProgress.last_chapter_number, 1);
+  assert.equal(savedProgress.last_paragraph_index, 14);
+});
+
+test('повторное открытие прочитанной главы делает её последней открытой', async () => {
+  const future = new Date(Date.now() + 60_000).toISOString();
+  let savedProgress = null;
+  const fetchImpl = async (url, options = {}) => {
+    const table = url.pathname.split('/').at(-1);
+    let data = [];
+    if (table === 'sessions') {
+      data = [{ expires_at: future, users: { user_id: 9, username: 'Читатель', role: 'reader' } }];
+    } else if (table === 'chapters' && url.searchParams.has('chapter_id')) {
+      data = [{ chapter_id: 26, novel_id: 8, chapter_number: 1 }];
+    } else if (table === 'chapters') {
+      data = [
+        { chapter_id: 26, chapter_number: 1, publish_at: null },
+        { chapter_id: 27, chapter_number: 2, publish_at: null }
+      ];
+    } else if (table === 'reading_progress' && options.method === 'POST') {
+      savedProgress = JSON.parse(options.body);
+      data = [savedProgress];
+    } else if (table === 'reading_progress') {
+      data = [{
+        last_chapter_id: 27,
+        last_chapter_number: 2,
+        read_chapters: [26, 27],
+        progress_percent: 100
+      }];
+    }
+    return new Response(JSON.stringify(data), {
+      status: options.method === 'POST' ? 201 : 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+
+  const result = await handleDirectMutation('updateReadingProgress', {
+    session_token: 'reader-token',
+    chapter_id: 26,
+    novel_id: 8
+  }, {
+    fetchImpl,
+    config: {
+      url: 'https://example-ref.supabase.co',
+      key: `sb_secret_${'x'.repeat(40)}`,
+      configured: true,
+      isLegacyKey: false
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(savedProgress.last_chapter_id, 26);
+  assert.equal(savedProgress.last_chapter_number, 1);
+  assert.deepEqual(savedProgress.read_chapters, [26, 27]);
+  assert.equal(savedProgress.progress_percent, 100);
 });
 
 test('следующий номер главы читается напрямую из Supabase', async () => {
@@ -1045,20 +1407,26 @@ test('проверка номера главы возвращает найден
 
 test('сессионная загрузка возвращает авторизованного пользователя', async () => {
   const future = new Date(Date.now() + 60_000).toISOString();
-  const fetchImpl = async () => new Response(JSON.stringify([{
-    expires_at: future,
-    users: {
-      user_id: 0,
-      username: 'Владелец',
-      email: 'owner@example.test',
-      role: 'owner',
-      avatar_url: null,
-      telegram_id: null
-    }
-  }]), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  });
+  const fetchImpl = async url => {
+    const table = url.pathname.split('/').at(-1);
+    const data = table === 'sessions'
+      ? [{
+          expires_at: future,
+          users: {
+            user_id: 0,
+            username: 'Владелец',
+            email: 'owner@example.test',
+            role: 'owner',
+            avatar_url: null,
+            telegram_id: null
+          }
+        }]
+      : [{ value: url.searchParams.get('key') === 'eq.roleTheme' ? 'сянься' : 'adaptive' }];
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
 
   const result = await handleDirectQuery('getInitialData', {
     scope: 'session',
@@ -1075,6 +1443,7 @@ test('сессионная загрузка возвращает авториз�
 
   assert.equal(result.success, true);
   assert.equal(result.user.role, 'owner');
+  assert.equal(result.roleTheme, 'сянься');
   assert.ok(result.user.features.includes('admin_panel'));
 });
 
@@ -1086,6 +1455,7 @@ test('полная загрузка для гостя возвращает то�
         {
           novel_id: 1,
           title: 'Публичная',
+          alt_titles: 'Другое название | 另一個名字',
           access_type: 'public',
           creator_id: 7,
           creator: { user_id: 7, username: 'Создатель' },
@@ -1118,10 +1488,36 @@ test('полная загрузка для гостя возвращает то�
   assert.equal(result.success, true);
   assert.deepEqual(result.novels.map(novel => novel.novel_id), [1]);
   assert.equal(result.novels[0].author, 'Автор');
+  assert.equal(result.novels[0].alt_titles, 'Другое название | 另一個名字');
   assert.equal(result.novels[0].cover_url, 'cover-1');
   assert.equal(result.roleTheme, 'midnight');
+  assert.equal(result.novelDetailsLayout, 'adaptive');
   assert.deepEqual(result.tags, [{ id: 3, name: 'Фэнтези', description: '' }]);
   assert.ok(result.config.languages.includes('Китайский'));
+});
+
+test('только администратор меняет общий макет страницы новеллы', async () => {
+  const calls = [];
+  const dbRequest = async (table, params, options = {}) => {
+    calls.push({ table, params, method: options.method, body: options.body });
+    return options.method === 'PATCH' ? [] : [{ key: 'novelDetailsLayout', value: 'fixed' }];
+  };
+
+  const saved = await setNovelDetailsLayoutDirect({ layout: 'fixed' }, {
+    user_id: 1,
+    role: 'admin'
+  }, { dbRequest });
+  const denied = await setNovelDetailsLayoutDirect({ layout: 'adaptive' }, {
+    user_id: 2,
+    role: 'reader'
+  }, { dbRequest });
+
+  assert.equal(saved.success, true);
+  assert.equal(saved.layout, 'fixed');
+  assert.deepEqual(calls.map(call => call.method), ['PATCH', 'POST']);
+  assert.deepEqual(calls.at(-1).body, { key: 'novelDetailsLayout', value: 'fixed' });
+  assert.equal(denied.success, false);
+  assert.equal(calls.length, 2);
 });
 
 test('полная загрузка соблюдает список чтения и явные разрешения', async () => {
@@ -1177,8 +1573,21 @@ test('списки чтения загружаются напрямую для �
     const data = table === 'sessions'
       ? [{ expires_at: future, users: { user_id: 9, username: 'Читатель', role: 'reader' } }]
       : [
-          { novel_id: 2, list_type: 'reading', created_at: '2026-01-01', notes: null },
-          { novel_id: 3, list_type: 'favorite', created_at: '2026-01-02', notes: 'Любимое' }
+          {
+            novel_id: 2,
+            list_type: 'reading',
+            created_at: '2026-01-01',
+            updated_at: '2026-01-03',
+            notes: null,
+            novel: { novel_id: 2, title: 'Первая', cover_urls: ['cover-2'], updated_at: '2026-01-04' }
+          },
+          {
+            novel_id: 3,
+            list_type: 'favorite',
+            created_at: '2026-01-02',
+            notes: 'Любимое',
+            novel: { novel_id: 3, title: 'Вторая', cover_urls: [] }
+          }
         ];
     return new Response(JSON.stringify(data), {
       status: 200,
@@ -1200,6 +1609,153 @@ test('списки чтения загружаются напрямую для �
   assert.deepEqual(result.lists.reading.map(item => item.novel_id), [2]);
   assert.deepEqual(result.lists.favorite.map(item => item.novel_id), [3]);
   assert.deepEqual(result.lists.completed, []);
+  assert.equal(result.lists.reading[0].novel.title, 'Первая');
+  assert.equal(result.lists.reading[0].novel.cover_url, 'cover-2');
+  assert.equal(result.lists.reading[0].added_at, '2026-01-01');
+  assert.equal(result.lists.reading[0].novel.updated_at, '2026-01-04');
+});
+
+test('настройки ширины полок безопасно используют локальный режим до миграции', async () => {
+  const future = new Date(Date.now() + 60_000).toISOString();
+  const fetchImpl = async url => {
+    const table = url.pathname.split('/').at(-1);
+    if (table === 'sessions') {
+      return new Response(JSON.stringify([{
+        expires_at: future,
+        users: { user_id: 9, username: 'Читатель', role: 'reader' }
+      }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    return new Response(JSON.stringify({ code: 'PGRST205', message: "Could not find public.profile_preferences" }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  const result = await handleDirectQuery('getProfilePreferences', {
+    session_token: 'reader-token'
+  }, {
+    fetchImpl,
+    config: {
+      url: 'https://example-ref.supabase.co',
+      key: `sb_secret_${'x'.repeat(40)}`,
+      configured: true,
+      isLegacyKey: false
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(result.synced, false);
+  assert.equal(result.preferences.shelf_nav_width, 180);
+});
+
+test('описание профиля сохраняется только для владельца текущей сессии', async () => {
+  const future = new Date(Date.now() + 60_000).toISOString();
+  let savedBody = null;
+  const fetchImpl = async (url, options = {}) => {
+    const table = url.pathname.split('/').at(-1);
+    if (table === 'sessions') {
+      return new Response(JSON.stringify([{
+        expires_at: future,
+        users: { user_id: 9, username: 'Читатель', role: 'reader' }
+      }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (table === 'users' && options.method === 'PATCH') {
+      savedBody = JSON.parse(options.body);
+      assert.equal(url.searchParams.get('user_id'), 'eq.9');
+      return new Response(JSON.stringify([{ user_id: 9 }]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+  const result = await handleDirectMutation('updateProfileBio', {
+    session_token: 'reader-token',
+    bio: 'Перевожу истории и собираю любимые новеллы.'
+  }, {
+    fetchImpl,
+    config: {
+      url: 'https://example-ref.supabase.co',
+      key: `sb_secret_${'x'.repeat(40)}`,
+      configured: true,
+      isLegacyKey: false
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.deepEqual(savedBody, { bio: 'Перевожу истории и собираю любимые новеллы.' });
+});
+
+test('сигнал присутствия обновляет активность только текущего пользователя', async () => {
+  const future = new Date(Date.now() + 60_000).toISOString();
+  let savedBody = null;
+  const fetchImpl = async (url, options = {}) => {
+    const table = url.pathname.split('/').at(-1);
+    if (table === 'sessions') {
+      return new Response(JSON.stringify([{
+        expires_at: future,
+        users: { user_id: 9, username: 'Читатель', role: 'reader' }
+      }]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (table === 'users' && options.method === 'PATCH') {
+      assert.equal(url.searchParams.get('user_id'), 'eq.9');
+      savedBody = JSON.parse(options.body);
+      return new Response(JSON.stringify([{ user_id: 9 }]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+  const result = await handleDirectMutation('touchPresence', {
+    session_token: 'reader-token'
+  }, {
+    fetchImpl,
+    config: {
+      url: 'https://example-ref.supabase.co',
+      key: `sb_secret_${'x'.repeat(40)}`,
+      configured: true,
+      isLegacyKey: false
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(result.is_online, true);
+  assert.ok(!Number.isNaN(new Date(savedBody.last_active).getTime()));
+});
+
+test('публичный профиль сообщает только статус онлайна без точного времени активности', async () => {
+  const fetchImpl = async url => {
+    const table = url.pathname.split('/').at(-1);
+    const data = table === 'users'
+      ? [{
+          user_id: 9,
+          username: 'Читатель',
+          avatar_url: null,
+          bio: '',
+          created_at: '2026-01-01T00:00:00.000Z',
+          last_active: new Date().toISOString()
+        }]
+      : [];
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  const result = await handleDirectQuery('getUserPublicProfile', {
+    userId: 9
+  }, {
+    fetchImpl,
+    config: {
+      url: 'https://example-ref.supabase.co',
+      key: `sb_secret_${'x'.repeat(40)}`,
+      configured: true,
+      isLegacyKey: false
+    }
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(result.user.is_online, true);
+  assert.equal(Object.hasOwn(result.user, 'last_active'), false);
 });
 
 test('прогресс чтения учитывает только уже опубликованные главы', async () => {
@@ -1673,4 +2229,20 @@ test('в админ-панели нет раздела полной очистк
   assert.doesNotMatch(source, /admin-tab-database/);
   assert.match(source, /handleToggleUserBlock/);
   assert.match(source, /Удалить навсегда/);
+});
+
+
+test('локальный сервер отдаёт SVG-иконки как изображение, включая URL с версией', async t => {
+  const server = createServer();
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  for (const asset of ['/assets/icons.svg', '/assets/icons.svg?v=20260920b']) {
+    const response = await fetch(baseUrl + asset);
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get('content-type'), /^image\/svg\+xml(?:;|$)/);
+    const body = await response.text();
+    assert.match(body, /<symbol id="icon-bell"/);
+    assert.match(body, /<symbol id="icon-book"/);
+  }
 });

@@ -5,12 +5,55 @@
 
 console.log('📦 novels.js загружен');
 
+function renderUiIcon(name) {
+    return `<svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg?v=20261108scheduled#icon-${name}"></use></svg>`;
+}
+
+function renderNovelProgress(novel, chapters, canEdit) {
+    const translated = Math.max(Number(novel.chapter_count) || 0, chapters.length);
+    const original = Math.max(0, Number(novel.original_chapter_count) || 0);
+    const available = chapters.length;
+    const translatedPercent = original ? Math.round(100 * Math.min(translated, original) / original) : null;
+    return `
+        <div class="novel-progress">
+            <div class="novel-progress-meters">
+                ${canEdit ? `<div data-novel-progress="translation">
+                    <div class="novel-progress-caption">
+                        <span class="novel-progress-label">${renderUiIcon('edit')} Перевод</span>
+                        <strong>${original ? `${translated} / ${original} · ${translatedPercent}%` : `${translated} ${getNounEnding(translated, 'глава', 'главы', 'глав')}`}</strong>
+                    </div>
+                    ${original ? `<progress aria-label="Прогресс перевода" max="${original}" value="${Math.min(translated, original)}"></progress>` : ''}
+                </div>` : ''}
+                <div data-novel-progress="reading"${canEdit ? ' hidden' : ''}>
+                    <div class="novel-progress-caption">
+                        <span class="novel-progress-label">${renderUiIcon('book-open')} Чтение</span>
+                        <strong data-reading-progress-count>${available ? `0 / ${available} · 0%` : 'Нет глав'}</strong>
+                    </div>
+                    ${available ? `<progress data-reading-progress aria-label="Прогресс чтения" max="${available}" value="0"></progress>` : ''}
+                </div>
+            </div>
+            ${canEdit ? '<button type="button" class="btn btn-secondary btn-sm novel-progress-toggle" onclick="toggleNovelProgress(this)">К чтению</button>' : ''}
+        </div>
+    `;
+}
+
+function toggleNovelProgress(button) {
+    const widget = button.closest('.novel-progress');
+    const translation = widget.querySelector('[data-novel-progress="translation"]');
+    const reading = widget.querySelector('[data-novel-progress="reading"]');
+    const showReading = reading.hidden;
+    reading.hidden = !showReading;
+    translation.hidden = showReading;
+    button.textContent = showReading ? 'К переводу' : 'К чтению';
+}
+
 async function renderNovelDetailsPage(novelId) {
     const container = document.getElementById('page-content-container');
     if (!container) return;
 
     // Каждая страница новеллы открывается в обычном режиме.
     STATE.isChapterEditMode = false;
+    window.currentReadingProgress = null;
 
     window.scrollTo({ top: 0, behavior: 'instant' });
     
@@ -86,13 +129,81 @@ async function renderNovelDetailsPage(novelId) {
     // No showLoading(false) needed
 }
 
+async function renderNovelGlossaryPage(novelId) {
+    const container = document.getElementById('page-content-container');
+    if (!container) return;
+
+    container.innerHTML = '<div class="page-content novel-glossary-page"><div class="loading-spinner"><div class="spinner"></div></div></div>';
+
+    try {
+        const response = await apiRequest('getNovel', { id: novelId });
+        if (!response.success || !response.novel) {
+            throw new Error(response.error || 'Новелла не найдена');
+        }
+
+        const novel = response.novel;
+        const useNovelSlug = (novel.access_type === 'link_only' || novel.access_type === 'private') && novel.slug;
+        const novelReference = useNovelSlug ? novel.slug : novel.novel_id;
+        const breadcrumbs = getBreadcrumbs('novel-glossary', {
+            id: novelReference,
+            title: novel.title
+        });
+
+        container.innerHTML = `
+            <section class="page-content novel-glossary-page">
+                ${breadcrumbs}
+                <div class="novel-glossary-heading">
+                    ${renderUiIcon('dictionary')}
+                    <div>
+                        <p class="eyebrow">Глоссарий новеллы</p>
+                        <h2>${escapeHtml(novel.title)}</h2>
+                    </div>
+                </div>
+                <div class="empty-state novel-glossary-empty">
+                    ${renderUiIcon('book')}
+                    <h3>Терминов пока нет</h3>
+                    <p>Позже здесь появятся понятия, имена и другие пояснения именно для этой новеллы.</p>
+                    <button class="btn btn-secondary" onclick="navigateTo('novel-details', {id: '${novelReference}'})">Вернуться к новелле</button>
+                </div>
+            </section>
+        `;
+    } catch (error) {
+        container.innerHTML = `
+            <div class="page-content error-page">
+                <h3>Не удалось открыть глоссарий</h3>
+                <p>${escapeHtml(error.message)}</p>
+                <button class="btn btn-secondary" onclick="goBackInHistory()">Вернуться</button>
+            </div>
+        `;
+    }
+}
+
 function renderNovelDetailsContent(novel, chapters, breadcrumbs) {
     const container = document.querySelector('.novel-details-page');
     if (!container) return;
 
-    const actualTranslationWordCount = chapters.reduce((sum, ch) => sum + (ch.word_count || 0), 0);
+    const editionPreview = new URLSearchParams(window.location.search).get('layout') === 'edition';
+    container.classList.toggle('is-edition-preview', editionPreview);
+
+    const actualTranslationWordCount = chapters.reduce((sum, chapter) => sum + (Number(chapter.word_count) || 0), 0);
+    const coverUrls = [...new Set(
+        (Array.isArray(novel.cover_urls) ? novel.cover_urls : [novel.cover_url])
+            .filter(url => typeof url === 'string' && url.trim())
+    )];
     
     const canEdit = checkUserPermission('edit', novel);
+    const useNovelSlug = (novel.access_type === 'link_only' || novel.access_type === 'private') && novel.slug;
+    const novelReference = useNovelSlug ? novel.slug : novel.novel_id;
+    const progressHtml = renderNovelProgress(novel, chapters, canEdit);
+    const alternateTitles = getNovelAlternateTitles(novel.alt_titles);
+
+    window.currentNovelShareData = {
+        novel_id: novel.novel_id,
+        title: novel.title,
+        access_type: novel.access_type,
+        slug: novel.slug,
+        can_manage_access: canEdit
+    };
 
     const tagsHtml = novel.tags?.map(t => `
         <span class="tag-badge clickable"
@@ -103,19 +214,29 @@ function renderNovelDetailsContent(novel, chapters, breadcrumbs) {
     `).join('') || '';
 
     // ✨ СОЗДАЁМ HTML ДЛЯ КНОПОК УПРАВЛЕНИЯ ОТДЕЛЬНО ✨
-    const actionsHtml = canEdit ? `
+    const actionsHtml = `
         <div class="novel-actions-bar">
-            <button class="action-btn edit" onclick="navigateTo('edit-novel', {id: '${novel.novel_id}'})" title="Редактировать новеллу">
-                ✏️ <span>Редактировать</span>
+            ${canEdit ? `
+            <button class="action-btn edit" onclick="navigateTo('edit-novel', {id: '${novel.novel_id}'})" title="Редактировать новеллу" aria-label="Редактировать новеллу">
+                ${renderUiIcon('edit')}
             </button>
-            <button class="action-btn share" onclick="handleShareNovel('${novel.novel_id}')" title="Поделиться">
-                🔗 <span>Поделиться</span>
+            ` : ''}
+            <button class="action-btn share" onclick="handleShareNovel('${novel.novel_id}')" title="Поделиться" aria-label="Поделиться">
+                ${renderUiIcon('share')}
             </button>
-            <button class="action-btn delete" onclick="handleDeleteNovel('${novel.novel_id}')" title="Удалить новеллу">
-                🗑️ <span>Удалить</span>
+            ${canEdit ? `
+            <button class="action-btn delete" onclick="handleDeleteNovel('${novel.novel_id}')" title="Удалить новеллу" aria-label="Удалить новеллу">
+                ${renderUiIcon('trash')}
             </button>
+            ` : ''}
         </div>
-    ` : '';
+    `;
+
+    const glossaryActionHtml = `
+        <button class="action-btn glossary" onclick="navigateTo('novel-glossary', {id: '${novelReference}'})" title="Глоссарий новеллы" aria-label="Глоссарий новеллы">
+            ${renderUiIcon('dictionary')}
+        </button>
+    `;
 
     let additionalLinksHtml = ''; // Объявляем переменную
     if (novel.additional_links) {
@@ -145,49 +266,107 @@ function renderNovelDetailsContent(novel, chapters, breadcrumbs) {
             ${novel.perspective ? `<div><span>Перспектива:</span> <span>${escapeHtml(novel.perspective)}</span></div>` : ''}
             <div><span>Слов (ориг./пер.):</span> <span>${formatNumber(novel.original_word_count || 0)} / ${formatNumber(actualTranslationWordCount)}</span></div>
             <div><span>Глав (ориг./пер.):</span> <span>${novel.original_chapter_count || 0} / ${novel.chapter_count || 0}</span></div>
-            ${novel.access_type ? `<div><span>Доступ:</span> <span>${getAccessLabel(novel.access_type)}</span></div>` : ''}
+            ${novel.access_type ? `<div class="info-access-row"><span>Доступ:</span><span class="info-value">${getAccessIcon(novel.access_type)}<span>${getAccessLabel(novel.access_type)}</span></span></div>` : ''}
             ${novel.created_at ? `<div><span>Добавлена:</span> <span>${formatDate(novel.created_at)}</span></div>` : ''}
-            ${novel.updated_at ? `<div><span>Обновлена:</span> <span>${formatDate(novel.updated_at)}</span></div>` : ''}
             ${additionalLinksHtml}
         </div>
     `;
 
     // КНОПКА НАЧАТЬ ЧТЕНИЕ
-    const startReadingButton = chapters.length > 0 ? `
+    const hasSignedInReader = Boolean(STATE.currentUser && STATE.currentUser.user_id != null);
+    const hasPublicChapters = chapters.some(chapter => !chapter.is_future);
+    const isSubscribed = novel.chapter_notifications_subscribed === true;
+    const chapterNotificationButton = `
+        <button type="button" class="btn btn-secondary chapter-notification-btn" data-novel-reference="${escapeHtml(String(novelReference)).replaceAll('"', '&quot;')}" aria-pressed="${isSubscribed}" onclick="toggleChapterNotifications(this)">
+            ${renderUiIcon('bell')}<span>${isSubscribed ? 'Уведомления включены' : 'Уведомить о выходе глав'}</span>
+        </button>
+    `;
+    const startReadingButton = hasPublicChapters ? `
         <div class="start-reading-container">
-            <button class="btn btn-primary start-reading-btn" onclick="startReading()">
-                Начать чтение
+            <button class="btn btn-primary start-reading-btn" onclick="startReading()"${hasSignedInReader ? ' disabled aria-busy="true"' : ''}>
+                ${hasSignedInReader ? 'Загрузка чтения…' : 'Начать чтение'}
             </button>
-            ${chapters.length > 1 ? `
-                <div class="reading-progress">
-                    <small>Доступно глав: ${chapters.length}</small>
-                </div>
-            ` : ''}
         </div>
-    ` : '';
+    ` : `<div class="start-reading-container">${chapterNotificationButton}</div>`;
 
-    const useNovelSlug = (novel.access_type === 'link_only' || novel.access_type === 'private') && novel.slug;
-    const novelReference = useNovelSlug ? novel.slug : novel.novel_id;
+    const authorName = novel.author || 'Автор не указан';
+    const authorAliases = String(novel.author_aliases || '').split(/\s*\|\s*/);
+    const readableAuthorName = /\p{Script=Han}/u.test(authorName)
+        ? authorAliases.find(alias => /\p{Script=Cyrillic}/u.test(alias) && !/\p{Script=Han}/u.test(alias))
+            || authorAliases.find(alias => /\p{Script=Latin}/u.test(alias) && !/\p{Script=Han}/u.test(alias))
+        : '';
+
+    const coverHtml = coverUrls.length ? `
+        <button type="button" class="novel-cover-open" aria-label="Открыть обложки новеллы «${escapeHtml(novel.title)}»">
+            <img src="${escapeHtml(coverUrls[0])}" alt="Обложка новеллы «${escapeHtml(novel.title)}»"
+                onerror="handleCoverError(this)" onload="handleCoverLoad(this)">
+        </button>
+    ` : '<div class="no-cover">Нет обложки</div>';
+
+    const headingHtml = `
+        <div class="novel-header-center" data-debug="header-container">
+            <h1 class="novel-main-title" id="novel-title" data-debug="main-title">${alternateTitles.length ? `
+                <button type="button" class="novel-alt-titles-trigger" title="Другие названия" aria-haspopup="dialog" onclick="document.getElementById('novel-alt-titles').showModal()">${escapeHtml(novel.title)}</button>
+            ` : escapeHtml(novel.title)}</h1>
+            <div class="author-container">
+                <span class="author-label">Автор:</span>
+                <span class="author-name"><a href="?page=author&amp;name=${encodeURIComponent(authorName)}" onclick="handleLinkClick(event)">${escapeHtml(authorName)}${readableAuthorName ? ` <span class="novel-author-alias">(${escapeHtml(readableAuthorName)})</span>` : ''}</a></span>
+            </div>
+            ${alternateTitles.length ? `
+                <dialog id="novel-alt-titles" class="novel-alt-titles-dialog" aria-labelledby="novel-alt-titles-heading" onclick="closeDialogOnBackdrop(event)">
+                    <header>
+                        <h2 id="novel-alt-titles-heading">Другие названия</h2>
+                        <button type="button" class="novel-alt-titles-close" aria-label="Закрыть" onclick="this.closest('dialog').close()">${renderUiIcon('close')}</button>
+                    </header>
+                    <ul>${alternateTitles.map(title => `<li>${escapeHtml(title)}</li>`).join('')}</ul>
+                </dialog>
+            ` : ''}
+            ${editionPreview ? startReadingButton : ''}
+        </div>
+    `;
+
+    const coverGroupHtml = `
+        <div class="novel-cover-float">
+            ${coverHtml}
+            ${editionPreview ? '' : startReadingButton}
+        </div>
+    `;
+
+    const fixedMobilePanelsHtml = editionPreview ? '' : `
+        <section class="fixed-mobile-novel-panels" aria-label="Основная информация о новелле">
+            <article class="fixed-mobile-novel-panel fixed-mobile-overview-panel">
+                <div class="fixed-mobile-overview-cover">
+                    ${coverHtml}
+                    ${startReadingButton}
+                </div>
+                <div class="fixed-mobile-overview-description">
+                    <h2>${renderUiIcon('book')}<span>Описание</span></h2>
+                    <div class="fixed-mobile-description">${renderCollapsibleNovelDescription(novel.description, 'fixed-novel-description')}</div>
+                </div>
+            </article>
+            <article class="fixed-mobile-novel-panel fixed-mobile-info-panel">
+                <h2>Основная информация</h2>
+                ${infoTableHtml}
+            </article>
+        </section>
+    `;
+
     const chaptersHtml = renderChaptersListV2(chapters, novel.has_volumes, canEdit, window.readChapterIds || [], novelReference); // Передаем ID прочитанных глав
 
     container.innerHTML = `
         <div class="page-header">
-            ${breadcrumbs || '<div></div>'}  ${actionsHtml}
+            ${breadcrumbs || '<div></div>'}
+            <div class="novel-page-actions">
+                ${glossaryActionHtml}
+                ${actionsHtml}
+            </div>
         </div>
+        ${fixedMobilePanelsHtml}
         
         <!-- ОСНОВНОЙ КОНТЕЙНЕР С ОБТЕКАНИЕМ -->
         <div class="novel-content-wrapper">
-            <!-- ОБЛОЖКА С FLOAT И КНОПКОЙ -->
-            <div class="novel-cover-float">
-                ${novel.cover_url ? 
-                   `<img src="${escapeHtml(novel.cover_url)}" alt="${escapeHtml(novel.title)}" 
-                        onerror="handleCoverError(this)" 
-                        onload="handleCoverLoad(this)">` : 
-                    '<div class="no-cover">📚</div>'
-                }
-                ${startReadingButton}
-            </div>
-            
+            ${editionPreview ? `<div class="novel-edition-hero">${coverGroupHtml}${headingHtml}</div>` : coverGroupHtml}
+
             <!-- САЙДБАР ИНФОРМАЦИИ ДЛЯ ДЕСКТОПА -->
             <aside class="novel-info-desktop">
                 <h3>Основная информация</h3>
@@ -209,76 +388,64 @@ function renderNovelDetailsContent(novel, chapters, breadcrumbs) {
             <!-- ОПИСАНИЕ, КОТОРОЕ ОБТЕКАЕТ -->
             <div class="novel-description-float">
                 <div class="description-tabs">
-                    <button class="tab-btn active" onclick="switchDescriptionTab('description')">📖 Описание</button>
-                    <button class="tab-btn" onclick="switchDescriptionTab('info')" id="info-tab-button">ℹ️ Информация</button>
+                    <button class="tab-btn active" onclick="switchDescriptionTab('description')">${renderUiIcon('book')}<span>Описание</span></button>
+                    <button class="tab-btn" onclick="switchDescriptionTab('info')" id="info-tab-button">${renderUiIcon('info')}<span>Информация</span></button>
                 </div>
                 
                 <div id="float-description" class="tab-content active">
-                    ${formatDescription(novel.description || 'Описание пока не добавлено.')}
+                    ${renderCollapsibleNovelDescription(novel.description, 'novel-description')}
                 </div>
                 
                 <div id="float-info" class="tab-content">
                     ${infoTableHtml}
                 </div>
             </div>
-            
-            <!-- ОЧИСТКА ОБТЕКАНИЯ -->
-            <div style="clear: both;"></div>
-        </div>
 
-        <!-- ТЕГИ -->
-        <div class="novel-taxonomy">
+            <!-- ОКОНЧАНИЕ ВЕРХНЕЙ ГРУППЫ -->
+            <div class="novel-float-clear"></div>
+        </div>
+        <div class="novel-taxonomy novel-taxonomy-top">
             <div class="tags-list">
                 <strong>Теги:</strong>
                 ${tagsHtml || '<span class="text-muted">Не указаны</span>'}
             </div>
         </div>
         
-        <!-- ЗАГОЛОВОК И АВТОР С ЦЕНТРИРОВАНИЕМ -->
-        <hr class="section-divider">
-        <div class="novel-header-center" data-debug="header-container">
-            <h1 class="novel-main-title" id="novel-title" data-debug="main-title">${escapeHtml(novel.title)}</h1>
-            <div class="author-container" onclick="navigateTo('author', {name: '${escapeHtml(novel.author)}'})">
-                <span class="author-label">Автор:</span>
-                <span class="author-name"><a href="/?page=author&name=${encodeURIComponent(novel.author)}" onclick="handleLinkClick(event)">${escapeHtml(novel.author)}</a></span>
-            </div>
-            ${novel.alt_titles ? `
-                <div class="alt-titles-popup" id="alt-titles-popup" data-debug="alt-titles-popup" style="display: none;">
-                    <div class="popup-content">
-                        <strong>Альтернативные названия:</strong>
-                        <div class="alt-titles-list">${escapeHtml(novel.alt_titles)}</div>
-                    </div>
-                </div>
-            ` : ''}
-        </div>
+        ${editionPreview ? '' : `<hr class="section-divider">${headingHtml}`}
         <hr class="section-divider">
 
         <!-- ГЛАВЫ -->
         <section class="chapters-section-v2">
             
-            ${canEdit ? `
             <div class="chapters-header-v2">
-                <div class="chapter-count">Всего глав: ${chapters.length}</div>
-                <div class="chapters-controls-v2">
-                    <button class="btn btn-secondary btn-sm" id="chapter-sort-btn-v2" onclick="toggleChapterOrderV2()">
-                        ${chapterSortOrder === 'asc' ? 'Сортировка: ↑ Старые' : 'Сортировка: ↓ Новые'}
+                <div class="chapters-primary-controls">
+                    <button class="btn btn-secondary btn-sm chapter-sort-icon-btn" id="chapter-sort-btn-v2" onclick="toggleChapterOrderV2()" title="${chapterSortOrder === 'asc' ? 'Показать сначала новые главы' : 'Показать сначала старые главы'}" aria-label="${chapterSortOrder === 'asc' ? 'Показать сначала новые главы' : 'Показать сначала старые главы'}">
+                        ${renderUiIcon('sort')}
                     </button>
-                    <button class="btn btn-primary btn-sm" onclick="navigateTo('add-chapter', {novelId: '${novel.novel_id}'})">
-                        + Добавить
-                    </button>
-                    
-                    <button class="btn btn-secondary btn-sm" id="toggle-chapter-edit-btn" onclick="toggleChapterEditMode(this)">
-                        ✏️ Редактировать
-                    </button>
-                    <button class="btn btn-secondary btn-sm" id="cancel-chapter-edit-btn" style="display: none;" onclick="toggleChapterEditMode(null, true)">
-                        ❌ Отмена
-                    </button>
+                    <div class="novel-shelf-control-anchor" id="novel-shelf-control-anchor"></div>
+                </div>
+                <div class="chapters-secondary-row">
+                    ${hasPublicChapters && isSubscribed ? chapterNotificationButton : ''}
+                    ${canEdit ? `
+                    <div class="novel-chapter-edit-controls">
+                        <span class="novel-chapter-stats-placeholder">Статистика <small>в разработке</small></span>
+                        <div class="chapters-secondary-controls">
+                            <button class="btn btn-primary btn-sm" onclick="navigateTo('add-chapter', {novelId: '${novel.novel_id}'})">
+                                + Добавить
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="navigateTo('manage-chapters', {id: '${novelReference}'})" title="Управлять главами" aria-label="Управлять главами">
+                                ${renderUiIcon('edit')}
+                            </button>
+                        </div>
                     </div>
+                    ` : ''}
+                    ${progressHtml}
+                </div>
             </div>
-            ` : ''}
 
             <div class="chapters-list-container-v2">
-                <div class="chapters-list-header">
+                <div class="chapters-list-header${hasSignedInReader ? ' has-read-toggle' : ''}">
+                    ${hasSignedInReader ? '<div class="ch-read-toggle" aria-label="Статус чтения"></div>' : ''}
                     <div class="ch-num">№</div>
                     <div class="ch-title">Название</div>
                     <div class="ch-words">Слов</div>
@@ -292,101 +459,156 @@ function renderNovelDetailsContent(novel, chapters, breadcrumbs) {
         </section>
         `;
 
-    // --- НОВЫЙ БЛОК: Создание и настройка плавающей кнопки ---
     const shelfButtonContainer = document.createElement('div');
-    shelfButtonContainer.className = 'floating-shelf-button';
-    document.body.appendChild(shelfButtonContainer); // Добавляем контейнер в body
+    shelfButtonContainer.className = 'novel-shelf-control';
+    const shelfControlAnchor = document.getElementById('novel-shelf-control-anchor');
+    shelfControlAnchor?.appendChild(shelfButtonContainer);
 
-    // Проверяем, есть ли новелла хотя бы на одной полке
-    const currentUserShelves = novel.userShelves || [];
-    const isOnAnyShelf = currentUserShelves.length > 0;
-
-    const shelfTypes = { /* ... (скопируй объект shelfTypes отсюда) ... */
+    const shelfTypes = {
         want_to_read: 'Хочу прочитать',
         reading: 'Читаю сейчас',
         completed: 'Прочитано',
         favorite: 'В любимое',
         dropped: 'Брошено'
     };
+    let selectedShelf = (novel.userShelves || []).find(type => shelfTypes[type]) || null;
 
-    let shelfLinksHtml = '';
-    Object.entries(shelfTypes).forEach(([type, title]) => {
-        const isActive = currentUserShelves.includes(type);
-        shelfLinksHtml += `
-            <a href="#" class="${isActive ? 'active-shelf' : ''}"
-               onclick="handleAddToReadingList(${novel.novel_id}, '${type}')">
-                <span>${title}</span>
-            </a>`;
-    });
-
-    const removeLinkHtml = `
-        <hr style="${isOnAnyShelf ? '' : 'display: none;'}">
-        <a href="#" class="remove-link ${isOnAnyShelf ? '' : 'hidden'}"
-           onclick="handleRemoveFromReadingList(${novel.novel_id})">
-            <span>🗑️ Убрать с полок</span>
-        </a>`;
-
-    // Генерируем HTML кнопки и меню
     shelfButtonContainer.innerHTML = `
-        <button class="btn-float" title="Добавить на полку">
-            +
+        <button type="button" class="shelf-trigger" aria-expanded="false" aria-haspopup="menu">
+            ${renderUiIcon('shelf')}
+            <span class="shelf-trigger-label">${selectedShelf ? shelfTypes[selectedShelf] : 'В полку'}</span>
         </button>
-        <div class="dropdown-menu">
-            ${shelfLinksHtml}
-            ${removeLinkHtml}
+        <div class="shelf-menu" role="menu" aria-label="Выбор полки">
+            <p class="shelf-menu-title">Моя полка</p>
+            <div class="shelf-options">
+                ${Object.entries(shelfTypes).map(([type, title]) => `
+                    <button type="button" class="shelf-option${type === selectedShelf ? ' is-selected' : ''}" data-shelf-type="${type}" role="menuitemradio" aria-checked="${type === selectedShelf}">
+                        <span>${title}</span>${type === selectedShelf ? renderUiIcon('check') : ''}
+                    </button>
+                `).join('')}
+            </div>
         </div>
     `;
 
-    // Находим созданные элементы
-    const mainButton = shelfButtonContainer.querySelector('.btn-float');
-    const dropdownMenu = shelfButtonContainer.querySelector('.dropdown-menu');
-
-    // ФУНКЦИЯ ДЛЯ ЗАКРЫТИЯ МЕНЮ
     const closeShelfMenu = () => {
         shelfButtonContainer.classList.remove('menu-visible');
-        document.removeEventListener('click', handleClickOutsideShelfMenu); // Удаляем слушатель клика вне
-        console.log("Меню полки закрыто, слушатель click outside удален");
+        shelfButtonContainer.querySelector('.shelf-trigger')?.setAttribute('aria-expanded', 'false');
+        document.documentElement.classList.remove('shelf-menu-open');
+        document.body.classList.remove('shelf-menu-open');
+        document.documentElement.style.removeProperty('--shelf-scrollbar-compensation');
     };
 
-    // ФУНКЦИЯ ДЛЯ ОБРАБОТКИ КЛИКА ВНЕ МЕНЮ
-    const handleClickOutsideShelfMenu = (event) => {
-        // Закрываем, если клик был НЕ по контейнеру кнопки
-        if (!shelfButtonContainer.contains(event.target)) {
-            closeShelfMenu();
+    const updateShelfControl = (nextShelf) => {
+        selectedShelf = nextShelf;
+        novel.userShelves = nextShelf ? [nextShelf] : [];
+        shelfButtonContainer.querySelector('.shelf-trigger-label').textContent = nextShelf ? shelfTypes[nextShelf] : 'В полку';
+        shelfButtonContainer.querySelectorAll('.shelf-option').forEach(option => {
+            const isSelected = option.dataset.shelfType === nextShelf;
+            option.classList.toggle('is-selected', isSelected);
+            option.setAttribute('aria-checked', String(isSelected));
+            const icon = option.querySelector('.ui-icon');
+            if (isSelected && !icon) option.insertAdjacentHTML('beforeend', renderUiIcon('check'));
+            if (!isSelected && icon) icon.remove();
+        });
+    };
+
+    const shelfTrigger = shelfButtonContainer.querySelector('.shelf-trigger');
+    const shelfMenu = shelfButtonContainer.querySelector('.shelf-menu');
+    const positionShelfMenu = () => {
+        const triggerRect = shelfTrigger.getBoundingClientRect();
+        const menuRect = shelfMenu.getBoundingClientRect();
+        const safeMargin = 10;
+        const gap = 8;
+        const roomRight = window.innerWidth - triggerRect.left;
+        const roomBelow = window.innerHeight - triggerRect.bottom;
+        const roomAbove = triggerRect.top;
+
+        let left = roomRight >= menuRect.width + safeMargin
+            ? triggerRect.left
+            : triggerRect.right - menuRect.width;
+        let top = roomBelow >= menuRect.height + gap + safeMargin
+            ? triggerRect.bottom + gap
+            : triggerRect.top - menuRect.height - gap;
+
+        if (roomAbove < menuRect.height + gap + safeMargin && roomBelow >= menuRect.height + gap + safeMargin) {
+            top = triggerRect.bottom + gap;
         }
+
+        left = Math.max(safeMargin, Math.min(left, window.innerWidth - menuRect.width - safeMargin));
+        top = Math.max(safeMargin, Math.min(top, window.innerHeight - menuRect.height - safeMargin));
+        shelfMenu.style.left = `${Math.round(left)}px`;
+        shelfMenu.style.top = `${Math.round(top)}px`;
     };
 
-    // ОБРАБОТЧИК КЛИКА ПО ОСНОВНОЙ КНОПКЕ (+)
-    mainButton.addEventListener('click', (event) => {
-        event.stopPropagation(); // Предотвращаем всплытие клика до document
+    shelfTrigger.addEventListener('click', () => {
+        if (!STATE.currentUser) {
+            showToast('Для полок нужно войти в аккаунт', 'warning');
+            return;
+        }
         const isVisible = shelfButtonContainer.classList.toggle('menu-visible');
-        console.log("Клик по кнопке полки, меню видимо:", isVisible);
-
+        shelfTrigger.setAttribute('aria-expanded', String(isVisible));
         if (isVisible) {
-            // Если меню открылось, добавляем слушатель клика вне (с небольшой задержкой)
-            setTimeout(() => {
-                document.addEventListener('click', handleClickOutsideShelfMenu);
-                console.log("Добавлен слушатель click outside для меню полки");
-            }, 0);
-        } else {
-            // Если меню закрылось по клику на кнопку, сразу удаляем слушатель
-            document.removeEventListener('click', handleClickOutsideShelfMenu);
-            console.log("Меню полки закрыто кнопкой, слушатель click outside удален");
+            const bodyWidth = document.body.getBoundingClientRect().width;
+            const appWidth = document.getElementById('app')?.getBoundingClientRect().width
+                ?? document.body.clientWidth;
+            const scrollbarWidth = Math.max(
+                0,
+                bodyWidth - appWidth
+            );
+            document.documentElement.style.setProperty('--shelf-scrollbar-compensation', `${scrollbarWidth}px`);
+        }
+        document.documentElement.classList.toggle('shelf-menu-open', isVisible);
+        document.body.classList.toggle('shelf-menu-open', isVisible);
+        if (isVisible) requestAnimationFrame(positionShelfMenu);
+    });
+
+    let isShelfSaving = false;
+    shelfButtonContainer.addEventListener('click', async (event) => {
+        const shelfOption = event.target.closest('[data-shelf-type]');
+        if (!shelfOption || isShelfSaving) return;
+
+        isShelfSaving = true;
+        shelfOption.classList.add('is-saving');
+        shelfOption.setAttribute('aria-busy', 'true');
+        shelfOption.insertAdjacentHTML('beforeend', '<span class="shelf-option-loading" aria-label="Сохраняется"></span>');
+
+        try {
+            const nextShelf = shelfOption.dataset.shelfType;
+            if (nextShelf === selectedShelf) {
+                const response = await apiPostRequest('removeFromReadingList', { novel_id: novel.novel_id });
+                if (!response.success) throw new Error(response.error);
+                updateShelfControl(null);
+                clearCache();
+                showToast('Новелла убрана с полки', 'success');
+            } else {
+                const response = await apiPostRequest('addToReadingList', { novel_id: novel.novel_id, list_type: nextShelf });
+                if (!response.success) throw new Error(response.error);
+                updateShelfControl(nextShelf);
+                clearCache();
+                showToast(`Новелла: «${shelfTypes[nextShelf]}»`, 'success');
+            }
+            closeShelfMenu();
+        } catch (error) {
+            showToast(`Не удалось изменить полку: ${error.message}`, 'error');
+        } finally {
+            isShelfSaving = false;
+            shelfOption.classList.remove('is-saving');
+            shelfOption.removeAttribute('aria-busy');
+            shelfOption.querySelector('.shelf-option-loading')?.remove();
         }
     });
 
-    // Обработчик клика ПО ПУНКТУ МЕНЮ (чтобы закрыть меню после выбора)
-    dropdownMenu.addEventListener('click', (event) => {
-        // Проверяем, был ли клик по ссылке <a> внутри меню
-        if (event.target.closest('a')) {
-             // Небольшая задержка перед закрытием, чтобы успел сработать onclick ссылки
-            setTimeout(closeShelfMenu, 50);
+    const handleShelfClickOutside = event => {
+        if (!document.body.contains(shelfButtonContainer)) {
+            document.removeEventListener('click', handleShelfClickOutside);
+            return;
         }
-    });
-    // --- КОНЕЦ НОВОГО БЛОКА ---
+        if (!shelfButtonContainer.contains(event.target)) closeShelfMenu();
+    };
+    document.addEventListener('click', handleShelfClickOutside);
 
     // ИНИЦИАЛИЗАЦИЯ ДОПОЛНИТЕЛЬНЫХ ФУНКЦИЙ
-    initializeNovelPageFeatures(novel, chapters);
+    initializeNovelPageFeatures(novel);
     window.currentNovelChapters = chapters;
     window.currentNovelHasVolumes = novel.has_volumes;
 
@@ -399,27 +621,29 @@ function renderNovelDetailsContent(novel, chapters, breadcrumbs) {
     window.currentNovelReferenceV2 = novelReference;
     
     // АВТОМАТИЧЕСКОЕ ПЕРЕКЛЮЧЕНИЕ НА ОПИСАНИЕ ПРИ ПОЯВЛЕНИИ САЙДБАРА
-    setupAutoTabSwitching();
+    if (!editionPreview) setupAutoTabSwitching();
+    setupFixedMobilePanels();
 
-    // --- ✨ ДОБАВЬ ЭТОТ ВЫЗОВ ЗДЕСЬ ✨ ---
-    setTimeout(() => {
-        // Проверяем пользователя ВНУТРИ setTimeout
-        if (STATE.currentUser && STATE.currentUser.user_id != null) {
-            console.log(`Запуск loadAndDisplayReadingProgress для novelId: ${novel.novel_id}`); // Добавим лог
-            loadAndDisplayReadingProgress(novel.novel_id);
-        } else {
-            console.log("Пользователь не авторизован, прогресс не загружается."); // Добавим лог
-        }
-    }, 100); // Увеличили задержку до 100 мс
-    // --- ✨ КОНЕЦ ДОБАВЛЕНИЯ ✨ ---
+    if (STATE.currentUser && STATE.currentUser.user_id != null) {
+        loadAndDisplayReadingProgress(novel.novel_id);
+    } else {
+        updateStartReadingButton(null);
+    }
 }
 
 function setupAutoTabSwitching() {
+    const infoTabButton = document.getElementById('info-tab-button');
+    if (!infoTabButton) return;
+
     function checkScreenSize() {
-        const infoTabButton = document.getElementById('info-tab-button');
-        const isDesktop = window.innerWidth >= 1024;
+        if (!infoTabButton.isConnected) {
+            window.removeEventListener('resize', checkScreenSize);
+            return;
+        }
+        const hasSideInfo = document.documentElement.dataset.novelDetailsLayout === 'fixed'
+            || window.innerWidth >= 1024;
         
-        if (isDesktop && infoTabButton) {
+        if (hasSideInfo && infoTabButton) {
             const infoTab = document.getElementById('float-info');
             if (infoTab && infoTab.classList.contains('active')) {
                 switchDescriptionTab('description');
@@ -434,109 +658,137 @@ function setupAutoTabSwitching() {
     window.addEventListener('resize', checkScreenSize);
 }
 
-function initializeNovelPageFeatures(novel, chapters) {
-    const titleElement = document.getElementById('novel-title');
+async function toggleChapterNotifications(button) {
+    if (STATE.currentUser?.user_id == null) {
+        showModal('auth-modal');
+        return;
+    }
 
-    if (titleElement && novel.alt_titles) {
-        titleElement.style.cursor = 'pointer';
-
-        // Убираем создание altTitlesHtml здесь
-        // const altTitlesHtml = novel.alt_titles.split('|') ...
-
-        titleElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // ✨ Передаем сырую строку novel.alt_titles ✨
-            showAltTitlesPopup(novel.alt_titles); // Убрали e.target
+    const buttons = [...button.closest('.novel-details-page').querySelectorAll('.chapter-notification-btn')];
+    const subscribe = button.getAttribute('aria-pressed') !== 'true';
+    buttons.forEach(control => { control.disabled = true; });
+    try {
+        const response = await apiPostRequest('setNovelChapterSubscription', {
+            novel: button.dataset.novelReference,
+            subscribed: subscribe
         });
+        if (!response.success) throw new Error(response.error || 'Не удалось сохранить уведомления');
+        clearCache();
+        buttons.forEach(control => {
+            control.setAttribute('aria-pressed', String(response.subscribed));
+            control.querySelector('span').textContent = response.subscribed ? 'Уведомления включены' : 'Уведомить о выходе глав';
+        });
+        showToast(response.subscribed ? 'Новые главы появятся в уведомлениях сайта' : 'Подписка на главы отключена', 'success');
+    } catch (error) {
+        showToast(error.message || 'Не удалось сохранить уведомления', 'error');
+    } finally {
+        buttons.forEach(control => { control.disabled = false; });
     }
 }
 
-function showAltTitlesPopup(altTitlesString) {
-    // Удаляем существующий попап если есть
-    const existingPopup = document.getElementById('custom-alt-titles-popup');
-    if (existingPopup) {
-        existingPopup.remove();
-    }
+function setupFixedMobilePanels() {
+    const panelsContainer = document.querySelector('.fixed-mobile-novel-panels');
+    if (!panelsContainer) return;
 
-    // Разбиваем строку на массив названий и убираем пустые
-    const titlesArray = altTitlesString.split('|').map(t => t.trim()).filter(Boolean);
-
-    // Генерируем HTML: каждый заголовок в <p>, между ними <hr>
-    let titlesHtml = '';
-    titlesArray.forEach((title, index) => {
-        titlesHtml += `<p>${escapeHtml(title)}</p>`;
-        // Добавляем разделитель <hr> после каждого, кроме последнего
-        if (index < titlesArray.length - 1) {
-            titlesHtml += '<hr>';
+    let frameId = null;
+    const syncHeight = () => {
+        frameId = null;
+        const isFixedMobile = document.documentElement.dataset.novelDetailsLayout === 'fixed'
+            && window.matchMedia('(max-width: 767px)').matches;
+        if (!isFixedMobile) {
+            panelsContainer.style.height = '';
+            return;
         }
-    });
 
-    // Если названий нет, показываем сообщение
-    if (!titlesHtml) {
-        titlesHtml = '<p class="text-muted">Альтернативных названий нет.</p>';
+        const panels = Array.from(panelsContainer.querySelectorAll('.fixed-mobile-novel-panel'));
+        if (!panels.length) return;
+        const viewportCenter = panelsContainer.scrollLeft + panelsContainer.clientWidth / 2;
+        const activePanel = panels.reduce((closest, panel) => (
+            Math.abs(panel.offsetLeft + panel.offsetWidth / 2 - viewportCenter)
+            < Math.abs(closest.offsetLeft + closest.offsetWidth / 2 - viewportCenter)
+                ? panel
+                : closest
+        ));
+        panelsContainer.style.height = `${activePanel.offsetHeight}px`;
+    };
+
+    const scheduleHeightSync = () => {
+        if (frameId !== null) return;
+        frameId = requestAnimationFrame(syncHeight);
+    };
+
+    panelsContainer.addEventListener('scroll', scheduleHeightSync, { passive: true });
+    panelsContainer.addEventListener('novel-description-toggle', scheduleHeightSync);
+    window.addEventListener('resize', scheduleHeightSync, { once: true });
+    requestAnimationFrame(syncHeight);
+}
+
+function initializeNovelPageFeatures(novel) {
+    const coverButtons = document.querySelectorAll('.novel-cover-open');
+
+    if (coverButtons.length) {
+        const coverUrls = [...new Set(
+            (Array.isArray(novel.cover_urls) ? novel.cover_urls : [novel.cover_url])
+                .filter(url => typeof url === 'string' && url.trim())
+        )];
+        coverButtons.forEach(button => {
+            button.addEventListener('click', () => showCoverGallery(coverUrls, novel.title));
+        });
     }
 
-    // Создаем попап
-    const popup = document.createElement('div');
-    popup.id = 'custom-alt-titles-popup';
-    // ✨ Добавляем класс для стилизации и анимации ✨
-    popup.className = 'custom-alt-titles-popup bottom-sheet';
-    popup.innerHTML = `
-        <div class="popup-content">
-            <div class="popup-header">
-                <h3>Альтернативные названия</h3>
-                <button class="popup-close" onclick="closeAltTitlesPopup()">×</button>
-            </div>
-            <div class="popup-body">
-                ${titlesHtml}
-            </div>
+}
+
+function showCoverGallery(coverUrls, title) {
+    const images = [...new Set((coverUrls || []).filter(url => typeof url === 'string' && url.trim()))];
+    if (!images.length) return;
+
+    closeCoverGallery();
+
+    const gallery = document.createElement('div');
+    gallery.id = 'cover-gallery-popup';
+    gallery.className = 'cover-gallery-popup';
+    gallery.innerHTML = `
+        <div class="cover-gallery-dialog" role="dialog" aria-modal="true" aria-label="Обложки новеллы">
+            <button type="button" class="popup-close" aria-label="Закрыть просмотр обложек">${renderUiIcon('close')}</button>
+            <div class="cover-gallery-main"><img src="${escapeHtml(images[0])}" alt="Обложка новеллы «${escapeHtml(title || '')}»"></div>
+            ${images.length > 1 ? `
+                <div class="cover-gallery-thumbnails" aria-label="Выбор обложки">
+                    ${images.map((url, index) => `
+                        <button type="button" class="cover-gallery-thumbnail${index === 0 ? ' is-active' : ''}" data-cover-index="${index}" aria-label="Показать обложку ${index + 1}">
+                            <img src="${escapeHtml(url)}" alt="Миниатюра обложки ${index + 1}">
+                        </button>
+                    `).join('')}
+                </div>` : ''}
         </div>
     `;
 
-    document.body.appendChild(popup);
-    // Блокируем прокрутку фона
-    document.body.style.overflow = 'hidden';
-
-    // --- ✨ ИСПРАВЛЕННЫЙ БЛОК ЗАКРЫТИЯ ---
-    const content = popup.querySelector('.popup-content');
-
-    // Закрытие при клике на ФОН (а не на контент)
-    popup.addEventListener('click', (event) => {
-        // Если клик был НЕ по .popup-content и НЕ по его дочерним элементам
-        if (!content.contains(event.target)) {
-            closeAltTitlesPopup();
-        }
+    const close = () => closeCoverGallery();
+    const mainImage = gallery.querySelector('.cover-gallery-main img');
+    gallery.querySelector('.popup-close').addEventListener('click', close);
+    gallery.addEventListener('click', event => {
+        if (!event.target.closest('.cover-gallery-main img, .cover-gallery-thumbnail, .popup-close')) close();
     });
-
-    // Закрытие при нажатии Escape
-    const escapeHandler = (e) => {
-        if (e.key === 'Escape') closeAltTitlesPopup();
+    gallery.querySelectorAll('.cover-gallery-thumbnail').forEach(button => {
+        button.addEventListener('click', () => {
+            const index = Number(button.dataset.coverIndex);
+            mainImage.src = images[index];
+            gallery.querySelectorAll('.cover-gallery-thumbnail').forEach(item => item.classList.toggle('is-active', item === button));
+        });
+    });
+    gallery._escapeHandler = event => {
+        if (event.key === 'Escape') close();
     };
-    document.addEventListener('keydown', escapeHandler);
-
-    // Сохраняем обработчик Escape для удаления при закрытии
-    popup._escapeHandler = escapeHandler;
-    // --- ✨ КОНЕЦ ИСПРАВЛЕНИЙ ---
-
-    // Показываем попап с анимацией
-    setTimeout(() => popup.classList.add('show'), 10);
+    document.addEventListener('keydown', gallery._escapeHandler);
+    document.body.appendChild(gallery);
+    document.body.style.overflow = 'hidden';
 }
 
-function closeAltTitlesPopup() {
-    const popup = document.getElementById('custom-alt-titles-popup');
-    if (popup) {
-        if (popup._escapeHandler) {
-            document.removeEventListener('keydown', popup._escapeHandler);
-        }
-        // Убираем класс для анимации скрытия
-        popup.classList.remove('show');
-        // Возвращаем прокрутку фона
-        document.body.style.overflow = '';
-        // Удаляем элемент после завершения анимации
-        setTimeout(() => {
-            popup.remove();
-        }, 300); // Должно совпадать с длительностью анимации в CSS
-    }
+function closeCoverGallery() {
+    const gallery = document.getElementById('cover-gallery-popup');
+    if (!gallery) return;
+    if (gallery._escapeHandler) document.removeEventListener('keydown', gallery._escapeHandler);
+    gallery.remove();
+    document.body.style.overflow = '';
 }
 
 function isInReadingList(novelId) {
@@ -563,11 +815,20 @@ function renderStars(rating) {
 
 function getAccessLabel(accessType) {
     const labels = {
-        public: '🌐 Публичный',
-        private: '🔒 Приватный', 
-        link_only: '🔗 По ссылке'
+        public: 'Публичный',
+        private: 'Приватный',
+        link_only: 'По ссылке'
     };
     return labels[accessType] || accessType;
+}
+
+function getAccessIcon(accessType) {
+    const icons = {
+        public: 'globe',
+        private: 'lock',
+        link_only: 'link'
+    };
+    return icons[accessType] ? renderUiIcon(icons[accessType]) : '';
 }
 
 function switchDescriptionTab(tabName) {
@@ -585,6 +846,32 @@ function switchDescriptionTab(tabName) {
 function formatDescription(text) {
     if (!text) return '<p>Нет описания</p>';
     return text.split('\n').filter(p => p.trim() !== '').map(p => `<p>${escapeHtml(p)}</p>`).join('');
+}
+
+function renderCollapsibleNovelDescription(description, id) {
+    const text = (description || '').trim() || 'Описание пока не добавлено.';
+    const fullDescription = formatDescription(text);
+    const previewLimit = 480;
+    if (text.length <= previewLimit) return fullDescription;
+
+    const preview = text.slice(0, previewLimit).replace(/\s+\S*$/, '').trimEnd();
+    return `
+        <div data-description-preview>${formatDescription(`${preview}…`)}</div>
+        <div id="${id}" hidden>${fullDescription}</div>
+        <button type="button" class="novel-description-toggle" aria-expanded="false" aria-controls="${id}" onclick="toggleNovelDescription(this)">
+            <span>Читать далее</span>${renderUiIcon('chevron-down')}
+        </button>
+    `;
+}
+
+function toggleNovelDescription(button) {
+    const expanded = button.getAttribute('aria-expanded') !== 'true';
+    button.parentElement.querySelector('[data-description-preview]').hidden = expanded;
+    document.getElementById(button.getAttribute('aria-controls')).hidden = !expanded;
+    button.setAttribute('aria-expanded', String(expanded));
+    button.querySelector('span').textContent = expanded ? 'Свернуть' : 'Читать далее';
+    button.dispatchEvent(new Event('novel-description-toggle', { bubbles: true }));
+    if (!expanded) button.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 function handleCoverError(img) {

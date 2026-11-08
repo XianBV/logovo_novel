@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { Buffer } from 'node:buffer';
 import { readFile, stat } from 'node:fs/promises';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -66,6 +67,7 @@ const DIRECT_MUTATION_ACTIONS = new Set([
   'unblockUser',
   'deleteUser',
   'setRoleTheme',
+  'setNovelDetailsLayout',
   'setGlobalLimits',
   'addTag',
   'updateTag',
@@ -73,14 +75,24 @@ const DIRECT_MUTATION_ACTIONS = new Set([
   'addChapter',
   'updateChapter',
   'deleteChapter',
+  'deleteChaptersBulk',
   'addToReadingList',
   'removeFromReadingList',
+  'setNovelChapterSubscription',
+  'markNotificationRead',
+  'markAllNotificationsRead',
+  'deleteNotification',
+  'updateNotificationShelfSetting',
+  'updateProfileBio',
+  'updateProfilePreferences',
+  'touchPresence',
   'updateReadingProgress',
   'markChapterRead',
   'markChapterUnread'
 ]);
 const GOOGLE_DRIVE_ROOT_FOLDER_ID = '1QNtdwGiVZFS4FI9MS-scFv3x-KLeb7OK';
 const GOOGLE_DRIVE_USERS_FOLDER_ID = '1X1JHzUNGnf0hJIt0dUguGkhl_W_zO4u5';
+const USER_ONLINE_WINDOW_MS = 7 * 60 * 1000;
 const GOOGLE_OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/documents'
@@ -960,17 +972,32 @@ export async function supabaseRestRequest(table, query = {}, options = {}) {
     headers.Prefer = options.prefer || 'return=representation';
   }
 
-  const response = await fetchImpl(url, {
-    method,
-    headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body)
-  });
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(`Ошибка Supabase: HTTP ${response.status}${detail ? ` — ${detail.slice(0, 200)}` : ''}`);
+  const readOnly = method === 'GET' || method === 'HEAD';
+  for (let attempt = 0; attempt < (readOnly ? 2 : 1); attempt++) {
+    const controller = readOnly ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), options.supabaseReadTimeoutMs || 6000) : null;
+    try {
+      const response = await fetchImpl(url, {
+        method,
+        headers,
+        ...(controller ? { signal: controller.signal } : {}),
+        body: options.body === undefined ? undefined : JSON.stringify(options.body)
+      });
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(`Ошибка Supabase: HTTP ${response.status}${detail ? ` — ${detail.slice(0, 200)}` : ''}`);
+      }
+      const text = await response.text();
+      return text ? JSON.parse(text) : [];
+    } catch (error) {
+      const networkFailure = controller?.signal.aborted ||
+        /fetch failed|failed to fetch|networkerror|ECONNRESET|ETIMEDOUT|UND_ERR_CONNECT_TIMEOUT|EAI_AGAIN/i.test(`${error.message} ${error.cause?.code || ''}`);
+      if (!readOnly || !networkFailure) throw error;
+      if (attempt) throw new Error('База данных временно недоступна. Повторите загрузку.', { cause: error });
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
   }
-  const text = await response.text();
-  return text ? JSON.parse(text) : [];
 }
 
 function anonymousUser() {
@@ -989,7 +1016,7 @@ export async function resolveSessionUser(params = {}, options = {}) {
 
   const rows = await supabaseRestRequest('sessions', {
     token: `eq.${params.session_token}`,
-    select: 'expires_at,users(user_id,username,email,role,avatar_url,telegram_id,is_banned)',
+    select: 'expires_at,users(user_id,username,email,role,avatar_url,telegram_id,is_banned,bio,created_at)',
     limit: 1
   }, options);
   const session = rows[0];
@@ -1009,6 +1036,8 @@ export async function resolveSessionUser(params = {}, options = {}) {
     email: sessionUser.email || null,
     role: sessionUser.role,
     avatar_url: sessionUser.avatar_url || null,
+    bio: sessionUser.bio || '',
+    created_at: sessionUser.created_at || null,
     auth_type: sessionUser.telegram_id ? 'telegram' : 'email',
     features
   };
@@ -1115,11 +1144,17 @@ async function getUserPublicProfileDirect(params, currentUser, options = {}) {
   const db = options.dbRequest || supabaseRestRequest;
   const profileRows = await db('users', {
     user_id: `eq.${profileUserId}`,
-    select: 'user_id,username,avatar_url,bio,created_at',
+    select: 'user_id,username,avatar_url,bio,created_at,last_active',
     limit: 1
   }, options);
   const profile = profileRows[0];
   if (!profile) return { success: false, error: 'Пользователь не найден' };
+  const lastActiveAt = profile.last_active ? new Date(profile.last_active) : null;
+  const isOnline = Boolean(
+    lastActiveAt &&
+    !Number.isNaN(lastActiveAt.getTime()) &&
+    Date.now() - lastActiveAt.getTime() <= USER_ONLINE_WINDOW_MS
+  );
 
   const hasCurrentUser = currentUser?.user_id !== null && currentUser?.user_id !== undefined;
   const seesEverything = hasCurrentUser && (
@@ -1166,7 +1201,8 @@ async function getUserPublicProfileDirect(params, currentUser, options = {}) {
       username: profile.username,
       avatar_url: profile.avatar_url,
       bio: profile.bio,
-      created_at: profile.created_at
+      created_at: profile.created_at,
+      is_online: isOnline
     },
     novels: visible,
     novels_count: visible.length
@@ -1293,6 +1329,15 @@ async function getRoleThemeDirect(options = {}) {
   return rows[0]?.value || 'default';
 }
 
+async function getNovelDetailsLayoutDirect(options = {}) {
+  const rows = await supabaseRestRequest('settings', {
+    key: 'eq.novelDetailsLayout',
+    select: 'value',
+    limit: 1
+  }, options);
+  return rows[0]?.value === 'fixed' ? 'fixed' : 'adaptive';
+}
+
 function mapCatalogNovel(row) {
   const authors = Array.isArray(row.novel_authors)
     ? row.novel_authors
@@ -1313,6 +1358,7 @@ function mapCatalogNovel(row) {
     novel_id: row.novel_id,
     title: row.title,
     author: authors || 'Автор не указан',
+    alt_titles: row.alt_titles || '',
     cover_url: coverUrl,
     language: row.language,
     era: row.era,
@@ -1402,7 +1448,7 @@ async function getReadingListsDirect(user, options = {}) {
   };
   const rows = await supabaseRestRequest('reading_lists', {
     user_id: `eq.${user.user_id}`,
-    select: 'novel_id,list_type,created_at,updated_at,notes'
+    select: 'novel_id,list_type,created_at,updated_at,notes,novel:novels(novel_id,title,cover_urls,updated_at)'
   }, options);
   for (const item of rows) {
     if (!Array.isArray(lists[item.list_type])) continue;
@@ -1410,10 +1456,119 @@ async function getReadingListsDirect(user, options = {}) {
       novel_id: item.novel_id,
       added_at: item.created_at,
       updated_at: item.updated_at,
-      notes: item.notes || ''
+      notes: item.notes || '',
+      novel: item.novel ? {
+        novel_id: item.novel.novel_id,
+        title: item.novel.title,
+        updated_at: item.novel.updated_at || null,
+        cover_url: Array.isArray(item.novel.cover_urls) && item.novel.cover_urls.length
+          ? item.novel.cover_urls[0]
+          : null
+      } : null
     });
   }
   return { success: true, lists };
+}
+
+const PROFILE_SHELF_WIDTH_DEFAULT = 180;
+const PROFILE_SHELF_WIDTH_MIN = 64;
+const PROFILE_SHELF_WIDTH_MAX = 320;
+
+function normalizeProfileShelfWidth(value) {
+  const width = Number(value);
+  if (!Number.isFinite(width)) return PROFILE_SHELF_WIDTH_DEFAULT;
+  return Math.round(Math.min(PROFILE_SHELF_WIDTH_MAX, Math.max(PROFILE_SHELF_WIDTH_MIN, width)));
+}
+
+function isMissingProfilePreferencesTable(error) {
+  return /profile_preferences|PGRST205|42P01/i.test(String(error?.message || ''));
+}
+
+async function getProfilePreferencesDirect(user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const db = options.dbRequest || supabaseRestRequest;
+  try {
+    const rows = await db('profile_preferences', {
+      user_id: `eq.${user.user_id}`,
+      select: 'shelf_nav_width',
+      limit: 1
+    }, options);
+    return {
+      success: true,
+      preferences: {
+        shelf_nav_width: normalizeProfileShelfWidth(rows[0]?.shelf_nav_width)
+      },
+      synced: true
+    };
+  } catch (error) {
+    if (!isMissingProfilePreferencesTable(error)) throw error;
+    return {
+      success: true,
+      preferences: { shelf_nav_width: PROFILE_SHELF_WIDTH_DEFAULT },
+      synced: false
+    };
+  }
+}
+
+async function updateProfilePreferencesDirect(data, user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const db = options.dbRequest || supabaseRestRequest;
+  const shelfNavWidth = normalizeProfileShelfWidth(data.shelf_nav_width);
+  try {
+    await db('profile_preferences', { on_conflict: 'user_id' }, {
+      ...options,
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates,return=representation',
+      body: {
+        user_id: user.user_id,
+        shelf_nav_width: shelfNavWidth,
+        updated_at: new Date().toISOString()
+      }
+    });
+    return {
+      success: true,
+      preferences: { shelf_nav_width: shelfNavWidth },
+      synced: true
+    };
+  } catch (error) {
+    if (!isMissingProfilePreferencesTable(error)) throw error;
+    return {
+      success: true,
+      preferences: { shelf_nav_width: shelfNavWidth },
+      synced: false
+    };
+  }
+}
+
+async function touchPresenceDirect(user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const db = options.dbRequest || supabaseRestRequest;
+  const lastActive = new Date().toISOString();
+  await db('users', { user_id: `eq.${user.user_id}` }, {
+    ...options,
+    method: 'PATCH',
+    body: { last_active: lastActive }
+  });
+  return { success: true, is_online: true };
+}
+
+async function updateProfileBioDirect(data, user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const bio = String(data.bio || '').trim();
+  if (bio.length > 500) {
+    return { success: false, error: 'Описание профиля не должно превышать 500 символов' };
+  }
+  const db = options.dbRequest || supabaseRestRequest;
+  await db('users', { user_id: `eq.${user.user_id}` }, {
+    ...options,
+    method: 'PATCH',
+    body: { bio }
+  });
+  return { success: true, bio };
 }
 
 async function getReadingProgressDirect(params, user, options = {}) {
@@ -1503,6 +1658,8 @@ function publicSessionUser(user) {
     email: user.email || null,
     role: user.role,
     avatar_url: user.avatar_url || null,
+    bio: user.bio || '',
+    created_at: user.created_at || null,
     auth_type: user.telegram_id ? 'telegram' : 'email',
     features: userFeatures(user)
   };
@@ -1629,6 +1786,270 @@ async function removeFromReadingListDirect(data, user, options = {}) {
   return { success: true, message: 'Удалено из списка' };
 }
 
+const NOTIFICATION_SHELF_DEFAULTS = Object.freeze({
+  reading: true,
+  completed: false,
+  want_to_read: false,
+  favorite: true,
+  dropped: false
+});
+
+const NOTIFICATION_SHELF_COLUMNS = Object.freeze({
+  reading: 'reading_enabled',
+  favorite: 'favorite_enabled',
+  want_to_read: 'want_to_read_enabled',
+  completed: 'completed_enabled',
+  dropped: 'dropped_enabled'
+});
+
+function isNotificationShelfEnabled(listType, preferenceRows = [], userId = null) {
+  const preference = preferenceRows.find(row => String(row.user_id) === String(userId));
+  const column = NOTIFICATION_SHELF_COLUMNS[listType];
+  if (preference && column && typeof preference[column] === 'boolean') return preference[column];
+  return NOTIFICATION_SHELF_DEFAULTS[listType] === true;
+}
+
+async function readNovelChapterSubscriptions(novelId, options, userId = null) {
+  const db = options.dbRequest || supabaseRestRequest;
+  try {
+    return await db('novel_chapter_subscriptions', {
+      novel_id: `eq.${novelId}`,
+      ...(userId === null ? {} : { user_id: `eq.${userId}` }),
+      select: 'user_id'
+    }, options);
+  } catch (error) {
+    if (/PGRST205|42P01/i.test(error.message)) return null;
+    throw error;
+  }
+}
+
+export async function setNovelChapterSubscriptionDirect(data, user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  if (typeof data.subscribed !== 'boolean') return { success: false, error: 'Укажите состояние подписки' };
+
+  const reference = String(data.novel || '').trim();
+  const novel = await getNovelRecordDirect(reference, options);
+  if (!await canReadNovel(novel, reference, user, options)) {
+    return { success: false, error: 'Новелла недоступна' };
+  }
+
+  const db = options.dbRequest || supabaseRestRequest;
+  try {
+    await db('rpc/set_novel_chapter_subscription', {}, {
+      ...options,
+      method: 'POST',
+      body: { p_user_id: user.user_id, p_novel_id: novel.novel_id, p_subscribed: data.subscribed }
+    });
+  } catch (error) {
+    if (/PGRST20[25]|42P01/i.test(error.message)) {
+      return { success: false, error: 'Подписки на главы ещё не подключены к базе данных' };
+    }
+    throw error;
+  }
+  return { success: true, subscribed: data.subscribed };
+}
+
+export async function createChapterNotificationsDirect(chapter, novel, options = {}) {
+  const db = options.dbRequest || supabaseRestRequest;
+  if (!chapter?.chapter_id || !novel?.novel_id) return { created: 0 };
+
+  const [shelfRows, subscriptionRows] = await Promise.all([
+    db('reading_lists', { novel_id: `eq.${novel.novel_id}`, select: 'user_id,list_type' }, options),
+    readNovelChapterSubscriptions(novel.novel_id, options)
+  ]);
+
+  const userIds = [...new Set(shelfRows.map(row => Number(row.user_id)).filter(Number.isFinite))];
+  const preferenceRows = options.notifyShelves !== false && userIds.length
+    ? await db('notification_preferences', {
+        user_id: `in.(${userIds.join(',')})`,
+        select: `user_id,${Object.values(NOTIFICATION_SHELF_COLUMNS).join(',')}`
+      }, options)
+    : [];
+  const shelfRecipients = new Set(shelfRows.filter(row => (
+    options.notifyShelves !== false && isNotificationShelfEnabled(row.list_type, preferenceRows, row.user_id)
+  )).map(row => Number(row.user_id)));
+  let subscribers = (subscriptionRows || []).map(row => Number(row.user_id));
+  if (novel.access_type === 'private' && subscribers.length) {
+    const permissions = await db('novel_permissions', {
+      novel_id: `eq.${novel.novel_id}`,
+      select: 'user_id'
+    }, options);
+    const permitted = new Set([0, Number(novel.creator_id), ...userIds, ...permissions.map(row => Number(row.user_id))]);
+    subscribers = subscribers.filter(userId => permitted.has(userId));
+  }
+  const recipients = new Set([...shelfRecipients, ...subscribers]);
+  if (!recipients.size) return { created: 0 };
+
+  const now = new Date().toISOString();
+  const availableAt = chapter.publish_at && new Date(chapter.publish_at) > new Date()
+    ? new Date(chapter.publish_at).toISOString()
+    : now;
+  const title = `Новая глава: ${novel.title}`;
+  const chapterLabel = `Глава ${chapter.chapter_number}${chapter.chapter_title ? ` — ${chapter.chapter_title}` : ''}`;
+  const link = `?page=chapter-read&novel=${encodeURIComponent(novel.slug || novel.novel_id)}&chapter=${encodeURIComponent(chapter.chapter_number)}`;
+  const body = [...recipients].map(userId => ({
+    user_id: userId,
+    type: 'new_chapter',
+    novel_id: Number(novel.novel_id),
+    chapter_id: Number(chapter.chapter_id),
+    title,
+    message: chapterLabel,
+    link,
+    is_read: false,
+    available_at: availableAt,
+    created_at: now,
+    read_at: null,
+    ...(subscriptionRows ? { chapter_subscription_only: !shelfRecipients.has(userId) } : {})
+  }));
+
+  await db('notifications', {
+    on_conflict: 'user_id,type,chapter_id'
+  }, {
+    ...options,
+    method: 'POST',
+    prefer: 'resolution=ignore-duplicates,return=representation',
+    body
+  });
+  return { created: body.length };
+}
+
+export async function getNotificationsDirect(params, user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const db = options.dbRequest || supabaseRestRequest;
+  const limit = Math.min(50, Math.max(1, Number(params.limit) || 20));
+  const now = new Date().toISOString();
+  const baseQuery = {
+    user_id: `eq.${user.user_id}`,
+    available_at: `lte.${now}`
+  };
+  const [rows, unreadRows] = await Promise.all([
+    db('notifications', {
+      ...baseQuery,
+      select: 'notification_id,type,novel_id,chapter_id,title,message,link,is_read,available_at,created_at,novel:novels(title,slug,access_type),chapter:chapters(chapter_number,chapter_title)',
+      order: 'available_at.desc',
+      limit
+    }, options),
+    db('notifications', {
+      ...baseQuery,
+      is_read: 'eq.false',
+      select: 'notification_id'
+    }, options)
+  ]);
+
+  return {
+    success: true,
+    unread_count: unreadRows.length,
+    notifications: rows.map(row => {
+      const novel = row.novel || {};
+      const useSlug = (novel.access_type === 'link_only' || novel.access_type === 'private') && novel.slug;
+      return {
+        notification_id: row.notification_id,
+        type: row.type,
+        title: row.title,
+        message: row.message,
+        is_read: row.is_read === true,
+        created_at: row.available_at || row.created_at,
+        novel_id: row.novel_id,
+        novel_reference: useSlug ? novel.slug : row.novel_id,
+        novel_title: novel.title || '',
+        chapter_id: row.chapter_id,
+        chapter_number: row.chapter?.chapter_number ?? null
+      };
+    })
+  };
+}
+
+export async function getNotificationShelfSettingsDirect(user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const db = options.dbRequest || supabaseRestRequest;
+  const rows = await db('notification_preferences', {
+    user_id: `eq.${user.user_id}`,
+    select: Object.values(NOTIFICATION_SHELF_COLUMNS).join(','),
+    limit: 1
+  }, options);
+  const settings = { ...NOTIFICATION_SHELF_DEFAULTS };
+  const preference = rows[0];
+  if (preference) Object.entries(NOTIFICATION_SHELF_COLUMNS).forEach(([listType, column]) => {
+    if (typeof preference[column] === 'boolean') settings[listType] = preference[column];
+  });
+  return { success: true, settings };
+}
+
+export async function updateNotificationShelfSettingDirect(data, user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const db = options.dbRequest || supabaseRestRequest;
+  const listType = String(data.list_type || '');
+  if (!Object.hasOwn(NOTIFICATION_SHELF_DEFAULTS, listType)) {
+    return { success: false, error: 'Неизвестная книжная полка' };
+  }
+  const enabled = data.enabled === true || data.enabled === 'true';
+  const column = NOTIFICATION_SHELF_COLUMNS[listType];
+  const now = new Date().toISOString();
+  await db('notification_preferences', {
+    on_conflict: 'user_id'
+  }, {
+    ...options,
+    method: 'POST',
+    prefer: 'resolution=merge-duplicates,return=representation',
+    body: {
+      user_id: user.user_id,
+      [column]: enabled,
+      updated_at: now
+    }
+  });
+  return { success: true, list_type: listType, enabled };
+}
+
+export async function markNotificationReadDirect(data, user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const notificationId = Number(data.notification_id);
+  if (!Number.isFinite(notificationId)) return { success: false, error: 'Уведомление не найдено' };
+  const db = options.dbRequest || supabaseRestRequest;
+  await db('notifications', {
+    notification_id: `eq.${notificationId}`,
+    user_id: `eq.${user.user_id}`
+  }, {
+    ...options,
+    method: 'PATCH',
+    body: { is_read: true, read_at: new Date().toISOString() }
+  });
+  return { success: true };
+}
+
+export async function markAllNotificationsReadDirect(data, user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const db = options.dbRequest || supabaseRestRequest;
+  await db('notifications', {
+    user_id: `eq.${user.user_id}`,
+    is_read: 'eq.false',
+    available_at: `lte.${new Date().toISOString()}`
+  }, {
+    ...options,
+    method: 'PATCH',
+    body: { is_read: true, read_at: new Date().toISOString() }
+  });
+  return { success: true };
+}
+
+export async function deleteNotificationDirect(data, user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+  const notificationId = Number(data.notification_id);
+  if (!Number.isFinite(notificationId)) return { success: false, error: 'Уведомление не найдено' };
+  const db = options.dbRequest || supabaseRestRequest;
+  await db('notifications', {
+    notification_id: `eq.${notificationId}`,
+    user_id: `eq.${user.user_id}`
+  }, { ...options, method: 'DELETE' });
+  return { success: true };
+}
+
 async function getChapterAndPublishedRows(chapterId, options = {}) {
   const chapters = await supabaseRestRequest('chapters', {
     chapter_id: `eq.${chapterId}`,
@@ -1670,6 +2091,17 @@ async function updateReadingProgressDirectMutation(data, user, options = {}) {
   const readChapters = new Set((progressRows[0]?.read_chapters || []).map(Number));
   readChapters.add(chapterId);
   const updatedReadChapters = [...readChapters];
+  const currentProgress = progressRows[0] || {};
+  const preserveLastChapter = data.preserve_last_chapter === true;
+  const lastChapterId = preserveLastChapter
+    ? (currentProgress.last_chapter_id ?? null)
+    : chapterId;
+  const lastChapterNumber = preserveLastChapter
+    ? (currentProgress.last_chapter_number ?? null)
+    : chapter.chapter_number;
+  const lastParagraphIndex = preserveLastChapter
+    ? Number(currentProgress.last_paragraph_index || 0)
+    : Number(data.last_paragraph_index || data.paragraph_index || 0);
   const percent = publishedRows.length
     ? Math.round((updatedReadChapters.length / publishedRows.length) * 100)
     : 0;
@@ -1682,11 +2114,11 @@ async function updateReadingProgressDirectMutation(data, user, options = {}) {
     body: {
       user_id: user.user_id,
       novel_id: novelId,
-      last_chapter_id: chapterId,
-      last_chapter_number: chapter.chapter_number,
+      last_chapter_id: lastChapterId,
+      last_chapter_number: lastChapterNumber,
       read_chapters: updatedReadChapters,
       progress_percent: percent,
-      last_paragraph_index: Number(data.last_paragraph_index || data.paragraph_index || 0),
+      last_paragraph_index: lastParagraphIndex,
       updated_at: new Date().toISOString()
     }
   });
@@ -1695,7 +2127,9 @@ async function updateReadingProgressDirectMutation(data, user, options = {}) {
     progress: percent,
     chapters_read: updatedReadChapters.length,
     total_chapters: publishedRows.length,
-    last_chapter: chapter.chapter_number
+    last_chapter_id: lastChapterId,
+    last_chapter_number: lastChapterNumber,
+    last_chapter: lastChapterNumber
   };
 }
 
@@ -1725,7 +2159,15 @@ async function markChapterUnreadDirect(data, user, options = {}) {
       user_id: `eq.${user.user_id}`,
       novel_id: `eq.${chapter.novel_id}`
     }, { ...options, method: 'DELETE' });
-    return { success: true, message: 'Прогресс сброшен', progress: 0, chapters_read: 0 };
+    return {
+      success: true,
+      message: 'Прогресс сброшен',
+      progress: 0,
+      chapters_read: 0,
+      total_chapters: publishedRows.length,
+      last_chapter_id: null,
+      last_chapter_number: null
+    };
   }
 
   const remainingSet = new Set(remaining);
@@ -1752,7 +2194,9 @@ async function markChapterUnreadDirect(data, user, options = {}) {
     success: true,
     progress: percent,
     chapters_read: remaining.length,
-    total_chapters: publishedRows.length
+    total_chapters: publishedRows.length,
+    last_chapter_id: last?.chapter_id || null,
+    last_chapter_number: last?.chapter_number || null
   };
 }
 
@@ -1946,11 +2390,25 @@ async function addChapterDirect(data, user, options = {}) {
     index < planned.length - 1 ? planned[index + 1].chapter_id : null
   ].filter(Boolean);
   const navigation = await syncNavigation(novelId, navigationIds, options);
+  let notificationWarning;
+  try {
+    const createNotifications = options.createChapterNotifications || createChapterNotificationsDirect;
+    await createNotifications({
+      ...insertedChapter,
+      chapter_number: chapterNumber,
+      chapter_title: chapterTitle,
+      publish_at: publishAt
+    }, novel, options);
+  } catch (error) {
+    notificationWarning = error.message;
+    console.error(`[notifications] Не удалось создать уведомления для главы ${insertedChapter.chapter_id}:`, error);
+  }
   return {
     success: true,
     chapter_id: insertedChapter.chapter_id,
     word_count: Number(insertedChapter.word_count || countWords(data.content)),
-    navigation_warning: navigation.success ? undefined : navigation.errors.join('; ')
+    navigation_warning: navigation.success ? undefined : navigation.errors.join('; '),
+    notification_warning: notificationWarning
   };
 }
 
@@ -2016,6 +2474,102 @@ async function deleteChapterDirect(data, user, options = {}) {
   return {
     success: true,
     drive_warning: driveWarning,
+    navigation_warning: navigation.success ? undefined : navigation.errors.join('; ')
+  };
+}
+
+async function deleteChaptersBulkDirect(data, user, options = {}) {
+  const authError = requireSignedInUser(user);
+  if (authError) return authError;
+
+  const chapterIds = [...new Set(
+    (Array.isArray(data.chapter_ids) ? data.chapter_ids : [])
+      .map(Number)
+      .filter(Number.isFinite)
+  )];
+  if (!chapterIds.length) return { success: false, error: 'Не выбраны главы' };
+  if (chapterIds.length > 100) {
+    return { success: false, error: 'За один раз можно удалить не более 100 глав' };
+  }
+
+  const idFilter = `in.(${chapterIds.join(',')})`;
+  const selectedRows = await supabaseRestRequest('chapters', {
+    chapter_id: idFilter,
+    is_deleted: 'eq.false',
+    select: 'chapter_id,novel_id,volume_name,volume_order,chapter_number,chapter_title,file_id'
+  }, options);
+  if (selectedRows.length !== chapterIds.length) {
+    return { success: false, error: 'Некоторые выбранные главы не найдены или уже удалены' };
+  }
+
+  const novelIds = [...new Set(selectedRows.map(row => Number(row.novel_id)))];
+  if (novelIds.length !== 1 || !Number.isFinite(novelIds[0])) {
+    return { success: false, error: 'Можно удалять главы только одной новеллы за раз' };
+  }
+
+  const novelId = novelIds[0];
+  const novel = await getNovelRecordDirect(novelId, options);
+  if (!novel || !await canEditNovelDirect(novel, user, options)) {
+    return { success: false, error: 'У вас нет прав на удаление этих глав' };
+  }
+
+  const activeRows = sortChapterRows(await supabaseRestRequest('chapters', {
+    novel_id: `eq.${novelId}`,
+    is_deleted: 'eq.false',
+    select: 'chapter_id,volume_name,volume_order,chapter_number,chapter_title,file_id',
+    order: 'volume_order.asc,chapter_number.asc'
+  }, options));
+  const selectedIdSet = new Set(chapterIds.map(Number));
+  const navigationIdSet = new Set();
+  activeRows.forEach((row, index) => {
+    if (!selectedIdSet.has(Number(row.chapter_id))) return;
+    const previous = activeRows[index - 1];
+    const next = activeRows[index + 1];
+    if (previous && !selectedIdSet.has(Number(previous.chapter_id))) {
+      navigationIdSet.add(previous.chapter_id);
+    }
+    if (next && !selectedIdSet.has(Number(next.chapter_id))) {
+      navigationIdSet.add(next.chapter_id);
+    }
+  });
+
+  const now = new Date().toISOString();
+  await supabaseRestRequest('chapters', { chapter_id: idFilter }, {
+    ...options,
+    method: 'PATCH',
+    body: { is_deleted: true, deleted_at: now, updated_at: now }
+  });
+
+  const trashChapterDocument = options.trashChapterDocument || (fileId => (
+    googleJsonRequest(
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?fields=id,trashed`,
+      { ...options, method: 'PATCH', body: { trashed: true } }
+    )
+  ));
+  const driveResults = await Promise.allSettled(
+    selectedRows
+      .filter(chapter => chapter.file_id)
+      .map(chapter => trashChapterDocument(chapter.file_id, options))
+  );
+  const driveWarnings = driveResults
+    .filter(result => result.status === 'rejected')
+    .map(result => result.reason?.message || 'Не удалось переместить документ главы в корзину');
+
+  const updateStats = options.updateNovelStats || updateNovelStatsDirect;
+  const updateVolumeStructure = options.updateNovelVolumeStructure || updateNovelVolumeStructureDirect;
+  const syncContents = options.syncContents || updateContentsDocumentDirect;
+  const syncNavigation = options.syncNavigation || syncChapterNavigationDirect;
+  await Promise.all([
+    updateStats(novelId, options),
+    updateVolumeStructure(novelId, options),
+    syncContents(novelId, options)
+  ]);
+  const navigation = await syncNavigation(novelId, [...navigationIdSet], options);
+
+  return {
+    success: true,
+    deleted_count: selectedRows.length,
+    drive_warnings: driveWarnings,
     navigation_warning: navigation.success ? undefined : navigation.errors.join('; ')
   };
 }
@@ -3344,6 +3898,17 @@ export async function setRoleThemeDirect(data, user, options = {}) {
   return { success: true, message: `Тема изменена на ${theme}` };
 }
 
+export async function setNovelDetailsLayoutDirect(data, user, options = {}) {
+  const accessError = requireAdministrator(user);
+  if (accessError) return accessError;
+  const layout = String(data.layout || '').trim();
+  if (!['adaptive', 'fixed'].includes(layout)) {
+    return { success: false, error: 'Некорректный режим страницы новеллы' };
+  }
+  await setSettingDirect('novelDetailsLayout', layout, options);
+  return { success: true, layout, message: 'Макет страницы новеллы сохранён' };
+}
+
 export async function setGlobalLimitsDirect(data, user, options = {}) {
   const accessError = requireAdministrator(user, true);
   if (accessError) return accessError;
@@ -3443,6 +4008,7 @@ export async function handleDirectMutation(action, data = {}, options = {}) {
   if (action === 'unblockUser') return setUserBlockedDirect(data, user, false, options);
   if (action === 'deleteUser') return deleteUserDirect(data, user, options);
   if (action === 'setRoleTheme') return setRoleThemeDirect(data, user, options);
+  if (action === 'setNovelDetailsLayout') return setNovelDetailsLayoutDirect(data, user, options);
   if (action === 'setGlobalLimits') return setGlobalLimitsDirect(data, user, options);
   if (action === 'addTag') return addTagDirect(data, user, options);
   if (action === 'updateTag') return updateTagDirect(data, user, options);
@@ -3450,8 +4016,21 @@ export async function handleDirectMutation(action, data = {}, options = {}) {
   if (action === 'addChapter') return addChapterDirect(data, user, options);
   if (action === 'updateChapter') return updateChapterDirect(data, user, options);
   if (action === 'deleteChapter') return deleteChapterDirect(data, user, options);
+  if (action === 'deleteChaptersBulk') return deleteChaptersBulkDirect(data, user, options);
   if (action === 'addToReadingList') return addToReadingListDirect(data, user, options);
   if (action === 'removeFromReadingList') return removeFromReadingListDirect(data, user, options);
+  if (action === 'setNovelChapterSubscription') return setNovelChapterSubscriptionDirect(data, user, options);
+  if (action === 'markNotificationRead') return markNotificationReadDirect(data, user, options);
+  if (action === 'markAllNotificationsRead') return markAllNotificationsReadDirect(data, user, options);
+  if (action === 'deleteNotification') return deleteNotificationDirect(data, user, options);
+  if (action === 'updateNotificationShelfSetting') {
+    return updateNotificationShelfSettingDirect(data, user, options);
+  }
+  if (action === 'updateProfileBio') return updateProfileBioDirect(data, user, options);
+  if (action === 'updateProfilePreferences') {
+    return updateProfilePreferencesDirect(data, user, options);
+  }
+  if (action === 'touchPresence') return touchPresenceDirect(user, options);
   if (action === 'updateReadingProgress' || action === 'markChapterRead') {
     return updateReadingProgressDirectMutation(data, user, options);
   }
@@ -3498,7 +4077,7 @@ async function getNovelDirect(params, options = {}) {
 
   const rows = await supabaseRestRequest('novels', {
     ...lookup,
-    select: '*,creator:creator_id(user_id,username),novel_authors(authors(name)),novel_tags(tags(tag_id,name))',
+    select: '*,creator:creator_id(user_id,username),novel_authors(authors(name,aliases)),novel_tags(tags(tag_id,name))',
     limit: 1
   }, options);
   if (!rows.length) return { success: false, error: 'Новелла не найдена' };
@@ -3522,7 +4101,10 @@ async function getNovelDirect(params, options = {}) {
         novel_id: `eq.${novelDb.novel_id}`,
         select: 'list_type'
       }, options);
-  const [chapterRows, shelfRows] = await Promise.all([chapterPromise, shelfPromise]);
+  const subscriptionPromise = user.user_id === null
+    ? Promise.resolve([])
+    : readNovelChapterSubscriptions(novelDb.novel_id, options, user.user_id);
+  const [chapterRows, shelfRows, subscriptions] = await Promise.all([chapterPromise, shelfPromise, subscriptionPromise]);
 
   const maySeeFuture = user.role === 'admin' || user.role === 'owner' ||
     String(user.user_id) === String(novelDb.creator_id);
@@ -3546,6 +4128,7 @@ async function getNovelDirect(params, options = {}) {
       username: novelDb.creator.username
     } : null,
     author: novelDb.novel_authors?.[0]?.authors?.name || 'Автор не указан',
+    author_aliases: novelDb.novel_authors?.[0]?.authors?.aliases || '',
     tags: Array.isArray(novelDb.novel_tags)
       ? novelDb.novel_tags.map(row => row.tags ? {
           id: row.tags.tag_id,
@@ -3554,6 +4137,7 @@ async function getNovelDirect(params, options = {}) {
       : [],
     chapters,
     userShelves: shelfRows.map(item => item.list_type),
+    chapter_notifications_subscribed: Boolean(subscriptions?.length),
     isOnShelf: shelfRows.length > 0
   };
   delete novel.novel_tags;
@@ -3719,7 +4303,8 @@ async function getChapterDirect(params, options = {}, forEdit = false) {
       isRead: readChapterIds.has(Number(row.chapter_id))
     })),
     novel_title: novel.title,
-    novel_slug: novel.slug || null
+    novel_slug: novel.slug || null,
+    novel_access_type: novel.access_type || 'public'
   };
 
   if (forEdit) {
@@ -3737,10 +4322,11 @@ export async function handleDirectQuery(action, params = {}, options = {}) {
     const user = await resolveSessionUser(params, options);
 
     if (params.scope === 'full') {
-      const [novels, tags, roleTheme] = await Promise.all([
+      const [novels, tags, roleTheme, novelDetailsLayout] = await Promise.all([
         getVisibleNovelsDirect(user, options),
         getTagsDirect(options),
-        getRoleThemeDirect(options)
+        getRoleThemeDirect(options),
+        getNovelDetailsLayoutDirect(options)
       ]);
       return {
         success: true,
@@ -3749,17 +4335,22 @@ export async function handleDirectQuery(action, params = {}, options = {}) {
         config: CLIENT_CONFIG,
         tags,
         roleTheme,
+        novelDetailsLayout,
         scope: 'full'
       };
     }
 
+    const [roleTheme, novelDetailsLayout] = await Promise.all([
+      getRoleThemeDirect(options), getNovelDetailsLayoutDirect(options)
+    ]);
     return {
       success: true,
       user,
       novels: [],
       config: {},
       tags: [],
-      roleTheme: 'default',
+      roleTheme,
+      novelDetailsLayout,
       scope: 'session'
     };
   }
@@ -3781,9 +4372,24 @@ export async function handleDirectQuery(action, params = {}, options = {}) {
     return getReadingListsDirect(user, options);
   }
 
+  if (action === 'getProfilePreferences') {
+    const user = await resolveSessionUser(params, options);
+    return getProfilePreferencesDirect(user, options);
+  }
+
   if (action === 'getReadingProgress') {
     const user = await resolveSessionUser(params, options);
     return getReadingProgressDirect(params, user, options);
+  }
+
+  if (action === 'getNotifications') {
+    const user = await resolveSessionUser(params, options);
+    return getNotificationsDirect(params, user, options);
+  }
+
+  if (action === 'getNotificationShelfSettings') {
+    const user = await resolveSessionUser(params, options);
+    return getNotificationShelfSettingsDirect(user, options);
   }
 
   if (action === 'getMyCreatedNovels') {
@@ -3929,6 +4535,11 @@ export function getMutationLockKey(action, data = {}) {
     'logout',
     'addToReadingList',
     'removeFromReadingList',
+    'setNovelChapterSubscription',
+    'markNotificationRead',
+    'markAllNotificationsRead',
+    'deleteNotification',
+    'updateNotificationShelfSetting',
     'updateReadingProgress',
     'markChapterRead',
     'markChapterUnread',
@@ -3940,6 +4551,7 @@ export function getMutationLockKey(action, data = {}) {
     'unblockUser',
     'deleteUser',
     'setRoleTheme',
+    'setNovelDetailsLayout',
     'setGlobalLimits',
     'addTag',
     'updateTag',
@@ -3959,6 +4571,9 @@ export function getMutationLockKey(action, data = {}) {
     return `chapter:${data.chapter_id || data.chapterId}`;
   }
   if (action === 'addChapter' && data.novel_id) {
+    return `novel:${data.novel_id}:chapters`;
+  }
+  if (action === 'deleteChaptersBulk' && data.novel_id) {
     return `novel:${data.novel_id}:chapters`;
   }
   if (['updateNovel', 'deleteNovel', 'restoreNovel', 'permanentDeleteNovel'].includes(action) && (data.novel_id || data.novelId)) {
@@ -4206,6 +4821,7 @@ const MIME_TYPES = {
   '.jpeg': 'image/jpeg',
   '.gif': 'image/gif',
   '.webp': 'image/webp',
+  '.svg': 'image/svg+xml; charset=utf-8',
   '.ico': 'image/x-icon'
 };
 
@@ -4229,7 +4845,10 @@ async function serveStatic(request, response) {
   try {
     const fileStats = await stat(filePath);
     if (!fileStats.isFile()) throw new Error('Not a file');
-    const content = await readFile(filePath);
+    let content = await readFile(filePath);
+    if (relativePath === 'js/config.js') {
+      content = Buffer.concat([content, Buffer.from(`\nif (['127.0.0.1', 'localhost'].includes(window.location.hostname)) {\n  window.LOVO_API_BASE ||= window.location.origin + '/api';\n}\n`)]);
+    }
     response.writeHead(200, {
       'Content-Type': MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
       'Content-Length': content.length

@@ -1,4 +1,4 @@
-import { readdir } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -17,3 +17,19 @@ for (const file of files) {
     if (result.status !== 0) process.exit(result.status || 1);
 }
 console.log(`Синтаксис JavaScript проверен: ${files.length} файлов.`);
+
+// Отдельный CSS-модуль должен попасть в поставку вместе с index.html.
+// Проверяем локальные подключения без запросов к шрифтам и другим сервисам.
+const html = await readFile(new URL('index.html', root), 'utf8');
+const stylesheetLinks = [...html.matchAll(/<link\b[^>]*>/gi)]
+    .map(([tag]) => ({
+        rel: tag.match(/\brel=["']([^"']+)["']/i)?.[1],
+        href: tag.match(/\bhref=["']([^"']+)["']/i)?.[1]
+    }))
+    .filter(link => link.rel?.split(/\s+/).includes('stylesheet') && link.href && !/^(?:https?:|data:|\/\/)/i.test(link.href));
+for (const { href } of stylesheetLinks) {
+    const asset = new URL(href, root);
+    asset.search = '';
+    if (!(await stat(asset)).isFile()) throw new Error(`Не найден файл стилей: ${href}`);
+}
+console.log(`Подключения CSS проверены: ${stylesheetLinks.length} файлов.`);

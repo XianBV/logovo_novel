@@ -354,54 +354,96 @@ function showFishLoading() {
     loadingBox.appendChild(fishContainer);
 }
 
-function showBookLoadingAnimation() {
-    const container = document.getElementById('custom-loading-animation');
-    if (!container) return;
-
-    // HTML для анимации книги (из CSS)
-    container.innerHTML = `
-        <div class="page-loading-animation" style="min-height: auto;"> <div class="book">
-                <div class="book__pg-shadow"></div>
-                <div class="book__pg"></div>
-                <div class="book__pg book__pg--2"></div>
-                <div class="book__pg book__pg--3"></div>
-                <div class="book__pg book__pg--4"></div>
-                <div class="book__pg book__pg--5"></div>
-            </div>
-            <p style="margin-top: 1rem;">Загрузка...</p> </div>
-    `;
+function renderBookLoadingMarkup(compact = false) {
+    return `<div class="page-loading-animation${compact ? ' is-compact' : ''}" role="status" aria-live="polite">
+        <div class="book" aria-hidden="true">
+            <span class="book__shadow"></span>
+            <span class="book__cover book__cover--left"></span><span class="book__cover book__cover--right"></span>
+            <span class="book__page book__page--left"></span><span class="book__page book__page--right"></span>
+            <span class="book__leaf"></span><span class="book__leaf book__leaf--2"></span><span class="book__leaf book__leaf--3"></span>
+            <span class="book__spine"></span>
+        </div>
+        <span class="book-loading-label">Загрузка…</span>
+    </div>`;
 }
 
-function showToast(message, type = 'info') {
+function showBookLoadingAnimation() {
+    const container = document.getElementById('custom-loading-animation');
+    if (container) container.innerHTML = renderBookLoadingMarkup(true);
+}
+
+function showToast(message, type = 'info', duration = 3600) {
     const container = document.getElementById('toast-container');
     if (!container) {
         console.log(`🔔 [${type}]:`, message);
         return;
     }
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    
-    const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
+
+    const allowedTypes = ['success', 'error', 'warning', 'info'];
+    const normalizedType = allowedTypes.includes(type) ? type : 'info';
+    const normalizedDuration = Math.min(
+        10000,
+        Math.max(1800, Number(duration) || 3600)
+    );
+    const cleanMessage = String(message || '')
+        .replace(/^\s*[✅❌⚠️ℹ️🔔]\s*/u, '')
+        .trim();
+    const iconNames = {
+        success: 'check',
+        error: 'close',
+        warning: 'warning',
+        info: 'info'
     };
-    
+
+    // Не даём серии сообщений закрыть весь интерфейс.
+    while (container.children.length >= 4) {
+        const oldestToast = container.firstElementChild;
+        if (typeof oldestToast?._dismissToast === 'function') {
+            oldestToast._dismissToast(true);
+        } else {
+            oldestToast?.remove();
+        }
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${normalizedType}`;
+    toast.setAttribute('role', normalizedType === 'error' ? 'alert' : 'status');
+
     toast.innerHTML = `
-        <span class="toast-icon">${icons[type] || icons.info}</span>
-        <span class="toast-message">${escapeHtml(message)}</span>
+        <span class="toast-icon" aria-hidden="true">
+            <svg class="ui-icon" focusable="false"><use href="assets/icons.svg#icon-${iconNames[normalizedType]}"></use></svg>
+        </span>
+        <div class="toast-content">
+            <p class="toast-message">${escapeHtml(cleanMessage)}</p>
+        </div>
+        <button type="button" class="toast-close" aria-label="Закрыть уведомление">
+            <svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-close"></use></svg>
+        </button>
     `;
-    
+
     container.appendChild(toast);
-    
-    setTimeout(() => toast.classList.add('show'), 10);
-    
-    setTimeout(() => {
+
+    let removeTimer = null;
+    let dismissed = false;
+    const dismissToast = (immediate = false) => {
+        if (dismissed) return;
+        dismissed = true;
+        if (removeTimer) clearTimeout(removeTimer);
+        if (immediate) {
+            toast.remove();
+            return;
+        }
         toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 240);
+    };
+    toast._dismissToast = dismissToast;
+    toast.querySelector('.toast-close')?.addEventListener('click', () => dismissToast());
+
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+        removeTimer = setTimeout(() => dismissToast(), normalizedDuration);
+    });
 }
 
 function escapeHtml(text) {
@@ -504,7 +546,7 @@ function updateUserDisplay() {
         
     } else {
         // Неавторизован
-        loginBtn.style.display = 'inline-flex';
+        loginBtn.style.display = '';
         userInfoBlock.style.display = 'none';
         if (adminBtn) adminBtn.style.display = 'none';
 
@@ -514,6 +556,10 @@ function updateUserDisplay() {
         // Убираем классы
         document.documentElement.classList.remove('is-admin', 'can-create');
         document.documentElement.removeAttribute('data-user-role');
+    }
+
+    if (typeof syncNotificationHeaderForUser === 'function') {
+        syncNotificationHeaderForUser();
     }
 }
 

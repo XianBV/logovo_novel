@@ -89,20 +89,10 @@ function removeSettingsListeners() {
 
 function createReadingSettingsPanel(chapter) { // Принимаем весь объект chapter
     const settings = getReadingSettings();
-    const isReadInitially = chapter.isRead || false; // Получаем статус из данных главы
-
-    // Получаем ID текущей главы и новеллы
-    const currentChapterId = chapter.chapter_id;
-    const currentNovelId = chapter.novel_id;
 
     const panel = document.createElement('div');
     panel.id = 'reading-settings-panel';
     panel.className = 'reading-settings-panel';
-
-    // Определяем начальное состояние кнопок и сообщения
-    const markUnreadDisplay = isReadInitially ? 'block' : 'none';
-    const markReadDisplay = isReadInitially ? 'none' : 'block';
-    const initialStatusMessage = isReadInitially ? 'Глава отмечена как прочитанная.' : 'Глава еще не прочитана.';
 
     panel.innerHTML = `
         <h3>⚙️ Настройки чтения</h3>
@@ -151,23 +141,6 @@ function createReadingSettingsPanel(chapter) { // Принимаем весь о
             <button class="btn btn-secondary btn-sm" id="reader-theme-toggle-btn" onclick="toggleThemeMode()" style="width: 100%;">
                 ${currentThemeMode === 'dark' ? 'Тема: Светлая ☀️' : 'Тема: Тёмная 🌙'}
             </button>
-        </div>
-
-        <div class="setting-group">
-            <label>Статус чтения</label>
-            <button class="btn btn-secondary btn-sm" id="mark-as-unread-btn"
-                    onclick="event.stopPropagation(); handleMarkAsUnread('${currentChapterId}', '${currentNovelId}')"
-                    style="width: 100%; display: ${markUnreadDisplay};">
-                ❌ Отметить непрочитанной
-            </button>
-            <button class="btn btn-success btn-sm" id="mark-as-read-btn-panel"
-                    onclick="event.stopPropagation(); handleMarkAsRead('${currentChapterId}', '${currentNovelId}')"
-                    style="width: 100%; display: ${markReadDisplay};">
-                 ✔️ Отметить прочитанной
-            </button>
-            <p id="read-status-message" style="text-align: center; font-size: 0.85em; color: var(--text-secondary); margin-top: 0.5em;">
-                ${initialStatusMessage}
-            </p>
         </div>
 
         <div class="setting-group">
@@ -464,39 +437,84 @@ function updateMarkReadUnreadButtons(currentChapterId) {
     }
 }
 
+async function toggleChapterReadStatus(button, chapterId, novelId, isRead) {
+    if (!STATE.currentUser) {
+        showToast('Для отслеживания прогресса нужно войти', 'warning');
+        return;
+    }
+
+    button.disabled = true;
+    button.classList.add('is-saving');
+    button.setAttribute('aria-busy', 'true');
+
+    try {
+        const response = isRead
+            ? await apiPostRequest('markChapterUnread', {
+                chapter_id: chapterId,
+                novel_id: novelId
+            })
+            : await apiPostRequest('markChapterRead', {
+                chapter_id: chapterId,
+                novel_id: novelId,
+                // Ручная отметка из оглавления не означает, что читатель
+                // действительно открывал эту главу.
+                preserve_last_chapter: true
+            });
+        if (!response.success) {
+            throw new Error(response.error || 'Не удалось изменить статус главы');
+        }
+
+        const readIds = new Set((window.readChapterIds || []).map(id => String(id)));
+        if (isRead) {
+            readIds.delete(String(chapterId));
+        } else {
+            readIds.add(String(chapterId));
+        }
+        window.readChapterIds = [...readIds];
+        window.currentReadingProgress = {
+            ...(window.currentReadingProgress || {}),
+            progress: response.progress ?? window.currentReadingProgress?.progress ?? 0,
+            chapters_read: response.chapters_read ?? readIds.size,
+            total_chapters: response.total_chapters ?? window.currentReadingProgress?.total_chapters,
+            last_chapter_id: response.last_chapter_id ?? null,
+            last_chapter_number: response.last_chapter_number ?? null,
+            read_chapters: window.readChapterIds
+        };
+
+        updateStartReadingButton(window.currentReadingProgress);
+        rerenderChapterListFromState();
+        showToast(
+            isRead
+                ? 'Глава отмечена как непрочитанная'
+                : 'Глава отмечена как прочитанная',
+            'success'
+        );
+    } catch (error) {
+        button.disabled = false;
+        button.classList.remove('is-saving');
+        button.removeAttribute('aria-busy');
+        showToast('Не удалось изменить статус: ' + error.message, 'error');
+    }
+}
+
 // Убираем 'chapters' из аргументов
 async function loadAndDisplayReadingProgress(novelId) {
+    const widget = document.querySelector('.novel-progress');
+    let progress = null;
     try {
         const response = await apiRequest('getReadingProgress', { novel_id: novelId });
-
-        // Мы больше не ищем container, progressBar, progressText
-
-        if (response.success) {
-             // Сразу обновляем список ID
-            window.readChapterIds = response.read_chapters || [];
-
-            // Обновляем кнопки в панели (если она открыта)
-            const currentChapterId = new URLSearchParams(window.location.search).get('id');
-            updateMarkReadUnreadButtons(currentChapterId);
-
-            // Подсветка прочитанных глав (перерисовка списка)
-            rerenderChapterListFromState();
-
-        } else {
-             // Если запрос не успешен, тоже сбрасываем и обновляем
-             window.readChapterIds = [];
-             const currentChapterId = new URLSearchParams(window.location.search).get('id');
-             updateMarkReadUnreadButtons(currentChapterId);
-             rerenderChapterListFromState();
-        }
+        if (response.success) progress = response;
     } catch (error) {
         console.warn('Не удалось загрузить прогресс чтения:', error);
-        // Сбрасываем и обновляем при ошибке
-        window.readChapterIds = [];
-        const currentChapterId = new URLSearchParams(window.location.search).get('id');
-        updateMarkReadUnreadButtons(currentChapterId);
-        rerenderChapterListFromState();
     }
+    if (widget && !widget.isConnected) return;
+
+    window.currentReadingProgress = progress;
+    window.readChapterIds = progress?.read_chapters || [];
+    updateStartReadingButton(progress);
+    const currentChapterId = new URLSearchParams(window.location.search).get('id');
+    updateMarkReadUnreadButtons(currentChapterId);
+    rerenderChapterListFromState();
 }
 
 
@@ -525,10 +543,13 @@ function renderChaptersListV2(chapters, hasVolumes, canEdit, readChapterIds = []
         const nameB = b.volume_name || '';
         return orderMultiplier * nameA.localeCompare(nameB);
     });
+    const readChapterIdSet = new Set(
+        (readChapterIds || []).map(id => String(id))
+    );
 
     // 2. Если томов нет, просто рендерим отсортированный список
     if (!hasVolumes) {
-        return sortedChapters.map(ch => renderChapterItemV2(ch, canEdit, readChapterIds.includes(ch.chapter_id), novelReference)).join('');
+        return sortedChapters.map(ch => renderChapterItemV2(ch, canEdit, readChapterIdSet.has(String(ch.chapter_id)), novelReference)).join('');
     }
 
     // 3. Группируем главы по томам (для получения названий и ключей)
@@ -598,7 +619,7 @@ function renderChaptersListV2(chapters, hasVolumes, canEdit, readChapterIds = []
                     <span class="volume-toggle-icon">▼</span>
                 </div>
                 <div class="volume-chapters-v2">
-                    ${chaptersForVolume.map(ch => renderChapterItemV2(ch, canEdit, readChapterIds.includes(ch.chapter_id), novelReference)).join('')}
+                    ${chaptersForVolume.map(ch => renderChapterItemV2(ch, canEdit, readChapterIdSet.has(String(ch.chapter_id)), novelReference)).join('')}
                 </div>
             </div>
         `;
@@ -610,6 +631,11 @@ function renderChaptersListV2(chapters, hasVolumes, canEdit, readChapterIds = []
  */
 function renderChapterItemV2(chapter, canEdit, isRead, novelReference = null) {
     const isOwner = STATE.currentUser?.role === 'owner';
+    const canTrackReading = Boolean(
+        STATE.currentUser &&
+        STATE.currentUser.user_id !== null &&
+        STATE.currentUser.user_id !== undefined
+    );
     const readClass = isRead ? 'read' : 'unread'; // Класс для подсветки
     const chapterNovelReference = novelReference || chapter.novel_slug || chapter.novel_id;
 
@@ -617,6 +643,9 @@ function renderChapterItemV2(chapter, canEdit, isRead, novelReference = null) {
     const updatedDateStr = formatDateOnly(chapter.updated_at || chapter.created_at);
     const createdDateStr = formatDateTooltip(chapter.created_at);
     const tooltipText = `Добавлено: ${createdDateStr}`;
+    const scheduleLabel = chapter.is_future
+        ? `Отложенная глава. Выход ${formatDateTooltip(chapter.publish_at)}`
+        : '';
 
     // --- ✨ НОВАЯ ЛОГИКА ДЛЯ КНОПОК ---
     let actionsHtml = '';
@@ -624,10 +653,10 @@ function renderChapterItemV2(chapter, canEdit, isRead, novelReference = null) {
         // РЕЖИМ РЕДАКТИРОВАНИЯ: Показываем кнопки "Edit" и "Delete"
         actionsHtml = `
             <button class="btn btn-sm btn-icon" title="Редактировать" onclick="event.stopPropagation(); navigateTo('edit-chapter', {novel: '${escapeHtml(chapterNovelReference)}', chapter: '${escapeHtml(chapter.chapter_number)}'})">
-                ✏️
+                ${renderUiIcon('edit')}
             </button>
             <button class="btn btn-sm btn-icon btn-danger" title="Удалить" onclick="event.stopPropagation(); handleDeleteChapter('${chapter.chapter_id}', '${escapeHtml(chapter.chapter_title)}')">
-                🗑️
+                ${renderUiIcon('trash')}
             </button>
         `;
     } else if (isOwner) {
@@ -645,12 +674,28 @@ function renderChapterItemV2(chapter, canEdit, isRead, novelReference = null) {
     // -----------------------------
 
     return `
-        <div class="chapter-item-v2 ${readClass}">
+        <div class="chapter-item-v2 ${readClass}${canTrackReading ? ' has-read-toggle' : ''}">
+            ${canTrackReading ? `
+                <div class="ch-read-toggle">
+                    <button type="button"
+                            class="chapter-read-toggle-btn${isRead ? ' is-read' : ' is-unread'}"
+                            title="${isRead ? 'Отметить непрочитанной' : 'Отметить прочитанной'}"
+                            aria-label="${isRead ? 'Отметить главу непрочитанной' : 'Отметить главу прочитанной'}"
+                            onclick="event.stopPropagation(); toggleChapterReadStatus(this, '${chapter.chapter_id}', '${chapter.novel_id}', ${isRead})">
+                        ${renderUiIcon(isRead ? 'eye-off' : 'eye')}
+                    </button>
+                </div>
+            ` : ''}
             <div class="ch-num">${chapter.chapter_number}</div>
             <div class="ch-title">
                 <a href="/?page=chapter-read&novel=${encodeURIComponent(chapterNovelReference)}&chapter=${encodeURIComponent(chapter.chapter_number)}" onclick="handleLinkClick(event)">
                     ${escapeHtml(chapter.chapter_title)}
                 </a>
+                ${scheduleLabel ? `
+                    <span class="chapter-scheduled-icon" role="img" aria-label="${scheduleLabel}" title="${scheduleLabel}">
+                        ${renderUiIcon('clock')}
+                    </span>
+                ` : ''}
             </div>
             <div class="ch-words">${formatNumber(chapter.word_count || 0)}</div>
             <div class="ch-updated" data-tooltip="${tooltipText}">${updatedDateStr}</div>
@@ -666,10 +711,12 @@ function renderChapterItemV2(chapter, canEdit, isRead, novelReference = null) {
 function toggleChapterOrderV2() {
     chapterSortOrder = chapterSortOrder === 'asc' ? 'desc' : 'asc';
 
-    // Обновляем текст кнопки сортировки
+    // Подсказка объясняет порядок, который включится следующим нажатием.
     const sortBtn = document.getElementById('chapter-sort-btn-v2');
     if (sortBtn) {
-        sortBtn.textContent = chapterSortOrder === 'asc' ? 'Сортировка: ↑ Старые' : 'Сортировка: ↓ Новые';
+        const sortLabel = chapterSortOrder === 'asc' ? 'Показать сначала новые главы' : 'Показать сначала старые главы';
+        sortBtn.title = sortLabel;
+        sortBtn.setAttribute('aria-label', sortLabel);
     }
 
     // Перерисовываем список глав
@@ -701,6 +748,251 @@ function toggleVolumeV2(headerElement) {
 // РЕДАКТИРОВАНИЕ ОГЛАВЛЕНИЯ
 // ==========================================
 
+async function renderChapterManagerPage(novelReference) {
+    const container = document.getElementById('page-content-container');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="page-content chapter-manager-page">
+            <div class="chapter-manager-loading">
+                <div class="spinner"></div>
+                <p>Загружаем главы…</p>
+            </div>
+        </div>
+    `;
+
+    try {
+        const response = await apiRequest('getNovel', { id: novelReference }, true);
+        if (!response.success || !response.novel) {
+            throw new Error(response.error || 'Новелла не найдена');
+        }
+
+        const novel = response.novel;
+        if (!checkUserPermission('edit', novel)) {
+            throw new Error('У вас нет прав на управление главами этой новеллы');
+        }
+
+        const useSlug = (novel.access_type === 'link_only' || novel.access_type === 'private') && novel.slug;
+        const canonicalReference = useSlug ? novel.slug : novel.novel_id;
+        const chapters = [...(novel.chapters || [])].sort((a, b) => {
+            const volumeCompare = Number(a.volume_order || 0) - Number(b.volume_order || 0);
+            if (volumeCompare !== 0) return volumeCompare;
+            return (parseFloat(a.chapter_number) || 0) - (parseFloat(b.chapter_number) || 0);
+        });
+        const breadcrumbs = getBreadcrumbs('manage-chapters', {
+            id: canonicalReference,
+            title: novel.title
+        });
+
+        window.currentChapterManagerNovel = novel;
+        window.currentChapterManagerNovelReference = canonicalReference;
+        window.currentChapterManagerChapters = chapters;
+        window.chapterManagerSelectedIds = new Set();
+
+        container.innerHTML = `
+            <section class="page-content chapter-manager-page">
+                ${breadcrumbs}
+                <header class="chapter-manager-heading">
+                    <h1 class="visually-hidden">Управление главами новеллы «${escapeHtml(novel.title)}»</h1>
+                    <div class="chapter-manager-heading-actions">
+                        <button class="btn btn-secondary" onclick="navigateTo('novel-details', {id: '${escapeHtml(canonicalReference)}'})">
+                            К новелле
+                        </button>
+                        <button class="btn btn-primary" onclick="navigateTo('add-chapter', {novelId: '${novel.novel_id}', returnTo: 'manage-chapters'})">
+                            + Добавить главу
+                        </button>
+                    </div>
+                </header>
+
+                <div class="chapter-manager-toolbar">
+                    <label class="chapter-manager-select-all">
+                        <input type="checkbox" id="chapter-manager-select-all">
+                        <span>Выбрать все</span>
+                    </label>
+                    <span class="chapter-manager-selected-count" id="chapter-manager-selected-count">Ничего не выбрано</span>
+                    <div class="chapter-manager-batch-actions">
+                        <button class="btn btn-secondary btn-sm" id="chapter-manager-edit-selected" disabled>
+                            ${renderUiIcon('edit')}<span>Редактировать</span>
+                        </button>
+                        <button class="btn btn-danger btn-sm" id="chapter-manager-delete-selected" disabled>
+                            ${renderUiIcon('trash')}<span>Удалить выбранные</span>
+                        </button>
+                    </div>
+                </div>
+
+                <p class="chapter-manager-list-count">${chapters.length} ${getNounEnding(chapters.length, 'глава', 'главы', 'глав')}</p>
+                <div class="chapter-manager-list" id="chapter-manager-list">
+                    ${chapters.length ? renderChapterManagerRows(chapters, canonicalReference) : `
+                        <div class="chapter-manager-empty">
+                            ${renderUiIcon('book')}
+                            <h2>Глав пока нет</h2>
+                            <p>Добавьте первую главу — она появится здесь и на странице новеллы.</p>
+                        </div>
+                    `}
+                </div>
+            </section>
+        `;
+
+        initializeChapterManagerInteractions();
+    } catch (error) {
+        container.innerHTML = `
+            <div class="page-content error-page">
+                <h3>Не удалось открыть управление главами</h3>
+                <p>${escapeHtml(error.message)}</p>
+                <button class="btn btn-secondary" onclick="goBackInHistory()">Вернуться</button>
+            </div>
+        `;
+    }
+}
+
+function renderChapterManagerRows(chapters, novelReference) {
+    return chapters.map(chapter => {
+        const volumeLabel = chapter.volume_name || 'Без тома';
+        const updatedAt = formatDateOnly(chapter.updated_at || chapter.created_at);
+        return `
+            <article class="chapter-manager-row" data-chapter-id="${chapter.chapter_id}">
+                <label class="chapter-manager-checkbox" aria-label="Выбрать главу ${escapeHtml(chapter.chapter_number)}">
+                    <input type="checkbox" class="chapter-manager-item-checkbox" value="${chapter.chapter_id}">
+                    <span></span>
+                </label>
+                <div class="chapter-manager-number">${escapeHtml(chapter.chapter_number)}</div>
+                <div class="chapter-manager-main">
+                    <h2>
+                        <button type="button" class="chapter-manager-title-link" onclick="navigateTo('edit-chapter', {novel: '${escapeHtml(novelReference)}', chapter: '${escapeHtml(chapter.chapter_number)}', returnTo: 'manage-chapters'})">
+                            ${escapeHtml(chapter.chapter_title || `Глава ${chapter.chapter_number}`)}
+                        </button>
+                    </h2>
+                    <p>${escapeHtml(volumeLabel)} · ${formatNumber(chapter.word_count || 0)} слов · ${updatedAt}</p>
+                </div>
+                <div class="chapter-manager-row-actions">
+                    <button class="btn btn-secondary btn-icon" title="Редактировать главу" aria-label="Редактировать главу" onclick="navigateTo('edit-chapter', {novel: '${escapeHtml(novelReference)}', chapter: '${escapeHtml(chapter.chapter_number)}', returnTo: 'manage-chapters'})">
+                        ${renderUiIcon('edit')}
+                    </button>
+                    <button class="btn btn-danger btn-icon" title="Удалить главу" aria-label="Удалить главу" onclick="confirmManagedChapterDeletion(['${chapter.chapter_id}'])">
+                        ${renderUiIcon('trash')}
+                    </button>
+                </div>
+            </article>
+        `;
+    }).join('');
+}
+
+function initializeChapterManagerInteractions() {
+    const selectAll = document.getElementById('chapter-manager-select-all');
+    const checkboxes = [...document.querySelectorAll('.chapter-manager-item-checkbox')];
+    const editButton = document.getElementById('chapter-manager-edit-selected');
+    const deleteButton = document.getElementById('chapter-manager-delete-selected');
+
+    selectAll?.addEventListener('change', () => {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+        });
+        updateChapterManagerSelection();
+    });
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateChapterManagerSelection);
+    });
+    editButton?.addEventListener('click', () => {
+        const selected = getSelectedChapterManagerChapters();
+        if (selected.length !== 1) return;
+        navigateTo('edit-chapter', {
+            novel: window.currentChapterManagerNovelReference,
+            chapter: selected[0].chapter_number,
+            returnTo: 'manage-chapters'
+        });
+    });
+    deleteButton?.addEventListener('click', () => {
+        const ids = [...(window.chapterManagerSelectedIds || [])];
+        if (ids.length) confirmManagedChapterDeletion(ids);
+    });
+    updateChapterManagerSelection();
+}
+
+function getSelectedChapterManagerChapters() {
+    const selected = window.chapterManagerSelectedIds || new Set();
+    return (window.currentChapterManagerChapters || []).filter(chapter => (
+        selected.has(String(chapter.chapter_id))
+    ));
+}
+
+function updateChapterManagerSelection() {
+    const checkboxes = [...document.querySelectorAll('.chapter-manager-item-checkbox')];
+    const selectedIds = new Set(
+        checkboxes.filter(checkbox => checkbox.checked).map(checkbox => String(checkbox.value))
+    );
+    window.chapterManagerSelectedIds = selectedIds;
+
+    document.querySelectorAll('.chapter-manager-row').forEach(row => {
+        row.classList.toggle('is-selected', selectedIds.has(String(row.dataset.chapterId)));
+    });
+
+    const count = selectedIds.size;
+    const countLabel = document.getElementById('chapter-manager-selected-count');
+    if (countLabel) {
+        countLabel.textContent = count
+            ? `Выбрано: ${count}`
+            : 'Ничего не выбрано';
+    }
+
+    const selectAll = document.getElementById('chapter-manager-select-all');
+    if (selectAll) {
+        selectAll.checked = checkboxes.length > 0 && count === checkboxes.length;
+        selectAll.indeterminate = count > 0 && count < checkboxes.length;
+    }
+
+    const editButton = document.getElementById('chapter-manager-edit-selected');
+    const deleteButton = document.getElementById('chapter-manager-delete-selected');
+    if (editButton) editButton.disabled = count !== 1;
+    if (deleteButton) deleteButton.disabled = count === 0;
+}
+
+function confirmManagedChapterDeletion(chapterIds) {
+    const normalizedIds = [...new Set(chapterIds.map(String))];
+    const selectedChapters = (window.currentChapterManagerChapters || []).filter(chapter => (
+        normalizedIds.includes(String(chapter.chapter_id))
+    ));
+    if (!selectedChapters.length) return;
+
+    const count = selectedChapters.length;
+    const message = count === 1
+        ? `Удалить главу «${selectedChapters[0].chapter_title}»? Она будет перемещена в корзину.`
+        : `Удалить выбранные главы (${count})? Они будут перемещены в корзину.`;
+    showConfirmModal(
+        count === 1 ? 'Удаление главы' : 'Групповое удаление',
+        message,
+        () => deleteManagedChapters(normalizedIds)
+    );
+}
+
+async function deleteManagedChapters(chapterIds) {
+    const novel = window.currentChapterManagerNovel;
+    if (!novel || !chapterIds.length) return;
+
+    showLoading(true, {
+        title: chapterIds.length === 1 ? 'Удаление главы' : `Удаление глав (${chapterIds.length})`
+    });
+    try {
+        const response = await apiPostRequest('deleteChaptersBulk', {
+            novel_id: novel.novel_id,
+            chapter_ids: chapterIds
+        });
+        if (!response.success) throw new Error(response.error || 'Не удалось удалить главы');
+
+        clearCache();
+        showToast(
+            response.deleted_count === 1
+                ? 'Глава перемещена в корзину'
+                : `Главы перемещены в корзину: ${response.deleted_count}`,
+            'success'
+        );
+        await renderChapterManagerPage(window.currentChapterManagerNovelReference);
+    } catch (error) {
+        showToast('Не удалось удалить: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
 function toggleChapterEditMode(button, forceCancel = false) {
     if (forceCancel) {
         STATE.isChapterEditMode = false;
@@ -713,11 +1005,19 @@ function toggleChapterEditMode(button, forceCancel = false) {
     const listContainer = document.getElementById('chapters-list-v2');
 
     if (STATE.isChapterEditMode) {
-        if (mainBtn) mainBtn.textContent = '✅ Готово';
+        if (mainBtn) {
+            mainBtn.innerHTML = renderUiIcon('check');
+            mainBtn.title = 'Готово';
+            mainBtn.setAttribute('aria-label', 'Готово');
+        }
         if (cancelBtn) cancelBtn.style.display = 'inline-block';
         if (listContainer) listContainer.classList.add('edit-mode');
     } else {
-        if (mainBtn) mainBtn.textContent = '✏️ Редактировать';
+        if (mainBtn) {
+            mainBtn.innerHTML = renderUiIcon('edit');
+            mainBtn.title = 'Редактировать главы';
+            mainBtn.setAttribute('aria-label', 'Редактировать главы');
+        }
         if (cancelBtn) cancelBtn.style.display = 'none';
         if (listContainer) listContainer.classList.remove('edit-mode');
     }
@@ -748,7 +1048,7 @@ function rerenderChapterListFromState() {
 // ЗАПУСК ЧТЕНИЯ
 // ==========================================
 
-// ФУНКЦИЯ ДЛЯ НАЧАЛА ЧТЕНИЯ (v3 - всегда с самой первой главы)
+// Начинаем с первой главы или возвращаемся к последней реально открытой.
 function startReading() {
     // Проверяем, есть ли вообще главы для этой новеллы
     if (window.currentNovelChapters && window.currentNovelChapters.length > 0) {
@@ -766,18 +1066,56 @@ function startReading() {
             return (parseFloat(a.chapter_number) || 0) - (parseFloat(b.chapter_number) || 0);
         });
 
-        // Берем самую первую главу из отсортированного списка
-        const firstChapter = chaptersCopy[0];
+        // Для вошедшего читателя продолжаем с последней реально открытой главы.
+        // Кнопка хранит тот же выбор, который показан её подписью.
+        const startButton = document.getElementById('start-reading-btn');
+        const buttonChapter = startButton?.dataset.chapterId
+            ? chaptersCopy.find(chapter => String(chapter.chapter_id) === String(startButton.dataset.chapterId))
+            : startButton?.dataset.chapterNumber
+                ? chaptersCopy.find(chapter => String(chapter.chapter_number) === String(startButton.dataset.chapterNumber))
+                : null;
+        // Если сохранённая глава стала недоступна, безопасно начинаем с первой.
+        const targetChapter = buttonChapter || findLastOpenedChapter() || chaptersCopy[0];
+        const novelReference = window.currentNovelReferenceV2 || targetChapter.novel_id;
 
-        // Переходим на страницу чтения этой главы
+        // Переходим на выбранную главу
         navigateTo('chapter-read', {
-            novel: firstChapter.novel_id,
-            chapter: firstChapter.chapter_number
+            novel: novelReference,
+            chapter: targetChapter.chapter_number
         });
 
     } else {
         // Если глав нет, показываем сообщение
         showAlertModal('Нет глав', 'Пока нет доступных глав для чтения', 'info');
+    }
+}
+
+async function trackOpenedChapter(chapterId, novelId, lastParagraphIndex = 0) {
+    if (!STATE.currentUser) return;
+
+    try {
+        const response = await apiPostRequest('updateReadingProgress', {
+            chapter_id: chapterId,
+            novel_id: novelId,
+            last_paragraph_index: lastParagraphIndex
+        });
+        if (!response.success) throw new Error(response.error || 'Не удалось сохранить прогресс');
+
+        if (!window.readChapterIds) window.readChapterIds = [];
+        if (!window.readChapterIds.some(id => String(id) === String(chapterId))) {
+            window.readChapterIds.push(chapterId);
+        }
+
+        window.currentReadingProgress = {
+            ...(window.currentReadingProgress || {}),
+            last_chapter_id: chapterId,
+            last_chapter_number: response.last_chapter,
+            read_chapters: window.readChapterIds
+        };
+        updateMarkReadUnreadButtons(chapterId);
+        rerenderChapterListFromState();
+    } catch (error) {
+        console.error(`Не удалось сохранить последнюю открытую главу ${chapterId}:`, error);
     }
 }
 
@@ -816,6 +1154,167 @@ function parseChapterRichDocument(value) {
         console.warn('Не удалось прочитать форматирование главы:', error);
         return null;
     }
+}
+
+function findLastOpenedChapter(progress = window.currentReadingProgress) {
+    const chapters = window.currentNovelChapters || [];
+    if (!progress || !chapters.length) return null;
+
+    return chapters.find(chapter => (
+        progress.last_chapter_id != null &&
+        String(chapter.chapter_id) === String(progress.last_chapter_id)
+    )) || chapters.find(chapter => (
+        progress.last_chapter_number != null &&
+        String(chapter.chapter_number) === String(progress.last_chapter_number)
+    )) || null;
+}
+
+function updateStartReadingButton(progress = window.currentReadingProgress) {
+    const buttons = document.querySelectorAll('.start-reading-btn');
+
+    const lastOpenedChapter = findLastOpenedChapter(progress);
+    buttons.forEach(button => {
+        button.textContent = lastOpenedChapter ? 'Продолжить чтение' : 'Начать чтение';
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+        button.dataset.mode = lastOpenedChapter ? 'continue' : 'start';
+        if (lastOpenedChapter) {
+            button.dataset.chapterId = lastOpenedChapter.chapter_id;
+            button.dataset.chapterNumber = lastOpenedChapter.chapter_number;
+        } else {
+            delete button.dataset.chapterId;
+            delete button.dataset.chapterNumber;
+        }
+    });
+
+    const meter = document.querySelector('[data-reading-progress]');
+    if (meter) {
+        const chapters = new Set((window.currentNovelChapters || []).map(chapter => String(chapter.chapter_id)));
+        const read = new Set((progress?.read_chapters || []).map(String));
+        const completed = [...read].filter(id => chapters.has(id)).length;
+        meter.value = completed;
+        const percent = Math.round(100 * completed / meter.max);
+        document.querySelector('[data-reading-progress-count]').textContent = `${completed} / ${meter.max} · ${percent}%`;
+    }
+}
+
+function getChapterNovelReference(chapter) {
+    const useSlug = (chapter?.novel_access_type === 'link_only' || chapter?.novel_access_type === 'private') && chapter?.novel_slug;
+    return useSlug ? chapter.novel_slug : chapter?.novel_id;
+}
+
+function getCurrentChapterParagraphIndex() {
+    const paragraphs = Array.from(document.querySelectorAll('#chapter-text p'));
+    if (!paragraphs.length) return 0;
+
+    const readingLine = Math.max(0, document.getElementById('reader-header')?.offsetHeight || 0) + 24;
+    const index = paragraphs.findIndex(paragraph => paragraph.getBoundingClientRect().bottom > readingLine);
+    return index === -1 ? paragraphs.length - 1 : index;
+}
+
+function getReadingPositionStorageKey(novelId) {
+    const userId = STATE.currentUser?.user_id ?? 'guest';
+    return `novel_lair_reading_position_${userId}_${novelId}`;
+}
+
+function readLocalChapterPosition(novelId, chapterId) {
+    try {
+        const stored = JSON.parse(localStorage.getItem(getReadingPositionStorageKey(novelId)) || 'null');
+        return stored && String(stored.chapterId) === String(chapterId)
+            ? Math.max(0, Number(stored.paragraphIndex) || 0)
+            : null;
+    } catch {
+        return null;
+    }
+}
+
+function rememberLocalChapterPosition(chapterId, novelId) {
+    const paragraphIndex = getCurrentChapterParagraphIndex();
+    const position = { chapterId, paragraphIndex, savedAt: Date.now() };
+    window.currentChapterReadingPosition = position;
+    try {
+        localStorage.setItem(getReadingPositionStorageKey(novelId), JSON.stringify(position));
+    } catch (error) {
+        console.warn('Не удалось сохранить место чтения в браузере:', error);
+    }
+    return position;
+}
+
+async function saveChapterParagraphPosition(chapterId, novelId, { keepalive = false } = {}) {
+    if (!STATE.currentUser || !chapterId || !novelId) return;
+
+    const position = rememberLocalChapterPosition(chapterId, novelId);
+    const paragraphIndex = position.paragraphIndex;
+    if (
+        window.lastSavedChapterParagraphIndex === paragraphIndex &&
+        String(window.lastSavedChapterId) === String(chapterId)
+    ) return;
+    window.lastSavedChapterParagraphIndex = paragraphIndex;
+
+    try {
+        await apiPostRequest('updateReadingProgress', {
+            chapter_id: chapterId,
+            novel_id: novelId,
+            last_paragraph_index: paragraphIndex
+        }, { keepalive });
+        window.lastSavedChapterId = chapterId;
+    } catch (error) {
+        console.warn('Не удалось сохранить место чтения:', error);
+    }
+}
+
+async function restoreAndTrackChapterPosition(chapter) {
+    const chapterId = chapter.chapter_id;
+    const novelId = chapter.novel_id;
+    let paragraphIndex = readLocalChapterPosition(novelId, chapterId);
+
+    // Если это первое открытие на этом устройстве, берём сохранённую позицию
+    // из базы. Пока она загружается, текст ещё закрыт общим загрузочным слоем.
+    if (paragraphIndex === null && STATE.currentUser) {
+        try {
+            const progress = await apiRequest('getReadingProgress', { novel_id: novelId });
+            if (progress.success && String(progress.last_chapter_id) === String(chapterId)) {
+                paragraphIndex = Math.max(0, Number(progress.last_paragraph_index) || 0);
+            }
+        } catch (error) {
+            console.warn('Не удалось загрузить сохранённое место чтения:', error);
+        }
+    }
+    paragraphIndex = paragraphIndex ?? 0;
+
+    const paragraphs = Array.from(document.querySelectorAll('#chapter-text p'));
+    const target = paragraphs[Math.min(paragraphIndex, Math.max(0, paragraphs.length - 1))];
+    if (target && paragraphIndex > 0) {
+        requestAnimationFrame(() => {
+            target.scrollIntoView({ block: 'start' });
+            window.scrollBy(0, -(document.getElementById('reader-header')?.offsetHeight || 0) - 16);
+        });
+    }
+
+    window.lastSavedChapterParagraphIndex = paragraphIndex;
+    window.lastSavedChapterId = null;
+    window.currentChapterReadingPosition = { chapterId, paragraphIndex, savedAt: Date.now() };
+    const rememberPosition = () => {
+        window.currentChapterReadingPosition = {
+            chapterId,
+            paragraphIndex: getCurrentChapterParagraphIndex(),
+            savedAt: Date.now()
+        };
+    };
+    const saveNow = (keepalive = false) => saveChapterParagraphPosition(chapterId, novelId, { keepalive });
+    const saveOnPageHide = () => { void saveNow(true); };
+
+    // Прокрутка меняет только значение в памяти браузера. Запроса к Supabase
+    // и записи в localStorage здесь нет.
+    window.addEventListener('scroll', rememberPosition, { passive: true });
+    window.addEventListener('pagehide', saveOnPageHide, { once: true });
+    window.chapterReadingPositionCleanup = () => {
+        window.removeEventListener('scroll', rememberPosition);
+        window.removeEventListener('pagehide', saveOnPageHide);
+        const saving = saveNow();
+        window.chapterReadingPositionCleanup = null;
+        return saving;
+    };
 }
 
 function renderChapterRichRuns(runs = []) {
@@ -1094,10 +1593,8 @@ async function renderChapterReadPage(
 
             canonicalUrl.search = '';
             canonicalUrl.searchParams.set('page', 'chapter-read');
-            canonicalUrl.searchParams.set(
-                'novel',
-                chapter.novel_id
-            );
+            const novelReference = getChapterNovelReference(chapter);
+            canonicalUrl.searchParams.set('novel', novelReference);
             canonicalUrl.searchParams.set(
                 'chapter',
                 chapter.chapter_number
@@ -1107,7 +1604,7 @@ async function renderChapterReadPage(
                 {
                     page: 'chapter-read',
                     params: {
-                        novel: String(chapter.novel_id),
+                        novel: String(novelReference),
                         chapter: String(chapter.chapter_number)
                     }
                 },
@@ -1115,32 +1612,9 @@ async function renderChapterReadPage(
                 canonicalUrl
             );
 
-            // --- ✨ НАЧАЛО: Автоматическая отметка прочитанным ✨ ---
-            if (STATE.currentUser) { // Проверяем, что пользователь вошел
-                // Проверяем, не была ли глава уже отмечена (чтобы не слать лишний запрос)
-                if (!window.readChapterIds || !window.readChapterIds.includes(chapterId)) {
-                    console.log(`Автоматически отмечаем главу ${chapterId} как прочитанную...`);
-                    // Вызываем существующую функцию БЕЗ await, чтобы не блокировать рендеринг
-                    handleMarkAsRead(chapterId, chapter.novel_id, true)
-                        .then(() => {
-                            updateMarkReadUnreadButtons(chapterId);
-                            if (window.readChapterIds && !window.readChapterIds.includes(chapterId)) {
-                               window.readChapterIds.push(chapterId);
-                            }
-                        })
-                        .catch(error => {
-                            // Лог ошибки теперь тоже внутри handleMarkAsRead
-                            // console.warn(`Не удалось автоматически отметить главу ${chapterId}:`, error);
-                        });
-                } else {
-                    console.log(`Глава ${chapterId} уже была отмечена как прочитанная.`);
-                }
-            }
-            // --- ✨ КОНЕЦ: Автоматическая отметка прочитанным ✨ ---
-            
             // Сохраняем данные для оверлея быстрой навигации
             window.currentChapterList = chapter.allChapters || [];
-            window.currentNovelIdForNav = chapter.novel_id;
+            window.currentNovelIdForNav = novelReference;
             
             // Генерируем хлебные крошки
             // Здесь мы тоже должны опираться на access_type, если сервер его отдает вместе с главой,
@@ -1155,6 +1629,10 @@ async function renderChapterReadPage(
 
             // Рендерим всё
             renderChapterContentV2(chapter, breadcrumbs); 
+
+            // Сначала возвращаем читателя к сохранённому абзацу, затем начинаем
+            // запоминать новое место при прокрутке.
+            await restoreAndTrackChapterPosition(chapter);
 
             const overlay = document.getElementById('chapter-load-overlay');
             if (overlay) overlay.style.display = 'none';
@@ -1183,12 +1661,13 @@ async function renderChapterReadPage(
 function renderChapterContentV2(chapter, breadcrumbsHtml) { 
     const container = document.querySelector('.chapter-read-page');
     if (!container) return;
+    const novelReference = getChapterNovelReference(chapter);
     
     // --- 1. HTML для нового хедера ---
     const readerHeaderHtml = `
         <header class="reader-header" id="reader-header">
             <div class="reader-header-left">
-                <a href="/?page=novel-details&id=${chapter.novel_id}" onclick="handleLinkClick(event)" class="btn-reader-back" title="К новелле">
+                <a href="/?page=novel-details&id=${encodeURIComponent(novelReference)}" onclick="handleLinkClick(event)" class="btn-reader-back" title="К новелле">
                     <span>←</span>
                 </a>
             </div>
@@ -1215,7 +1694,7 @@ function renderChapterContentV2(chapter, breadcrumbsHtml) {
               chapter.prevChapterNumber !== undefined
                     ? `
                         <a
-                            href="/?page=chapter-read&novel=${encodeURIComponent(chapter.novel_id)}&chapter=${encodeURIComponent(chapter.prevChapterNumber)}"
+                            href="/?page=chapter-read&novel=${encodeURIComponent(novelReference)}&chapter=${encodeURIComponent(chapter.prevChapterNumber)}"
                             onclick="handleLinkClick(event)"
                             class="btn btn-nav-prev"
                         >
@@ -1225,7 +1704,7 @@ function renderChapterContentV2(chapter, breadcrumbsHtml) {
                     : '<span></span>'
             }
             
-            <a href="/?page=novel-details&id=${chapter.novel_id}" onclick="handleLinkClick(event)" class="btn btn-nav-toc">
+            <a href="/?page=novel-details&id=${encodeURIComponent(novelReference)}" onclick="handleLinkClick(event)" class="btn btn-nav-toc">
                 Оглавление
             </a>
             
@@ -1234,7 +1713,7 @@ function renderChapterContentV2(chapter, breadcrumbsHtml) {
                 chapter.nextChapterNumber !== undefined
                     ? `
                         <a
-                            href="/?page=chapter-read&novel=${encodeURIComponent(chapter.novel_id)}&chapter=${encodeURIComponent(chapter.nextChapterNumber)}"
+                            href="/?page=chapter-read&novel=${encodeURIComponent(novelReference)}&chapter=${encodeURIComponent(chapter.nextChapterNumber)}"
                             onclick="handleLinkClick(event)"
                             class="btn btn-nav-next"
                         >
@@ -1473,7 +1952,21 @@ function formatChapterDateTimeLocal(dateString) {
     return localDate.toISOString().slice(0, 16);
 }
 
-async function renderChapterFormPage(novelId = null, chapterId = null, chapterNumber = null) {
+function returnFromChapterEditor() {
+    const target = window.currentChapterEditorReturnTarget;
+    if (target?.page) {
+        navigateTo(target.page, target.params || {});
+        return;
+    }
+    goBackInHistory();
+}
+
+async function renderChapterFormPage(
+    novelId = null,
+    chapterId = null,
+    chapterNumber = null,
+    returnTo = null
+) {
     const container = document.getElementById('page-content-container');
     if (!container) return;
 
@@ -1583,12 +2076,18 @@ async function renderChapterFormPage(novelId = null, chapterId = null, chapterNu
         canonicalUrl.searchParams.set('page', 'edit-chapter');
         canonicalUrl.searchParams.set('novel', novelReference);
         canonicalUrl.searchParams.set('chapter', chapterData.chapter_number);
+        if (returnTo === 'manage-chapters') {
+            canonicalUrl.searchParams.set('returnTo', 'manage-chapters');
+        }
         window.history.replaceState(
             {
                 page: 'edit-chapter',
                 params: {
                     novel: String(novelReference),
-                    chapter: String(chapterData.chapter_number)
+                    chapter: String(chapterData.chapter_number),
+                    ...(returnTo === 'manage-chapters'
+                        ? { returnTo: 'manage-chapters' }
+                        : {})
                 }
             },
             '',
@@ -1607,14 +2106,24 @@ async function renderChapterFormPage(novelId = null, chapterId = null, chapterNu
     const initialPlainContent = chapterData?.content || '';
     const initialEditorHtml = renderChapterEditorContent(initialRichDocument, initialPlainContent);
     const initialRichValue = initialRichDocument ? JSON.stringify(initialRichDocument) : '';
-    
+
+    window.currentChapterEditorReturnTarget = returnTo === 'manage-chapters'
+        ? {
+            page: 'manage-chapters',
+            params: { id: String(novelReference) }
+        }
+        : {
+            page: 'novel-details',
+            params: { id: String(novelReference) }
+        };
+
     container.innerHTML = `
         <div class="page-content chapter-form-page">
             <div class="chapter-editor-topbar">
                 ${breadcrumbs}
                 <div class="chapter-editor-topbar-actions">
                     <button type="button" class="chapter-editor-action-btn"
-                            onclick="navigateTo('novel-details', {id: '${novelReference}'})">
+                            onclick="returnFromChapterEditor()">
                         Отмена
                     </button>
                     <button type="submit" class="chapter-editor-action-btn chapter-editor-action-btn-primary"
@@ -1634,7 +2143,7 @@ async function renderChapterFormPage(novelId = null, chapterId = null, chapterNu
                     <button type="button" class="btn btn-secondary btn-sm" id="chapter-draft-discard-btn">Удалить</button>
                 </div>
             </div>
-            
+
             <form id="chapter-form" class="chapter-form">
                 <input type="hidden" id="chapter-novel-id" name="novel_id" value="${novelId}">
                 ${chapterId ? `<input type="hidden" name="chapter_id" value="${chapterId}">` : ''}
@@ -2507,12 +3016,12 @@ async function handleChapterSubmit(e) {
     form.dataset.submitting = 'true';
     const submitButton = document.querySelector(`button[type="submit"][form="${form.id}"]`);
     if (submitButton) submitButton.disabled = true;
-    
+
     showLoading(true, {
         title: 'Сохранение главы',
         description: 'Создание документа в Google Drive...'
     });
-    
+
     syncChapterEditorFields();
     const formData = new FormData(form);
     const chapterData = {};
@@ -2540,7 +3049,7 @@ async function handleChapterSubmit(e) {
             clearCache();
             
             setTimeout(() => {
-                navigateTo('novel-details', { id: chapterData.novel_id });
+                returnFromChapterEditor();
             }, 1000);
         } else {
             throw new Error(response.error || 'Не удалось сохранить');

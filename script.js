@@ -5,6 +5,58 @@
 
 console.log('📦 script.js загружен');
 
+const PRESENCE_HEARTBEAT_INTERVAL_MS = 4 * 60 * 1000;
+const PRESENCE_CHECK_INTERVAL_MS = 60 * 1000;
+let presenceTimerId = null;
+let presenceVisibilityBound = false;
+
+function getPresenceStorageKey() {
+    return `presence_last_sent_${STATE.currentUser?.user_id ?? 'guest'}`;
+}
+
+async function sendPresenceHeartbeat() {
+    if (!STATE.currentUser || document.visibilityState !== 'visible') return;
+
+    const storageKey = getPresenceStorageKey();
+    const now = Date.now();
+    const lastSentAt = Number(localStorage.getItem(storageKey) || 0);
+    if (now - lastSentAt < PRESENCE_HEARTBEAT_INTERVAL_MS) {
+        if (typeof updateProfilePresence === 'function') updateProfilePresence(true);
+        return;
+    }
+
+    localStorage.setItem(storageKey, String(now));
+    try {
+        const response = await apiPostRequest('touchPresence', {});
+        if (response?.success) {
+            STATE.currentUser.is_online = true;
+            if (typeof updateProfilePresence === 'function') updateProfilePresence(true);
+        }
+    } catch (error) {
+        if (localStorage.getItem(storageKey) === String(now)) {
+            localStorage.removeItem(storageKey);
+        }
+        console.warn('Не удалось обновить статус присутствия:', error);
+    }
+}
+
+function startPresenceTracking() {
+    if (presenceTimerId) clearInterval(presenceTimerId);
+    if (!STATE.currentUser) return;
+
+    void sendPresenceHeartbeat();
+    presenceTimerId = setInterval(() => {
+        void sendPresenceHeartbeat();
+    }, PRESENCE_CHECK_INTERVAL_MS);
+
+    if (!presenceVisibilityBound) {
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') void sendPresenceHeartbeat();
+        });
+        presenceVisibilityBound = true;
+    }
+}
+
 // Страницы каталога и редактора используют общий список новелл, теги и
 // конфигурацию. Остальным страницам достаточно данных текущей сессии.
 function getInitialDataScopeForPage(page) {
@@ -12,13 +64,14 @@ function getInitialDataScopeForPage(page) {
         'home',
         'catalog',
         'author',
-        'profile',
         'add-novel',
         'edit-novel'
     ];
 
     if (fullDataPages.includes(page)) return 'full';
-    if (page === 'admin') return 'admin';
+    // Админ-панель получает данные отдельными прямыми запросами после
+    // безопасной загрузки текущей сессии.
+    if (page === 'admin') return 'session';
     return 'session';
 }
 
@@ -40,9 +93,7 @@ async function loadInitialDataForPage(page) {
         return;
     }
 
-    const response = await apiRequest('getInitialData', {
-        scope: requiredScope
-    });
+    const response = await requestInitialData(requiredScope);
 
     if (!response.success) throw new Error(response.error);
 
@@ -61,11 +112,39 @@ async function loadInitialDataForPage(page) {
         STATE.tags = Array.isArray(response.tags) ? response.tags : [];
     }
 
-    if (requiredScope === 'full' || requiredScope === 'admin') {
-        STATE.currentRoleTheme = response.roleTheme || 'default';
-    }
+    STATE.currentRoleTheme = response.roleTheme || STATE.currentRoleTheme || 'default';
+
+    STATE.novelDetailsLayout = response.novelDetailsLayout === 'fixed'
+        ? 'fixed'
+        : 'adaptive';
+    document.documentElement.dataset.novelDetailsLayout = STATE.novelDetailsLayout;
 
     STATE.initialDataScope = requiredScope;
+}
+
+async function requestInitialData(scope) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            const response = await apiRequest('getInitialData', { scope }, attempt > 0);
+            if (!response.success) throw new Error(response.error);
+            return response;
+        } catch (error) {
+            const transient = /fetch failed|failed to fetch|networkerror|network request failed|сетевая ошибка|HTTP (502|503|504)\b/i.test(String(error.message));
+            if (attempt || !transient) throw error;
+            await new Promise(resolve => setTimeout(resolve, 400));
+        }
+    }
+}
+
+function renderInitialDataError() {
+    const container = document.getElementById('page-content-container');
+    if (!container) return;
+    showSection('page-content-container');
+    container.innerHTML = `<div class="page-content startup-load-error" role="alert">
+        <h1>Не удалось загрузить сайт</h1>
+        <p>Проверьте соединение и повторите загрузку. Выходить из аккаунта не нужно.</p>
+        <button type="button" class="btn btn-secondary" onclick="window.location.reload()">Повторить загрузку</button>
+    </div>`;
 }
 
 function restoreSortPreference() {
@@ -169,18 +248,7 @@ async function initializeApp() {
                 } else {
                     // Для всех остальных страниц (детали, профиль и т.д.)
                     // показываем заглушку-книгу, как и раньше.
-                    pageContainer.innerHTML = `
-                      <div class="page-loading-animation">
-                          <div class="book">
-                              <div class="book__pg-shadow"></div>
-                              <div class="book__pg"></div>
-                              <div class="book__pg book__pg--2"></div>
-                              <div class="book__pg book__pg--3"></div>
-                              <div class="book__pg book__pg--4"></div>
-                              <div class="book__pg book__pg--5"></div>
-                          </div>
-                          <p>Загрузка...</p>
-                      </div>`;
+                    pageContainer.innerHTML = renderBookLoadingMarkup();
                 }
                 // ✨ КОНЕЦ ИСПРАВЛЕНИЯ ✨
             }
@@ -194,6 +262,7 @@ async function initializeApp() {
         // --- ЭТАП 3: ФИНАЛЬНАЯ ОТРИСОВКА ---
         updateUserDisplay();
         setupSearchAutocomplete();
+        startPresenceTracking();
 
         try {
             const savedSort = localStorage.getItem('novel-sort-preference');
@@ -231,6 +300,8 @@ async function initializeApp() {
         if (gridBtn && listBtn) {
             gridBtn.classList.toggle('active', STATE.viewMode === 'grid');
             listBtn.classList.toggle('active', STATE.viewMode === 'list');
+            gridBtn.setAttribute('aria-pressed', String(STATE.viewMode === 'grid'));
+            listBtn.setAttribute('aria-pressed', String(STATE.viewMode === 'list'));
             console.log(`🖼️ Вид восстановлен: ${STATE.viewMode}`);
         }
 
@@ -254,21 +325,11 @@ async function initializeApp() {
         
     } catch (error) {
         console.error('❌ Ошибка инициализации:', error);
-        showToast('Критическая ошибка загрузки данных', 'error');
+        renderInitialDataError();
     }
 }
 
 function setupEventListeners() {
-    // Поиск
-    bindClick('search-btn', performSearch);
-    
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') performSearch();
-        });
-    }
-
     const authorSubmissionForm = document.getElementById(
         'author-submission-form'
     );
@@ -308,8 +369,8 @@ function setupEventListeners() {
     //}
     
     // Кнопки
-    bindClick('add-novel-btn', () => navigateTo('add-novel'));
     bindClick('admin-btn', openAdminPanel);
+    if (typeof setupNotificationCenter === 'function') setupNotificationCenter();
     
     setupThemeSwitcher();
     
@@ -344,7 +405,7 @@ function setupEventListeners() {
         }
         
         // Ctrl+N - добавить новеллу (если есть права)
-        if (e.ctrlKey && e.key === 'n' && STATE.currentUser) {
+        if (e.ctrlKey && e.key === 'n' && ['creator', 'admin', 'owner'].includes(STATE.currentUser?.role)) {
             e.preventDefault();
             navigateTo('add-novel');
         }

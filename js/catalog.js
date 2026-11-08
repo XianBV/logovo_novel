@@ -12,13 +12,8 @@ async function renderCatalogPage(isSkeleton = false) {
     const grid = document.getElementById('novels-grid');
     if (!grid) return;
 
-    // ✨ Если это первый запуск, показываем скелет
     if (isSkeleton) {
-    // Применяем правильный класс в зависимости от режима просмотра (до вставки skeleton)
-    grid.className = STATE.viewMode === 'list' ? 'novels-grid list-view' : 'novels-grid';
-        
-        // Рисуем 12 skeleton карточек
-        grid.innerHTML = Array(12).fill(null).map(() => renderSkeletonCard()).join('');
+        showSkeletonCards();
         return;
     }
 
@@ -63,8 +58,7 @@ function showSkeletonCards(count = 12) {
     const grid = document.getElementById('novels-grid');
     if (!grid) return;
     
-    // Применяем правильный класс в зависимости от режима просмотра (до вставки skeleton)
-    grid.className = STATE.viewMode === 'list' ? 'novels-grid list-view' : 'novels-grid';
+    grid.classList.toggle('list-view', STATE.viewMode === 'list');
     
     // Генерируем skeleton карточки
     const skeletons = Array(count).fill(null).map(() => renderSkeletonCard()).join('');
@@ -79,13 +73,15 @@ function renderNovelsGrid(novels) {
     if (!grid) return;
     
     // Обновляем статистику
-    if (novelsCount) {
-        novelsCount.textContent = `${novels.length} ${getNounEnding(novels.length, 'новелла', 'новеллы', 'новелл')}`;
-
-        novelsCount.classList.remove('skeleton-loader'); // Убираем скелетон
+    const filterResult = document.getElementById('catalog-filter-result');
+    for (const count of [novelsCount, filterResult].filter(Boolean)) {
+        count.textContent = `${novels.length} ${getNounEnding(novels.length, 'новелла', 'новеллы', 'новелл')}`;
+        count.classList.remove('skeleton-loader');
     }
-    
+
     if (statsBar) statsBar.style.display = 'flex';
+    grid.classList.toggle('list-view', STATE.viewMode === 'list');
+    STATE.totalPages = Math.ceil(novels.length / STATE.itemsPerPage);
     
     if (novels.length === 0) {
         grid.innerHTML = `
@@ -102,91 +98,92 @@ function renderNovelsGrid(novels) {
     const endIdx = startIdx + STATE.itemsPerPage;
     const pageNovels = novels.slice(startIdx, endIdx);
     
-    STATE.totalPages = Math.ceil(novels.length / STATE.itemsPerPage);
-    
-    // Рендерим карточки
-    grid.className = STATE.viewMode === 'list' ? 'novels-grid list-view' : 'novels-grid';
-    grid.innerHTML = pageNovels.map(novel => renderNovelCard(novel)).join('');
+    grid.innerHTML = renderNovelCards(pageNovels);
 }
+
+function getNovelGridClassName(extraClass = '', viewMode = STATE.viewMode) {
+    return ['novels-grid', extraClass, viewMode === 'list' ? 'list-view' : ''].filter(Boolean).join(' ');
+}
+
+function renderNovelCards(novels) {
+    return novels.map(novel => renderNovelCard(novel)).join('');
+}
+
+function renderNovelCollection(novels, extraClass = '') {
+    return `<div class="${getNovelGridClassName(extraClass)}">${renderNovelCards(novels)}</div>`;
+}
+
+function catalogAttribute(value) {
+    return escapeHtml(String(value ?? '')).replaceAll('"', '&quot;');
+}
+
+const NOVEL_LANGUAGE_CODES = new Map([
+    ['Китайский', 'ZH'],
+    ['Корейский', 'KO'],
+    ['Японский', 'JA'],
+    ['Английский', 'EN'],
+    ['Русский', 'RU']
+]);
 
 function renderNovelCard(novel) {
     const isListView = STATE.viewMode === 'list';
-    let cardClass = 'novel-card';
-    let overlayHtml = '';
-    
-    // Проверяем: если новелла "по ссылке" ИЛИ "приватная", берем slug. Для публичных (public) оставляем ID.
-    const useSlug = (novel.access_type === 'link_only' || novel.access_type === 'private') && novel.slug;
-    const linkIdentifier = useSlug ? novel.slug : novel.novel_id;
-    
-    const novelUrl = `/?page=novel-details&id=${linkIdentifier}`;
-    let linkAttributes = `href="${novelUrl}" class="novel-card-link"`;
-
-    // Логика для удаленных, обрабатывающихся, ошибочных
+    const useSlug = ['link_only', 'private'].includes(novel.access_type) && novel.slug;
+    const identifier = useSlug ? novel.slug : novel.novel_id;
+    const title = escapeHtml(novel.title);
+    const attribute = catalogAttribute;
+    let href = `?page=novel-details&amp;id=${encodeURIComponent(identifier)}`;
+    let action = 'handleLinkClick(event)';
+    let state = '';
+    let overlay = '';
     if (novel.is_deleted) {
-        cardClass += ' deleted';
-        // Убираем стандартный URL, добавляем onclick для восстановления
-        linkAttributes = `href="#" onclick="handleRestoreNovel('${novel.novel_id}'); event.preventDefault();" class="novel-card-link deleted-link"`;
-        overlayHtml = `<div class="novel-card-overlay"><span class="restore-icon">↩️</span><span>Восстановить</span></div>`;
+        state = 'deleted';
+        href = '#';
+        action = 'event.preventDefault(); handleRestoreNovel(this.dataset.novelId, event)';
+        overlay = '<span class="restore-icon">↩️</span><span>Восстановить</span>';
     } else if (novel.original_status === 'processing') {
-        cardClass += ' processing';
-        linkAttributes = `href="#" class="novel-card-link disabled"`; // Делаем некликабельной
-        overlayHtml = `<div class="novel-card-overlay"><div class="spinner"></div><span>Создается...</span></div>`;
+        state = 'processing';
+        href = '#';
+        action = 'event.preventDefault()';
+        overlay = '<div class="spinner"></div><span>Создаётся...</span>';
     } else if (novel.original_status === 'error') {
-        cardClass += ' error';
-        // Убираем стандартный URL, добавляем onclick для обработки ошибки
-        linkAttributes = `href="#" onclick="handleErrorNovelClick('${novel.novel_id}'); event.preventDefault();" class="novel-card-link error-link"`;
-        overlayHtml = `<div class="novel-card-overlay"><span class="error-icon">⚠️</span><span>Ошибка</span></div>`;
+        state = 'error';
+        href = '#';
+        action = 'event.preventDefault(); handleErrorNovelClick(this.dataset.novelId)';
+        overlay = '<span>⚠️</span><span>Ошибка</span>';
     }
-
-    const statusClass = getStatusClass(novel.translation_status);
-
-    // Содержимое карточки (внутренний HTML для div.novel-card)
-    let cardInnerHtml = '';
-
-    if (!isListView) { // --- СЕТКА ---
-        cardClass += ' grid-view-card';
-        cardInnerHtml = `
-            ${overlayHtml}
-            ${novel.language ? `<span class="novel-language">${escapeHtml(novel.language)}</span>` : ''}
-            ${novel.translation_status ? `<span class="novel-status ${statusClass}">${escapeHtml(novel.translation_status)}</span>` : ''}
-            <div class="novel-cover">
-                ${novel.cover_url ? `<img src="${escapeHtml(novel.cover_url)}" alt="${escapeHtml(novel.title)}" loading="lazy">` : '<div class="no-cover">📚</div>'}
-            </div>
-            <div class="novel-info">
-                <h3 class="novel-title">${escapeHtml(novel.title)}</h3>
-            </div>
-        `;
-    } else { // --- СПИСОК ---
-        cardClass += ' list-view-card';
-        const metaInfo = [novel.orientation, novel.era, novel.perspective].filter(Boolean).join(' · ');
-        cardInnerHtml = `
-            ${overlayHtml}
-            ${novel.language ? `<span class="novel-language">${escapeHtml(novel.language)}</span>` : ''}
-            ${novel.translation_status ? `<span class="novel-status ${statusClass}">${escapeHtml(novel.translation_status)}</span>` : ''}
-            <div class="novel-cover">
-                 ${novel.cover_url ? `<img src="${escapeHtml(novel.cover_url)}" alt="${escapeHtml(novel.title)}" loading="lazy">` : '<div class="no-cover">📚</div>'}
-            </div>
-            <div class="novel-info">
-                <h3 class="novel-title">${escapeHtml(novel.title)}</h3>
-                <p class="novel-author">
-                    <a href="/?page=author&name=${encodeURIComponent(novel.author)}" class="author-link-inline" onclick="handleLinkClick(event)">
-                        ${escapeHtml(novel.author)}
-                    </a>
-                </p>
-                <div class="novel-meta-line">
-                     ${novel.original_chapter_count ? `<span>${novel.original_chapter_count} глав в оригинале</span>` : ''}
-                     ${metaInfo ? `<span>${escapeHtml(metaInfo)}</span>` : ''}
-                </div>
-            </div>
-        `;
+    const cardClass = ['novel-card', isListView ? 'list-view-card' : 'grid-view-card', state].filter(Boolean).join(' ');
+    const linkClass = isListView ? 'novel-row-link' : 'novel-card-link';
+    const linkAttributes = `href="${href}" class="${linkClass}" data-novel-id="${attribute(novel.novel_id)}" onclick="${action}"${state === 'processing' ? ' aria-disabled="true" tabindex="-1"' : ''}`;
+    const language = novel.language;
+    const languageCode = NOVEL_LANGUAGE_CODES.get(language);
+    const languageBadge = languageCode
+        ? `<span aria-hidden="true">${languageCode}</span><span class="visually-hidden">${escapeHtml(language)}</span>`
+        : escapeHtml(language);
+    const statusBadge = novel.translation_status
+        ? `<span class="novel-status ${getStatusClass(novel.translation_status)}">${escapeHtml(novel.translation_status)}</span>` : '';
+    const cover = `
+        ${overlay ? `<div class="novel-card-overlay">${overlay}</div>` : ''}
+        ${isListView ? '' : statusBadge}
+        <div class="novel-cover">
+            ${novel.cover_url ? `<img src="${attribute(novel.cover_url)}" alt="${attribute(novel.title)}" loading="lazy">` : '<div class="no-cover">📚</div>'}
+            ${language ? `<span class="novel-language" title="${catalogAttribute(language)}">${languageBadge}</span>` : ''}
+        </div>`;
+    if (!isListView) {
+        return `<a ${linkAttributes}><div class="${cardClass}">
+            ${cover}<div class="novel-info"><h3 class="novel-title">${title}</h3></div>
+        </div></a>`;
     }
-    // ✨ Возвращаем ССЫЛКУ <a>, которая ОБОРАЧИВАЕТ <div> карточки ✨
-    // ✨ К ссылке добавляем onclick="handleLinkClick(event)" для перехвата ✨
-    return `<a ${linkAttributes} onclick="handleLinkClick(event)">
-               <div class="${cardClass}">
-                   ${cardInnerHtml}
-               </div>
-           </a>`;
+    const meta = [novel.orientation, novel.era, novel.perspective].filter(Boolean).join(' · ');
+    const metaParts = [novel.original_chapter_count ? `${novel.original_chapter_count} глав в оригинале` : '', meta].filter(Boolean);
+    return `<article class="${cardClass}">
+        <a ${linkAttributes} aria-label="${attribute(novel.title)}"></a>
+        ${cover}
+        <div class="novel-info">
+            <h3 class="novel-title">${title}</h3>
+            ${novel.author ? `<p class="novel-author"><a href="?page=author&amp;name=${encodeURIComponent(novel.author)}" class="author-link-inline" onclick="handleLinkClick(event)">${escapeHtml(novel.author)}</a></p>` : ''}
+            ${metaParts.length || statusBadge ? `<div class="novel-meta-line">${metaParts.map(part => `<span>${escapeHtml(part)}</span>`).join('')}${statusBadge}</div>` : ''}
+        </div>
+    </article>`;
 }
 
 function getStatusClass(status) {
@@ -197,9 +194,8 @@ function getStatusClass(status) {
     return 'status-unknown';
 }
 
-function handleRestoreNovel(novelId) {
-    // Останавливаем переход на другую страницу, если он был
-    event.stopPropagation(); 
+function handleRestoreNovel(novelId, event) {
+    event?.stopPropagation();
     
     showConfirmModal('Восстановить новеллу?', 'Вы уверены, что хотите восстановить эту новеллу из корзины?',
         async () => {
@@ -292,7 +288,7 @@ function goToPage(page) {
     window.history.pushState({ page: 'catalog', params: { p: page } }, '', url);
 
     STATE.currentPage = page;
-    const novelsToShow = STATE.filteredNovels.length > 0 ? STATE.filteredNovels : STATE.novels;
+    const novelsToShow = STATE.filteredNovels;
     renderNovelsGrid(novelsToShow);
     renderPagination();
     
@@ -300,94 +296,163 @@ function goToPage(page) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function getNovelAlternateTitles(value) {
+    const titles = Array.isArray(value) ? value : String(value ?? '').split('|');
+    return titles.map(title => String(title ?? '').trim()).filter(Boolean);
+}
+
+function getCatalogSearchMatch(novel, query) {
+    const matches = value => String(value ?? '').toLocaleLowerCase('ru').includes(query);
+    if (matches(novel.title)) return { field: 'title', value: novel.title };
+    const alternate = getNovelAlternateTitles(novel.alt_titles).find(matches);
+    if (alternate) return { field: 'alternate', value: alternate };
+    if (matches(novel.author)) return { field: 'author', value: novel.author };
+    return null;
+}
+
 function setupSearchAutocomplete() {
-    const searchInput = document.getElementById('search-input');
-    if (!searchInput) return;
-    
-    let autocompleteList = null;
-    
-    searchInput.addEventListener('input', function() {
-        const query = this.value.toLowerCase().trim();
-        
-        // Удаляем старый список
-        if (autocompleteList) {
-            autocompleteList.remove();
-            autocompleteList = null;
+    const form = document.getElementById('catalog-search-form');
+    const input = document.getElementById('search-input');
+    const clear = document.getElementById('catalog-search-clear');
+    const results = document.getElementById('catalog-search-results');
+    if (!form || !input || !clear || !results) return;
+
+    const dismiss = () => { results.hidden = true; };
+    input.addEventListener('input', () => {
+        const query = input.value.trim().toLocaleLowerCase('ru');
+        clear.hidden = !input.value;
+        if (!query && STATE.catalogSearchQuery) performSearch();
+        if (query.length < 2) return dismiss();
+
+        const suggestions = [];
+        let matchCount = 0;
+        for (const novel of STATE.novels) {
+            const match = getCatalogSearchMatch(novel, query);
+            if (!match) continue;
+            matchCount += 1;
+            if (suggestions.length === 8) continue;
+            const reference = ['private', 'link_only'].includes(novel.access_type) && novel.slug
+                ? novel.slug : novel.novel_id;
+            const caption = match.field === 'alternate' ? match.value : novel.author;
+            suggestions.push(`<li><a class="catalog-suggestion" href="?page=novel-details&amp;id=${encodeURIComponent(reference)}" onclick="handleLinkClick(event)">
+                <span class="catalog-suggestion-cover" aria-hidden="true">
+                    ${renderUiIcon('book-open')}
+                    ${novel.cover_url ? `<img src="${catalogAttribute(novel.cover_url)}" alt="" onerror="this.remove()">` : ''}
+                </span>
+                <span class="catalog-suggestion-text">
+                    <strong>${highlightMatch(novel.title, query)}</strong>
+                    ${caption ? `<small>${highlightMatch(caption, query)}</small>` : ''}
+                </span>
+            </a></li>`);
         }
-        
-        if (query.length < 2) return;
-        
-        // Ищем совпадения
-        const matches = STATE.novels.filter(novel => 
-            novel.title.toLowerCase().includes(query) ||
-            novel.author.toLowerCase().includes(query)
-        ).slice(0, 5);
-        
-        if (matches.length === 0) return;
-        
-        // Создаём список автодополнения
-        autocompleteList = document.createElement('div');
-        autocompleteList.className = 'autocomplete-list';
-        autocompleteList.style.width = this.offsetWidth + 'px'; // Задаём ширину, равную ширине инпута
-        
-        matches.forEach(novel => {
-            const item = document.createElement('div');
-            item.className = 'autocomplete-item';
-            item.innerHTML = `
-                <div class="autocomplete-title">${highlightMatch(novel.title, query)}</div>
-                <div class="autocomplete-author">${highlightMatch(novel.author, query)}</div>
-            `;
-            item.addEventListener('click', () => {
-                navigateTo('novel-details', { id: novel.novel_id });
-                autocompleteList.remove();
-            });
-            autocompleteList.appendChild(item);
-        });
-        
-        this.parentElement.appendChild(autocompleteList);
+        results.innerHTML = suggestions.length
+            ? `<ul aria-label="Подходящие новеллы">${suggestions.join('')}</ul>
+                ${matchCount > 5 ? `<button class="catalog-search-show-all" type="submit">Показать в каталоге · ${matchCount}</button>` : ''}`
+            : '<p class="catalog-search-empty">Совпадений нет</p>';
+        results.hidden = false;
     });
-    
-    // Закрываем при клике вне
-    document.addEventListener('click', (e) => {
-        if (!searchInput.contains(e.target) && autocompleteList) {
-            autocompleteList.remove();
-            autocompleteList = null;
+    form.addEventListener('submit', event => {
+        event.preventDefault();
+        dismiss();
+        performSearch();
+    });
+    clear.addEventListener('click', () => {
+        input.value = '';
+        clear.hidden = true;
+        dismiss();
+        performSearch();
+        input.focus();
+    });
+    form.addEventListener('keydown', event => {
+        if (results.hidden) return;
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            dismiss();
+            input.focus();
+        } else if (event.key === 'ArrowDown' && event.target === input) {
+            const first = results.querySelector('a');
+            if (first) {
+                event.preventDefault();
+                first.focus();
+            }
         }
+    });
+    form.addEventListener('focusout', event => {
+        if (!form.contains(event.relatedTarget)) dismiss();
+    });
+    document.addEventListener('pointerdown', event => {
+        if (!form.contains(event.target)) dismiss();
+    });
+    results.addEventListener('click', event => {
+        if (event.target.closest('a')) dismiss();
     });
 }
 
 function highlightMatch(text, query) {
-    const index = text.toLowerCase().indexOf(query.toLowerCase());
-    if (index === -1) return escapeHtml(text);
-    
-    const before = escapeHtml(text.substring(0, index));
-    const match = escapeHtml(text.substring(index, index + query.length));
-    const after = escapeHtml(text.substring(index + query.length));
-    
-    return `${before}<strong>${match}</strong>${after}`;
+    const value = String(text ?? '');
+    const index = value.toLocaleLowerCase('ru').indexOf(query);
+    if (index === -1) return escapeHtml(value);
+    const end = index + query.length;
+    return `${escapeHtml(value.slice(0, index))}<mark>${escapeHtml(value.slice(index, end))}</mark>${escapeHtml(value.slice(end))}`;
+}
+
+function closeDialogOnBackdrop(event) {
+    const panel = event.currentTarget;
+    if (event.target !== panel) return;
+    const bounds = panel.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX >= bounds.right ||
+        event.clientY < bounds.top || event.clientY >= bounds.bottom) panel.close();
 }
 
 function toggleFilters() {
     const panel = document.getElementById('filters-panel');
-    if (panel) {
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    }
+    if (!panel) return;
+    if (panel.open) return panel.close();
+
+    const scrollPositions = [document.documentElement, document.body].map(element => ({
+        element, top: element.scrollTop, left: element.scrollLeft
+    }));
+    const toggle = document.getElementById('filter-toggle');
+    panel.addEventListener('close', () => {
+        const tooltip = document.getElementById('custom-tooltip');
+        if (tooltip && panel.contains(tooltip)) {
+            tooltip.classList.remove('show');
+            document.body.appendChild(tooltip);
+        }
+        toggle?.setAttribute('aria-expanded', 'false');
+        toggle?.focus({ preventScroll: true });
+        scrollPositions.forEach(({ element, top, left }) => {
+            element.scrollTop = top;
+            element.scrollLeft = left;
+        });
+    }, { once: true });
+    panel.showModal();
+    toggle?.setAttribute('aria-expanded', 'true');
 }
 
 function applyFilters() {
-    const languageFilter = document.getElementById('language-filter');
-    const eraFilter = document.getElementById('era-filter');
-    const statusFilter = document.getElementById('status-filter');
-    const perspectiveFilter = document.getElementById('perspective-filter');
-    const orientationFilter = document.getElementById('orientation-filter');
-    
-    STATE.currentFilters.language = languageFilter ? languageFilter.value : '';
-    STATE.currentFilters.era = eraFilter ? eraFilter.value : '';
-    STATE.currentFilters.status = statusFilter ? statusFilter.value : '';
-    STATE.currentFilters.perspective = perspectiveFilter ? perspectiveFilter.value : '';
-    STATE.currentFilters.orientation = orientationFilter ? orientationFilter.value : '';
-
     applyFiltersAndSort();
+    document.getElementById('filters-panel')?.close();
+}
+
+function showCatalogFilterPage(index) {
+    const gallery = document.getElementById('catalog-filter-gallery');
+    gallery.scrollTo({ left: gallery.clientWidth * index });
+}
+
+function syncCatalogFilterGallery(gallery) {
+    const width = gallery.clientWidth;
+    if (!width) return;
+    const index = Math.round(gallery.scrollLeft / width);
+    // Новая секция получает фокус только у точки остановки прокрутки.
+    if (Math.abs(gallery.scrollLeft - index * width) > 2) return;
+    const tabs = gallery.previousElementSibling.querySelectorAll('button');
+    if (tabs[index]?.getAttribute('aria-current') === 'true') return;
+    Array.from(gallery.children).forEach((page, position) => {
+        const active = position === index;
+        page.inert = !active;
+        tabs[position].setAttribute('aria-current', String(active));
+    });
 }
 
 function resetFilterControlsAndState() {
@@ -413,8 +478,12 @@ function resetFilterControlsAndState() {
     if (tagMapContainer) {
         tagMapContainer.querySelectorAll('.filter-tag-item').forEach(item => {
             item.classList.remove('include-active', 'exclude-active');
+            syncCatalogTagButtons(item);
         });
     }
+    const tagSearch = document.getElementById('catalog-tag-search');
+    if (tagSearch) tagSearch.value = '';
+    filterCatalogTags('');
 
     updateSelectedTagsDisplay('selected-include-tags', [], 'include');
     updateSelectedTagsDisplay('selected-exclude-tags', [], 'exclude');
@@ -461,13 +530,18 @@ function toggleSortPopup() {
 
     if (isVisible) {
         popup.style.display = 'none';
+        sortButton.setAttribute('aria-expanded', 'false');
         document.removeEventListener('click', closeSortPopupOnClickOutside, true);
     } else {
         // Позиционируем попап под кнопкой
         const rect = sortButton.getBoundingClientRect();
-        popup.style.left = `${rect.left + window.scrollX}px`;
         popup.style.top = `${rect.bottom + window.scrollY + 5}px`; // 5px отступ снизу
         popup.style.display = 'block';
+        sortButton.setAttribute('aria-expanded', 'true');
+        const edgeGap = 8;
+        const rightLimit = document.documentElement.clientWidth - popup.offsetWidth - edgeGap;
+        const left = Math.max(edgeGap, Math.min(rect.left, rightLimit));
+        popup.style.left = `${left + window.scrollX}px`;
 
         // Отмечаем активную опцию
         updateActiveSortOption();
@@ -485,6 +559,7 @@ function closeSortPopupOnClickOutside(event) {
     // Проверяем, что клик был не по попапу и не по кнопке
     if (popup && sortButton && !popup.contains(event.target) && !sortButton.contains(event.target)) {
         popup.style.display = 'none';
+        sortButton.setAttribute('aria-expanded', 'false');
         document.removeEventListener('click', closeSortPopupOnClickOutside, true);
     }
 }
@@ -516,6 +591,7 @@ function handleSortOptionClick(value, text) {
     // Закрываем попап
     const popup = document.getElementById('sort-popup');
     if (popup) popup.style.display = 'none';
+    document.getElementById('sort-btn')?.setAttribute('aria-expanded', 'false');
     document.removeEventListener('click', closeSortPopupOnClickOutside, true);
 
     // Применяем сортировку
@@ -609,7 +685,8 @@ function applyFiltersAndSort() {
 
     console.log("Applying filters:", STATE.currentFilters); // Лог для отладки
 
-    let novelsToProcess = [...STATE.novels];
+    const query = STATE.catalogSearchQuery;
+    let novelsToProcess = STATE.novels.filter(novel => !query || getCatalogSearchMatch(novel, query));
 
     // --- ШАГ 1: ФИЛЬТРАЦИЯ ---
     novelsToProcess = novelsToProcess.filter(novel => {
@@ -665,24 +742,14 @@ function applyFiltersAndSort() {
 }
 
 function updateFilterInfo() {
-  const filterInfoEl = document.getElementById('filter-info');
-  if (!filterInfoEl) return;
-
-  // ✨ ИСПРАВЛЕНИЕ: Получаем текст кнопки сортировки ✨
-  const sortButton = document.getElementById('sort-btn');
-  let sortText = '';
-  if (sortButton) {
-      // Берем текстовое содержимое кнопки (без иконки)
-      const buttonTextElement = sortButton.querySelector('span:last-child');
-      if (buttonTextElement) {
-          sortText = buttonTextElement.textContent.trim();
-      }
-  }
-  // ------------------------------------------
-
-  // TODO: Сформировать строку, описывающую активные фильтры
-  // Пока просто добавляем текст сортировки
-  filterInfoEl.textContent = sortText ? ` | Сортировка: ${sortText}` : '';
+    const toggle = document.getElementById('filter-toggle');
+    if (!toggle) return;
+    const filters = STATE.currentFilters;
+    const fields = ['language', 'era', 'perspective', 'orientation', 'originalStatus', 'translationStatus', 'chaptersMin', 'chaptersMax', 'wordsMin', 'wordsMax'];
+    const count = fields.filter(key => filters[key] !== '' && filters[key] != null).length
+        + (filters.includeTags?.length || 0) + (filters.excludeTags?.length || 0);
+    toggle.querySelector('[data-filter-caption]').textContent = count ? `Фильтры · ${count}` : 'Фильтры';
+    toggle.classList.toggle('has-filters', count > 0);
 }
 
 function getSelectedTags(containerId) {
@@ -701,9 +768,10 @@ function checkTaxonomyFilter(itemTaxonomies, selectedTaxonomies, mode, isExclude
     let result = true; // Результат по умолчанию
 
     if (isExclude) {
-        const hasExcluded = selectedTaxonomies.some(tax =>
-            lowerItemTaxonomies.includes(String(tax || '').toLowerCase())
-        );
+        const matches = tax => lowerItemTaxonomies.includes(String(tax || '').toLowerCase());
+        const hasExcluded = mode === 'all'
+            ? selectedTaxonomies.every(matches)
+            : selectedTaxonomies.some(matches);
         result = !hasExcluded;
         // --- ЛОГ РЕЗУЛЬТАТА ---
         console.log(`   🔍 checkTaxonomyFilter (EXCLUDE): itemTags=[${lowerItemTaxonomies.join(', ')}], selected=[${selectedTaxonomies.join(', ')}], hasExcluded=${hasExcluded}, result=${result}`);
@@ -732,13 +800,20 @@ function checkTaxonomyFilter(itemTaxonomies, selectedTaxonomies, mode, isExclude
 }
 
 function setupAdvancedFilters() {
-    // Заполняем простые селекты
-    populateSelect('language-filter', STATE.config.LANGUAGES);
-    populateSelect('era-filter', STATE.config.ERAS);
-    populateSelect('orientation-filter', STATE.config.ORIENTATIONS);
-    populateSelect('perspective-filter', STATE.config.PERSPECTIVES);
-    populateSelect('original-status-filter', STATE.config.STATUS_OPTIONS);
-    populateSelect('translation-status-filter', STATE.config.STATUS_OPTIONS);
+    // Поддерживаем текущую конфигурацию сервера и прежние имена параметров.
+    const facets = [
+        ['language-filter', 'languages', 'LANGUAGES', 'language'],
+        ['era-filter', 'eras', 'ERAS', 'era'],
+        ['orientation-filter', 'orientations', 'ORIENTATIONS', 'orientation'],
+        ['perspective-filter', 'perspectives', 'PERSPECTIVES', 'perspective'],
+        ['original-status-filter', 'statusOptions', 'STATUS_OPTIONS', 'original_status'],
+        ['translation-status-filter', 'statusOptions', 'STATUS_OPTIONS', 'translation_status']
+    ];
+    facets.forEach(([id, key, legacyKey, field]) => {
+        const configured = STATE.config[key] || STATE.config[legacyKey] || [];
+        const values = [...new Set([...configured, ...STATE.novels.map(novel => novel[field])].filter(Boolean))];
+        populateSelect(id, values);
+    });
 
     // Рендерим карту тегов
     renderFilterTagMap();
@@ -781,21 +856,48 @@ function renderFilterTagMap() {
 
     container.innerHTML = STATE.tags.map(tag => `
         <div class="filter-tag-item"
-             data-value="${escapeHtml(tag.name)}"
-             data-description="${tag.description ? escapeHtml(tag.description) : ''}">
-            <span class="filter-tag-name">${escapeHtml(tag.name)}</span>
-            <button class="tag-filter-btn include-btn" title="Включить" onclick="handleTagFilterClick(this, 'include')">+</button>
-            <button class="tag-filter-btn exclude-btn" title="Исключить" onclick="handleTagFilterClick(this, 'exclude')">-</button>
+             data-value="${catalogAttribute(tag.name)}"
+             data-description="${catalogAttribute(tag.description)}">
+            <button type="button" class="filter-tag-name" aria-pressed="false"
+                    onclick="handleTagFilterClick(this, this.closest('.exclude-active') ? 'exclude' : 'include')">${escapeHtml(tag.name)}</button>
+            <button type="button" class="tag-filter-btn include-btn" title="Включить" aria-label="Включить тег: ${catalogAttribute(tag.name)}" aria-pressed="false" onclick="handleTagFilterClick(this, 'include')">+</button>
+            <button type="button" class="tag-filter-btn exclude-btn" title="Исключить" aria-label="Исключить тег: ${catalogAttribute(tag.name)}" aria-pressed="false" onclick="handleTagFilterClick(this, 'exclude')">−</button>
         </div>
     `).join('');
 
     // Восстанавливаем состояние из STATE.currentFilters, если оно есть
     updateTagMapSelectionFromState();
+    filterCatalogTags(document.getElementById('catalog-tag-search')?.value || '');
+}
+
+function filterCatalogTags(value) {
+    const query = value.trim().toLocaleLowerCase('ru');
+    const items = document.querySelectorAll('#filter-tags-map .filter-tag-item');
+    let visible = 0;
+    items.forEach(item => {
+        item.hidden = !item.dataset.value.toLocaleLowerCase('ru').includes(query);
+        if (!item.hidden) visible += 1;
+    });
+    const empty = document.getElementById('catalog-tags-empty');
+    if (empty) empty.hidden = !items.length || visible > 0;
+}
+
+function syncCatalogTagButtons(item) {
+    const included = item.classList.contains('include-active');
+    const excluded = item.classList.contains('exclude-active');
+    item.querySelector('.filter-tag-name')?.setAttribute('aria-pressed', String(included || excluded));
+    item.querySelector('.include-btn')?.setAttribute('aria-pressed', String(included));
+    item.querySelector('.exclude-btn')?.setAttribute('aria-pressed', String(excluded));
+    const includeButton = item.querySelector('.include-btn');
+    if (includeButton) includeButton.textContent = included ? '✓' : '+';
+    item.querySelector('.filter-tag-name')?.setAttribute('aria-label',
+        `${included ? 'Включён' : excluded ? 'Исключён' : 'Включить'}: ${item.dataset.value}${included || excluded ? '. Нажмите, чтобы снять выбор' : ''}`);
 }
 
 function handleTagFilterClick(buttonElement, mode) { // mode: 'include' or 'exclude'
     const tagItem = buttonElement.closest('.filter-tag-item');
     if (!tagItem) return;
+    document.getElementById('custom-tooltip')?.classList.remove('show');
 
     const tagName = tagItem.dataset.value;
     const isIncludeActive = tagItem.classList.contains('include-active');
@@ -819,6 +921,7 @@ function handleTagFilterClick(buttonElement, mode) { // mode: 'include' or 'excl
     }
 
     // Обновляем состояние в STATE и списки выбранных тегов
+    syncCatalogTagButtons(tagItem);
     updateFiltersFromTagMap();
 
     // Применяем фильтры
@@ -858,6 +961,7 @@ function updateTagMapSelectionFromState() {
         } else if (STATE.currentFilters.excludeTags.includes(tagName)) {
             item.classList.add('exclude-active');
         }
+        syncCatalogTagButtons(item);
     });
 
     // Также обновляем списки выбранных
@@ -874,9 +978,18 @@ function updateTagMapSelectionFromState() {
 function updateSelectedTagsDisplay(containerId, tagNames, type) { // type: 'include' or 'exclude'
     const container = document.getElementById(containerId);
     if (!container) return;
-    container.innerHTML = tagNames.map(name =>
-        `<span class="selected-tag ${type}">${escapeHtml(name)}</span>`
-    ).join('');
+    container.innerHTML = tagNames.map(name => {
+        const description = STATE.tags?.find(tag => tag.name === name)?.description;
+        return `<button type="button" class="selected-tag ${type}" data-value="${catalogAttribute(name)}" data-description="${catalogAttribute(description)}" onclick="removeCatalogTag(this, '${type}')" aria-label="Убрать тег: ${catalogAttribute(name)}">${escapeHtml(name)}<span aria-hidden="true"> ×</span></button>`;
+    }).join('');
+}
+
+function removeCatalogTag(button, type) {
+    const field = type === 'include' ? 'includeTags' : 'excludeTags';
+    STATE.currentFilters[field] = STATE.currentFilters[field].filter(name => name !== button.dataset.value);
+    updateTagMapSelectionFromState();
+    applyFiltersAndSort();
+    document.getElementById('catalog-tag-search')?.focus({ preventScroll: true });
 }
 
 function filterByTag(tagName) {
@@ -884,6 +997,11 @@ function filterByTag(tagName) {
 
     setTimeout(() => {
         resetFilterControlsAndState();
+        STATE.catalogSearchQuery = '';
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) searchInput.value = '';
+        const clearSearch = document.getElementById('catalog-search-clear');
+        if (clearSearch) clearSearch.hidden = true;
 
         const tagItem = Array.from(
             document.querySelectorAll('#filter-tags-map .filter-tag-item')
@@ -931,6 +1049,8 @@ function handleTooltipMouseOver(e) {
     if (target && tooltip) {
         const description = target.dataset.description;
         if (description && description.trim() !== '') {
+            const host = target.closest('dialog') || document.body;
+            if (tooltip.parentElement !== host) host.appendChild(tooltip);
             tooltip.textContent = description;
             updateTooltipPosition(e, tooltip); // Сначала позиционируем
             tooltip.classList.add('show'); // Добавляем класс для плавного появления
@@ -950,7 +1070,7 @@ function handleTooltipMouseOut(e) {
 
 function handleTooltipMouseMove(e) {
     const tooltip = document.getElementById('custom-tooltip');
-    if (tooltip && tooltip.style.display === 'block') {
+    if (tooltip?.classList.contains('show')) {
         updateTooltipPosition(e, tooltip);
     }
 }
@@ -962,35 +1082,37 @@ function updateTooltipPosition(e, tooltip) {
     const tooltipHeight = tooltip.offsetHeight;
     const cursorPadding = 15;
 
-    let left = e.pageX + cursorPadding;
-    let top = e.pageY + cursorPadding;
+    let left = e.clientX + cursorPadding;
+    let top = e.clientY + cursorPadding;
 
     // Проверка выхода за края окна
-    const scrollX = window.scrollX || window.pageXOffset;
-    const scrollY = window.scrollY || window.pageYOffset;
+    const scrollX = 0;
+    const scrollY = 0;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
     // Проверка правого края
     if (left + tooltipWidth > scrollX + viewportWidth) {
-        left = e.pageX - tooltipWidth - cursorPadding;
+        left = e.clientX - tooltipWidth - cursorPadding;
     }
     // Проверка левого края
     if (left < scrollX) {
-         left = e.pageX + cursorPadding; // Возвращаем справа от курсора
+         left = e.clientX + cursorPadding; // Возвращаем справа от курсора
     }
 
     // Проверка нижнего края
     if (top + tooltipHeight > scrollY + viewportHeight) {
-        top = e.pageY - tooltipHeight - cursorPadding;
+        top = e.clientY - tooltipHeight - cursorPadding;
     }
      // Проверка верхнего края
     if (top < scrollY) {
-         top = e.pageY + cursorPadding; // Возвращаем снизу от курсора
+         top = e.clientY + cursorPadding; // Возвращаем снизу от курсора
     }
 
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
+    // После переноса относительно курсора подсказка всё равно должна помещаться
+    // на узком экране и внутри верхнего слоя диалога.
+    tooltip.style.left = `${Math.max(8, Math.min(left, viewportWidth - tooltipWidth - 8))}px`;
+    tooltip.style.top = `${Math.max(8, Math.min(top, viewportHeight - tooltipHeight - 8))}px`;
 }
 
 function toggleViewMode(mode) {
@@ -1006,47 +1128,17 @@ function toggleViewMode(mode) {
     if (gridBtn && listBtn) {
         gridBtn.classList.toggle('active', mode === 'grid');
         listBtn.classList.toggle('active', mode === 'list');
+        gridBtn.setAttribute('aria-pressed', String(mode === 'grid'));
+        listBtn.setAttribute('aria-pressed', String(mode === 'list'));
     }
 
     // Перерисовываем сетку с учетом пагинации
-    const novelsToShow = STATE.filteredNovels.length > 0 ? STATE.filteredNovels : STATE.novels;
-    renderNovelsGrid(novelsToShow); // Функция сама учтет STATE.viewMode
+    renderNovelsGrid(STATE.filteredNovels);
 }
 
 function performSearch() {
     const input = document.getElementById('search-input');
     if (!input) return;
-    
-    const query = input.value.toLowerCase().trim();
-    
-    if (!query) {
-        STATE.filteredNovels =
-            sortNovelsByCurrentPreference(
-                STATE.novels
-            );
-
-        STATE.currentPage = 1;
-        renderNovelsGrid(STATE.filteredNovels);
-        renderPagination();
-        return;
-    }
-    
-    const searchResults = STATE.novels.filter(
-        novel =>
-            novel.title.toLowerCase().includes(query) ||
-            novel.author.toLowerCase().includes(query) ||
-            (
-                novel.description &&
-                novel.description
-                    .toLowerCase()
-                    .includes(query)
-            )
-    );
-
-    STATE.filteredNovels =
-        sortNovelsByCurrentPreference(searchResults);
-    
-    STATE.currentPage = 1;
-    renderNovelsGrid(STATE.filteredNovels);
-    renderPagination();
+    STATE.catalogSearchQuery = input.value.trim().toLocaleLowerCase('ru');
+    applyFiltersAndSort();
 }

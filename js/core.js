@@ -47,6 +47,7 @@ const STATE = {
     totalPages: 1,
     isInitialized: false,
     isSubmittingNovel: false,
+    catalogSearchQuery: '',
     currentFilters: {
         language: '',
         era: '',
@@ -67,6 +68,7 @@ const STATE = {
     sortBy: 'title',
     sortOrder: 'asc',
     currentRoleTheme: 'default',
+    novelDetailsLayout: 'adaptive',
     isChapterEditMode: false,
     cache: {
         data: {},

@@ -38,10 +38,39 @@ function navigateTo(page, params = {}) {
     renderPage(page, params, { scrollToTop: true });
 }
 
+let pendingPageRender = null;
+
 async function renderPage(page, params = {}, options = {}) {
+    const request = { page, params: { ...params }, options: { ...options } };
+    if (isRendering) {
+        // Пока старая страница загружается, сохраняем последний выбранный маршрут.
+        pendingPageRender = request;
+        return;
+    }
+    isRendering = true;
+    try {
+        let next = request;
+        while (next) {
+            pendingPageRender = null;
+            try {
+                await renderPageContent(next.page, next.params, next.options);
+            } catch (error) {
+                console.error('Ошибка подготовки страницы:', error);
+                showToast('Не удалось загрузить страницу', 'error');
+            }
+            next = pendingPageRender;
+        }
+    } finally {
+        isRendering = false;
+    }
+}
+
+async function renderPageContent(page, params = {}, options = {}) {
     const { scrollToTop = false } = options;
 
+    if (typeof clearProfileScrollSpace === 'function') clearProfileScrollSpace();
     window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
 
     // ✨ ИСПРАВЛЕНИЕ №2: Принудительно включаем скролл
     // (на случай, если модальное окно не закрылось и оставило overflow: hidden)
@@ -49,12 +78,6 @@ async function renderPage(page, params = {}, options = {}) {
         document.body.style.overflow = 'auto';
         document.documentElement.style.overflow = 'auto'; // И для <html> на всякий случай
     } catch (e) {}
-
-    if (isRendering) {
-        console.warn('Рендеринг уже идёт, новый вызов заблокирован:', page);
-        return;
-    }
-    isRendering = true;
 
     // Убираем горячие клавиши и полноэкранный режим редактора главы
     // перед переходом на другую виртуальную страницу.
@@ -96,9 +119,18 @@ async function renderPage(page, params = {}, options = {}) {
         currentScrollHandler = null;
     }
 
+    // Страница чтения создаёт свой обработчик сохранения позиции. Перед
+    // переходом сохраняем её один раз и не оставляем слушатель на новой странице.
+    if (typeof window.chapterReadingPositionCleanup === 'function') {
+        // Место чтения сразу записывается в браузер, а сетевой запрос уходит
+        // в фоне. Переход на страницу новеллы не должен ждать ответ сервера.
+        void window.chapterReadingPositionCleanup();
+    }
+
     const chapterEditorPages = ['add-chapter', 'edit-chapter'];
     const isChapterEditorPage = chapterEditorPages.includes(page);
     document.body.classList.toggle('chapter-editor-page-open', isChapterEditorPage);
+    document.body.classList.toggle('profile-page-open', page === 'profile');
 
     const mainHeader = document.getElementById('main-header');
     if (mainHeader) {
@@ -111,6 +143,27 @@ async function renderPage(page, params = {}, options = {}) {
     
     console.log(`📄 Рендеринг: ${page}`, params);
 
+    // При первом переходе на главную список новелл может ещё не быть загружен.
+    // Сразу заменяем предыдущую страницу скелетом каталога, чтобы переход
+    // ощущался мгновенным, а данные спокойно догружались уже на главной.
+    const isCatalogPage = page === 'home' || page === 'catalog';
+    const needsCatalogData = (
+        isCatalogPage &&
+        !hasLoadedInitialDataScope('full')
+    );
+
+    if (needsCatalogData) {
+        ['search-section', 'novels-container'].forEach(id => showSection(id));
+
+        const pageViewContainer = document.getElementById('page-content-container');
+        if (pageViewContainer) {
+            pageViewContainer.style.display = 'none';
+            pageViewContainer.innerHTML = '';
+        }
+
+        await renderCatalogPage(true);
+    }
+
     // Если приложение было открыто сразу на лёгкой странице (например,
     // чтение главы), при переходе в каталог или редактор подгружаем
     // недостающие общие данные один раз.
@@ -120,19 +173,20 @@ async function renderPage(page, params = {}, options = {}) {
     } catch (error) {
         console.error('Ошибка начальной загрузки страницы:', error);
         showToast('Не удалось загрузить данные страницы', 'error');
-        isRendering = false;
         return;
     }
 
+    // Не рисуем промежуточную страницу, если за время загрузки уже выбрана другая.
+    if (pendingPageRender) return;
+
     // ✨ НАШ НОВЫЙ "ОХРАННИК" ✨
     // Список страниц, для которых нужны права 'creator' или выше
-    const creatorPages = ['add-novel', 'edit-novel', 'add-chapter', 'edit-chapter'];
+    const creatorPages = ['add-novel', 'edit-novel', 'add-chapter', 'edit-chapter', 'manage-chapters'];
     // Проверяем, нужна ли для страницы авторизация
     if ((creatorPages.includes(page) || page === 'profile') && !STATE.currentUser) {
         // Сначала базовая проверка: если пользователь вообще не вошел
         showToast('Для доступа к этой странице необходимо войти', 'warning');
         navigateTo('home'); // Просто перенаправляем на главную
-        isRendering = false;
         return;
     }
 
@@ -141,7 +195,6 @@ async function renderPage(page, params = {}, options = {}) {
         // checkUserPermission('create') вернет true для creator, admin и owner
         showToast('У вас недостаточно прав для доступа к этой странице', 'error');
         navigateTo('home'); // Перенаправляем на главную
-        isRendering = false;
         return;
     }
 
@@ -155,7 +208,6 @@ async function renderPage(page, params = {}, options = {}) {
                 'У вас нет доступа к админ-панели',
                 'error'
             );
-            isRendering = false;
             navigateTo('home');
             return;
         }
@@ -189,6 +241,10 @@ async function renderPage(page, params = {}, options = {}) {
             case 'novel-details':
                 if (params.id) await renderNovelDetailsPage(params.id);
                 break;
+
+            case 'novel-glossary':
+                if (params.id) await renderNovelGlossaryPage(params.id);
+                break;
                 
             case 'add-novel':
                 await renderNovelFormPage();
@@ -215,7 +271,14 @@ async function renderPage(page, params = {}, options = {}) {
                 break;
                 
             case 'add-chapter':
-                if (params.novelId) await renderChapterFormPage(params.novelId);
+                if (params.novelId) {
+                    await renderChapterFormPage(
+                        params.novelId,
+                        null,
+                        null,
+                        params.returnTo
+                    );
+                }
                 break;
                 
             case 'edit-chapter':
@@ -224,11 +287,25 @@ async function renderPage(page, params = {}, options = {}) {
                     params.chapter !== undefined &&
                     params.chapter !== ''
                 ) {
-                    await renderChapterFormPage(params.novel, null, params.chapter);
+                    await renderChapterFormPage(
+                        params.novel,
+                        null,
+                        params.chapter,
+                        params.returnTo
+                    );
                 } else if (params.id) {
                     // Старые ссылки продолжают работать и после загрузки заменяются на канонические.
-                    await renderChapterFormPage(null, params.id);
+                    await renderChapterFormPage(
+                        null,
+                        params.id,
+                        null,
+                        params.returnTo
+                    );
                 }
+                break;
+
+            case 'manage-chapters':
+                if (params.id) await renderChapterManagerPage(params.id);
                 break;
                 
             case 'author':
@@ -262,7 +339,6 @@ async function renderPage(page, params = {}, options = {}) {
         }
         // --- КОНЕЦ ВСТАВКИ ---
 
-        isRendering = false; // ✨ Снимаем блокировку в конце
     }
 }
 
@@ -321,8 +397,18 @@ function getBreadcrumbs(page, params = {}) {
     
     // ✨ Включаем все ваши 'case'
     switch(page) {
-        case 'novel-details':
-            breadcrumbs += ` <span>›</span> <span>${escapeHtml(params.title || 'Новелла')}</span>`;
+        case 'novel-details': {
+            const title = escapeHtml(params.title || 'Новелла');
+            breadcrumbs += ` <span aria-hidden="true">›</span> <span aria-current="page" title="${title.replaceAll('"', '&quot;')}">${title}</span>`;
+            break;
+        }
+        case 'novel-glossary':
+            breadcrumbs += ` <span>›</span> <a href="/?page=novel-details&id=${encodeURIComponent(params.id || '')}" onclick="handleLinkClick(event)">${escapeHtml(params.title || 'Новелла')}</a>`;
+            breadcrumbs += ' <span>›</span> <span>Глоссарий</span>';
+            break;
+        case 'manage-chapters':
+            breadcrumbs += ` <span>›</span> <a href="/?page=novel-details&id=${encodeURIComponent(params.id || '')}" onclick="handleLinkClick(event)">${escapeHtml(params.title || 'Новелла')}</a>`;
+            breadcrumbs += ' <span>›</span> <span>Управление главами</span>';
             break;
         case 'chapter-read':
             // ✨ ИСПРАВЛЕНО:

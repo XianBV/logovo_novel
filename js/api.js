@@ -4,6 +4,10 @@
    ========================================== */
 
 const API_BASE = '';
+const pendingApiReads = new Map();
+const latestApiReads = new Map();
+let apiReadId = 0;
+let apiCacheVersion = 0;
 const CONFIGURED_API_BASE = String(window.LOVO_API_BASE || '').replace(/\/$/, '');
 const IS_LOCAL_SITE = ['127.0.0.1', 'localhost'].includes(window.location.hostname);
 const NORMAL_API_BASE = CONFIGURED_API_BASE || (
@@ -20,7 +24,10 @@ const NORMAL_GET_ACTIONS = new Set([
     'getChapter',
     'getChapterForEdit',
     'getReadingLists',
+    'getProfilePreferences',
     'getReadingProgress',
+    'getNotifications',
+    'getNotificationShelfSettings',
     'getMyCreatedNovels',
     'getTrash',
     'getNovelPermissions',
@@ -53,6 +60,8 @@ console.log('📦 api.js загружен');
 
 // ✅ ПРАВИЛЬНАЯ И РАБОЧАЯ ВЕРСИЯ ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ (GET-ЗАПРОСЫ)
 function apiRequest(action, data = {}, forceFresh = false) {
+    // Параметры вызывающего кода могут использоваться повторно после смены сессии.
+    data = { ...data };
     // Добавляем токен сессии, если он есть
     const sessionToken = localStorage.getItem('session_token');
     if (sessionToken) {
@@ -60,7 +69,7 @@ function apiRequest(action, data = {}, forceFresh = false) {
     }
 
     const cacheKey = `${action}_${JSON.stringify(data)}`;
-    
+
 // Проверяем кэш, НО игнорируем его для опроса статуса
     if (!forceFresh && STATE.cache.data[cacheKey]) {
         const cached = STATE.cache.data[cacheKey];
@@ -71,26 +80,46 @@ function apiRequest(action, data = {}, forceFresh = false) {
     }
 
     if (shouldUseNormalGet(action, data)) {
+        if (!forceFresh && pendingApiReads.has(cacheKey)) return pendingApiReads.get(cacheKey);
         const params = new URLSearchParams({ action, ...data });
-        return fetch(`${getNormalApiBase()}/query?${params}`)
+        const url = `${getNormalApiBase()}/query?${params}`;
+        const cacheVersion = apiCacheVersion;
+        const readId = ++apiReadId;
+        latestApiReads.set(cacheKey, readId);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), action === 'getChapterForEdit' ? 60000 : 30000);
+        const request = Promise.resolve().then(() => fetch(url, { signal: controller.signal }))
             .then(async response => {
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.error || `Ошибка сервера: HTTP ${response.status}`);
-                STATE.cache.data[cacheKey] = { data: result, timestamp: Date.now() };
+                if (result?.success !== false && cacheVersion === apiCacheVersion && latestApiReads.get(cacheKey) === readId && localStorage.getItem('session_token') === sessionToken) {
+                    STATE.cache.data[cacheKey] = { data: result, timestamp: Date.now() };
+                }
                 return result;
+            })
+            .catch(error => {
+                if (controller.signal.aborted) throw new Error('Сервер не ответил вовремя. Повторите загрузку.');
+                throw error;
+            })
+            .finally(() => {
+                clearTimeout(timeout);
+                if (pendingApiReads.get(cacheKey) === request) pendingApiReads.delete(cacheKey);
+                if (latestApiReads.get(cacheKey) === readId) latestApiReads.delete(cacheKey);
             });
+        if (!forceFresh) pendingApiReads.set(cacheKey, request);
+        return request;
     }
     
     // Оборачиваем в Promise для использования async/await
     return new Promise((resolve, reject) => {
         // Создаём уникальное имя для нашего "почтового ящика"
         const callbackName = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
+
         // Формируем URL с параметрами
         const params = new URLSearchParams({ action, callback: callbackName, ...data });
         const script = document.createElement('script');
         script.src = `${API_BASE}?${params}`;
-        
+
         // Таймер безопасности на случай, если сервер не отвечает
         const timeoutMs = action === 'getChapterForEdit'
             ? 60000
@@ -99,14 +128,14 @@ function apiRequest(action, data = {}, forceFresh = false) {
             cleanup();
             reject(new Error('Timeout: сервер не отвечает'));
         }, timeoutMs);
-        
+
         // Функция для очистки
         const cleanup = () => {
             clearTimeout(timeout);
             if (script.parentNode) document.head.removeChild(script);
             delete window[callbackName]; // Удаляем "почтовый ящик"
         };
-        
+
         // Создаём тот самый "почтовый ящик" (глобальную функцию)
         window[callbackName] = (response) => {
             cleanup();
@@ -117,13 +146,13 @@ function apiRequest(action, data = {}, forceFresh = false) {
             };
             resolve(response); // Отправляем данные туда, где их ждут
         };
-        
+
         // Обработка сетевых ошибок
         script.onerror = () => {
             cleanup();
             reject(new Error('Сетевая ошибка'));
         };
-        
+
         // Добавляем скрипт на страницу, чтобы запустить запрос
         document.head.appendChild(script);
     });
@@ -131,7 +160,7 @@ function apiRequest(action, data = {}, forceFresh = false) {
 
 // POST-запросы идут через Node.js локально или через Supabase Edge Function на сайте.
 // Пока перенос не завершён, серверная логика сама вызывает оставшийся мост Apps Script.
-async function apiPostRequest(action, data = {}) {
+async function apiPostRequest(action, data = {}, requestOptions = {}) {
     console.log(`📤 POST через серверную функцию: ${action}`);
     
     const sessionToken = localStorage.getItem('session_token');
@@ -148,6 +177,7 @@ async function apiPostRequest(action, data = {}) {
             headers: {
                 'Content-Type': 'application/json'
             },
+            keepalive: requestOptions.keepalive === true,
             body: JSON.stringify({ action, data, mutation_id: mutationId })
         });
 
@@ -180,7 +210,7 @@ async function apiPostRequest(action, data = {}) {
 function submitPostData(action, data, requestId) {
     return new Promise((resolve, reject) => {
         const uniqueId = 'iframe_' + requestId;
-        
+
         // Создаём невидимый iframe
         const iframe = document.createElement('iframe');
         iframe.style.display = 'none';
@@ -270,7 +300,7 @@ async function pollRequestStatus(requestId, options = {}) {
         try {
             // Запрашиваем статус через GET
             const response = await apiRequest('getPostStatus', { request_id: requestId }, true);
-            
+
             if (response.status === 'completed') {
                 console.log(`✅ Запрос выполнен (проверка ${attempt})`);
                 return response.result;
@@ -304,6 +334,10 @@ async function pollRequestStatus(requestId, options = {}) {
 
 // Очистка кэша
 function clearCache() {
+    // Ответ, начатый до выхода или изменения данных, не должен вернуть старый кэш.
+    apiCacheVersion += 1;
+    pendingApiReads.clear();
+    latestApiReads.clear();
     STATE.cache.data = {};
     console.log('🗑️ Кэш очищен');
 }

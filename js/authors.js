@@ -46,11 +46,7 @@ async function renderAuthorPage(authorName) {
 
             <div class="author-novels">
                 <h2>Произведения автора</h2>
-                ${authorNovels.length > 0 ? `
-                    <div class="novels-grid">
-                        ${authorNovels.map(novel => renderNovelCard(novel)).join('')}
-                    </div>
-                ` : `
+                ${authorNovels.length > 0 ? renderNovelCollection(authorNovels) : `
                     <p class="text-muted">У этого автора пока нет добавленных произведений.</p>
                 `}
             </div>
